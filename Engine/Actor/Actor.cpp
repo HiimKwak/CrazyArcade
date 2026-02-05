@@ -5,7 +5,7 @@
 #include "Actor.h"
 #include "Render/Renderer.h"
 
-namespace Wanted
+namespace engine
 {
 	Actor::Actor(const char* image, const Vector2& position, Color color)
 		: position(position), color(color)

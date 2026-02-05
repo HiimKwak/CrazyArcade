@@ -6,13 +6,13 @@
 #include "Math/Vector2.h"
 #include "Math/Color.h"
 
-namespace Wanted
+namespace engine
 {
 	// 콘솔 버퍼 전방선언
 	class ScreenBuffer;
 
 	// 더블 버퍼링 지원 렌더러
-	class WANTED_API Renderer
+	class ENGINE_API Renderer
 	{
 		// 프레임 구조체 - 2차원 문자열의 항목이 될 가상의 이미지
 		struct Frame

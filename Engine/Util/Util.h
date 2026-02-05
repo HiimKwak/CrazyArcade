@@ -3,7 +3,7 @@
 #include "Math/Vector2.h"
 #include "Math/Color.h"
 
-using namespace Wanted;
+using namespace engine;
 
 namespace Util // Helper
 {

@@ -4,9 +4,9 @@
 
 #include "Common/Common.h"
 
-namespace Wanted
+namespace engine
 {
-	class WANTED_API Vector2
+	class ENGINE_API Vector2
 	{
 	public:
 		Vector2();

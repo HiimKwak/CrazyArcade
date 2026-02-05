@@ -4,13 +4,9 @@
 
 #include "Math/Vector2.h"
 
-namespace Wanted
+namespace engine
 {
-	/*
-	* 작성자: 곽민규
-	* 날짜: 2026.02.03
-	* 내용: 더블 버퍼링에 사용할 Console output 핸들을 관리하는 클래스
-	*/
+	// 더블 버퍼링에 사용할 Console output 핸들을 관리하는 클래스
 	class ScreenBuffer
 	{
 	public:

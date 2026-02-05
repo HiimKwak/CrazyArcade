@@ -2,7 +2,7 @@
 
 #include "ScreenBuffer.h"
 
-namespace Wanted
+namespace engine
 {
 	ScreenBuffer::ScreenBuffer(const Vector2& screenSize)
 		: screenSize(screenSize)

@@ -7,7 +7,7 @@
 #include "Util/Util.h"
 #include "Render/Renderer.h"
 
-namespace Wanted
+namespace engine
 {
 	Engine* Engine::instance = nullptr;
 	Engine::Engine()

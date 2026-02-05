@@ -3,9 +3,9 @@
 #include <Windows.h>
 #include "Common/Common.h"
 
-namespace Wanted
+namespace engine
 {
-	enum class WANTED_API Color : unsigned short
+	enum class ENGINE_API Color : unsigned short
 	{
 		// MS´Â BGRA
 		Black = 0,

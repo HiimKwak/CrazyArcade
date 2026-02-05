@@ -3,14 +3,14 @@
 #include "Common/Common.h"
 #include "Util/Util.h"
 
-namespace  Wanted
+namespace  engine
 {
 	// 싱글톤 관계없이 명시적 전방선언은 필수
 	class Input;
 	class Renderer;
 	class Level;
 
-	class WANTED_API Engine
+	class ENGINE_API Engine
 	{
 		struct EngineSettings
 		{

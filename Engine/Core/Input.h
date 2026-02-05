@@ -2,9 +2,9 @@
 
 #include "Common/Common.h"
 
-namespace Wanted
+namespace engine
 {
-	class WANTED_API Input
+	class ENGINE_API Input
 	{
 		friend class Engine; // 엔진에게만 ProcessInput(private 멤버)을 노출시키고 싶을 때
 

@@ -8,7 +8,7 @@
 #define DLLIMPORT __declspec(dllimport)
 
 #if ENGINE_BUILD_DLL
-#define WANTED_API DLLEXPORT
+#define ENGINE_API DLLEXPORT
 #else
 #define WANTED_API DLLIMPORT
 #endif

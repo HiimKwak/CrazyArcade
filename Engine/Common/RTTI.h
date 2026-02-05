@@ -5,11 +5,11 @@
 // 상속 관계에 있는 클래스 간의
 // 동적(실행중에) 형변환을 하기 위해 사용하는 클래스.
 // RunTime-Type-Information.
-namespace Wanted
+namespace engine
 {
 	// 커스텀 RTTI 제공하는 최상위 클래스
 	// C#의 Object, Java의 Object, 언리얼의 UObject와 유사
-	class WANTED_API RTTI
+	class ENGINE_API RTTI
 	{
 	public:
 		virtual const size_t& GetType() const = 0;
