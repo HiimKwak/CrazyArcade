@@ -34,6 +34,17 @@ namespace engine
 		Renderer::Get().Submit(image, position, color, sortingOrder);
 	}
 
+	void Actor::Destroy()
+	{
+		destroyRequested = true;
+
+		OnDestroy();
+	}
+
+	void Actor::OnDestroy()
+	{
+	}
+
 	void Actor::SetPosition(const Vector2& newPosition)
 	{
 		// 변경하려는 위치가 현재 위치와 같으면 건너뜀
