@@ -3,7 +3,7 @@
 #include "Common/Common.h"
 #include "Util/Util.h"
 
-namespace  engine
+namespace engine
 {
 	// 싱글톤 관계없이 명시적 전방선언은 필수
 	class Input;

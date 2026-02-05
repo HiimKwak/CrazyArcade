@@ -66,6 +66,7 @@
     </Link>
     <PreBuildEvent>
       <Command>xcopy *.h ..\Includes\Engine\ /e /y
+
 xcopy ..\Config\* $(OutDir)..\Config\ /e /y</Command>
     </PreBuildEvent>
     <PostBuildEvent>
@@ -90,6 +91,7 @@ xcopy $(OutDir)\Engine.lib ..\Library\Engine\$(Platform)\$(Configuration)\ /e /y
     </Link>
     <PreBuildEvent>
       <Command>xcopy *.h ..\Includes\Engine\ /e /y
+
 xcopy ..\Config\* $(OutDir)..\Config\ /e /y</Command>
     </PreBuildEvent>
     <PostBuildEvent>
