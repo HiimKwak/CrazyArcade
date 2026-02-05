@@ -8,7 +8,6 @@ namespace engine
 	{
 		charInfoArray = new CHAR_INFO[bufferCount];
 		memset(charInfoArray, 0, sizeof(CHAR_INFO) * bufferCount);
-		//ZeroMemory(charInfoArray, sizeof(CHAR_INFO) * bufferCount) macro, 결국은 memset 호출
 
 		sortingOrderArray = new int[bufferCount];
 		memset(sortingOrderArray, 0, sizeof(int) * bufferCount); // 배열 동적할당 후엔 memset으로 제대로 초기화해주는게 좋음
@@ -42,8 +41,8 @@ namespace engine
 			}
 		}
 	}
+	// ------------------ Frame ------------------- //
 
-	// ----------- Frame ------------------- //
 	// 정적 변수 초기화
 	Renderer* Renderer::instance = nullptr;
 
@@ -76,6 +75,18 @@ namespace engine
 		{
 			SafeDelete(buffer);
 		}
+	}
+
+	Renderer& Renderer::Get()
+	{
+		if (!instance)
+		{
+			MessageBoxA(nullptr, "Renderer::Get() - instance is null", "Error", MB_OK);
+
+			__debugbreak();
+		}
+
+		return *instance;
 	}
 
 	void Renderer::Draw()
@@ -144,18 +155,6 @@ namespace engine
 		renderQueue.clear();
 	}
 
-	Renderer& Renderer::Get()
-	{
-		if (!instance)
-		{
-			MessageBoxA(nullptr, "Renderer::Get() - instance is null", "Error", MB_OK);
-
-			__debugbreak();
-		}
-
-		return *instance;
-	}
-
 	void Renderer::Clear()
 	{
 		// 화면 지우기
@@ -192,4 +191,10 @@ namespace engine
 		return screenBuffers[currentBufferIndex];
 	}
 
+	void Renderer::PresentImmediately()
+	{
+		Draw();
+		GetCurrentBuffer()->Draw(frame->charInfoArray);
+		Present();
+	}
 }

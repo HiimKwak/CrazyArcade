@@ -46,8 +46,12 @@ namespace engine
 		Renderer(const Vector2& screenSize);
 		~Renderer();
 
+		// 싱글톤 접근 함수
+		static Renderer& Get();
+
 		void Draw();
-		// 그리는데 필요한 데이터 제출 함수
+
+		// 그려야할 렌더 커맨드를 렌더 큐에 밀어넣는 함수
 		void Submit(
 			const char* text,
 			const Vector2& position,
@@ -55,26 +59,33 @@ namespace engine
 			int sortingOrder = 0
 		);
 
-		// 싱글톤 접근 함수
-		static Renderer& Get();
+		// 같은 프레임 안에서 임시 저장 문자열을 즉시 화면에 표시할 때 사용
+		void PresentImmediately();
 
 	private:
 		void Clear();
+
 		// 더블 버퍼링을 활용해 활성화 버퍼를 교환하는 함수
 		void Present();
+
 		// 사용할 버퍼 반환 Getter
 		ScreenBuffer* GetCurrentBuffer();
 
 	private:
 		Vector2 screenSize;
+
 		// 관리할 프레임 객체
 		Frame* frame = nullptr;
+
 		// 이중 버퍼 배열
 		ScreenBuffer* screenBuffers[2] = {};
+
 		// 현재 활성화된 버퍼 인덱스
 		int currentBufferIndex = 0;
+
 		// 렌더 큐(scene의 모든 그리기 명령을 모아두는 배열)
 		std::vector<RenderCommand> renderQueue;
+
 		// 싱글톤 구현을 위한 정적 변수
 		static Renderer* instance;
 	};
