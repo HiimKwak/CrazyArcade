@@ -34,14 +34,14 @@ namespace  engine
 
 		static Engine& Get();
 
+		// 화면 너비 반환 함수
+		inline int GetWidth() const { return settings.width; }
+		// 화면 높이 반환 함수
+		inline int GetHeight() const { return settings.height; }
+
 	protected:
 		// 정리 함수
-		void Shutdown()
-		{
-			std::cout << "Engine has been shutdown..." << std::endl;
-
-			Util::TurnOnCursor();
-		}
+		void Shutdown();
 
 		// load setting file
 		void LoadSettings();
@@ -65,6 +65,8 @@ namespace  engine
 		Input* input = nullptr;
 		// main level
 		Level* mainLevel = nullptr;
+		// 전환할 레벨 임시 저장
+		Level* nextLevel = nullptr;
 
 		static Engine* instance;
 	};

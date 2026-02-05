@@ -26,6 +26,9 @@ namespace engine
 
 		// 커서 끄기
 		Util::TurnOffCursor();
+
+		// 타이머 시드 설정
+		Util::SetRandomSeed();
 	}
 	Engine::~Engine()
 	{
@@ -34,7 +37,6 @@ namespace engine
 			delete input; // delete 연산자 안에서 소멸자 호출하므로 Engine 안에선 됨
 			input = nullptr;
 		}
-		//SafeDelete(input);
 		SafeDelete(mainLevel);
 		SafeDelete(renderer);
 	}
@@ -94,6 +96,19 @@ namespace engine
 				{
 					mainLevel->ProcessAddAndDestoryActors();
 				}
+
+				// 레벨 전환 처리.
+				if (nextLevel)
+				{
+					// 기존 레벨 제거.
+					SafeDelete(mainLevel);
+
+					// 전환할 레벨을 메인 레벨로 지정.
+					mainLevel = nextLevel;
+
+					// 포인터 정리.
+					nextLevel = nullptr;
+				}
 			}
 		}
 
@@ -106,14 +121,6 @@ namespace engine
 	}
 	void Engine::SetNewLevel(Level* newLevel)
 	{
-		// todo: temporary, must not delete level when switching levels in actual game
-		if (mainLevel)
-		{
-			delete mainLevel;
-			mainLevel = nullptr;
-		}
-
-		// level setting
 		mainLevel = newLevel;
 	}
 
@@ -178,35 +185,19 @@ namespace engine
 
 	void Engine::BeginPlay()
 	{
-		if (!mainLevel)
-		{
-			std::cout << "No level is set as main level!" << std::endl;
-			return;
-		}
+		if (!mainLevel) return;
+
 		mainLevel->BeginPlay();
 	}
 	void Engine::Tick(float deltaTime)
 	{
-		//std::cout
-		//	<< "DeltaTime: " << deltaTime 
-		//	<< ", FPS: " << (1.0f / deltaTime) << std::endl;
+		if (!mainLevel) return;
 
-		if (!mainLevel)
-		{
-			std::cout << "No level is set as main level!" << std::endl;
-			return;
-		}
-
-		// 
 		mainLevel->Tick(deltaTime);
 	}
 	void Engine::Draw()
 	{
-		if (!mainLevel)
-		{
-			std::cout << "No level is set as main level!" << std::endl;
-			return;
-		}
+		if (!mainLevel) return;
 
 		// 레벨의 모든 액터가 렌더 데이터 제출(Submit)
 		mainLevel->Draw();
