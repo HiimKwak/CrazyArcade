@@ -124,6 +124,13 @@ namespace engine
 		mainLevel = newLevel;
 	}
 
+	void Engine::Shutdown()
+	{
+		std::cout << "Engine is being shutdown ..." << std::endl;
+
+		Util::TurnOnCursor();
+	}
+
 	Engine& Engine::Get()
 	{
 		if (!instance)
