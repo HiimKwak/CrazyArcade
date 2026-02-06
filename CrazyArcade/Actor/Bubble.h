@@ -1,26 +1,32 @@
 #pragma once
 
 #include "Actor/Actor.h"
+#include "Util/Timer.h"
 
 using namespace engine;
+
+class ExplosionTilePool;
 
 class Bubble : public Actor
 {
 	RTTI_DECLARATIONS(Bubble, Actor)
 
 public:
-	Bubble(const Vector2& newPosition);
+	Bubble(const Vector2& newPosition, int explosionRange = 1);
 
 	virtual void Tick(float deltaTime) override;
 
 	bool IsExploded() const;
-	bool IsInExplosionRange(const Actor* other) const;
+
+	void SetExplosionTilePool(ExplosionTilePool* pool);
 
 private:
-	void Explode();
+	void Explode(float deltaTime);
 
-	float elapsedTime = 0.0f;
+	Timer explodeTimer;
 	float countDown = 3.0f;
 	bool exploded = false;
+	int range;
+	ExplosionTilePool* segmentPool;
 };
 

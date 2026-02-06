@@ -18,6 +18,8 @@ namespace engine
 		// 편의기능
 		Vector2 operator+(const Vector2& other) const;
 		Vector2 operator-(const Vector2& other) const;
+		Vector2 operator*(int scalar) const;
+		friend ENGINE_API Vector2 operator*(int scalar, const Vector2& v);
 
 		bool operator==(const Vector2& other) const;
 		bool operator!=(const Vector2& other) const;
@@ -30,6 +32,8 @@ namespace engine
 		static Vector2 One;
 		static Vector2 Up;
 		static Vector2 Right;
+		static Vector2 Down;
+		static Vector2 Left;
 
 	public:
 		// x, y 좌표. 콘솔은 정수 좌표만 가능하다

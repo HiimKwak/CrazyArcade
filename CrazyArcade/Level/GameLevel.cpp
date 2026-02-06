@@ -5,15 +5,25 @@
 #include "Actor/Player.h"
 #include "Actor/Enemy.h"
 #include "Actor/Wall.h"
+#include "Actor/ExplosionTile.h"
+#include "Actor/ExplosionTilePool.h"
 
 #include <iostream>
 
 using namespace engine;
 
 GameLevel::GameLevel()
+	: explosionPool(new ExplosionTilePool(128))
 {
 	LoadMap("Stage1.txt");
 }
+
+GameLevel::~GameLevel()
+{
+	delete explosionPool;
+	explosionPool = nullptr;
+}
+
 void GameLevel::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
@@ -23,14 +33,18 @@ void GameLevel::Tick(float deltaTime)
 
 void GameLevel::ProcessExplosionCollision()
 {
-	std::vector<Bubble*> bubbles;
+	std::vector<ExplosionTile*> activeExplosions;
 	Player* player = nullptr;
 	std::vector<Enemy*> enemies;
 
 	for (Actor* actor : actors)
 	{
-		if (actor->IsTypeOf<Bubble>())
-			bubbles.push_back(actor->As<Bubble>());
+		if (actor->IsTypeOf<ExplosionTile>())
+		{
+			ExplosionTile* seg = actor->As<ExplosionTile>();
+			if (seg->IsActive())
+				activeExplosions.push_back(seg);
+		}
 
 		if (actor->IsTypeOf<Player>())
 			player = actor->As<Player>();
@@ -39,16 +53,16 @@ void GameLevel::ProcessExplosionCollision()
 			enemies.push_back(actor->As<Enemy>());
 	}
 
-	for (Bubble* bubble : bubbles)
+	for (ExplosionTile* explosion : activeExplosions)
 	{
-		if (!bubble->IsExploded()) continue;
+		Vector2 explosionPos = explosion->GetPosition();
 
-		if (player && bubble->IsInExplosionRange(player))
+		if (player && player->GetPosition() == explosionPos)
 			player->OnDamaged();
 
 		for (Enemy* enemy : enemies)
 		{
-			if (bubble->IsInExplosionRange(enemy))
+			if (enemy->GetPosition() == explosionPos)
 				enemy->OnDamaged();
 		}
 	}
@@ -94,7 +108,7 @@ void GameLevel::LoadMap(const char* filename)
 	int index = 0;
 	Vector2 position;
 
-	while (index < fileSize) // todo: 조건 수정했음 안돌아가면 이거 봐야함
+	while (index < fileSize)
 	{
 		char mapCharacter = data[index];
 		++index;

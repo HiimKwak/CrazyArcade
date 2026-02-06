@@ -93,7 +93,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Actor\Bubble.cpp" />
+    <ClCompile Include="Actor\BubbleExplosion.cpp" />
     <ClCompile Include="Actor\Enemy.cpp" />
+    <ClCompile Include="Actor\ExplosionTile.cpp" />
+    <ClCompile Include="Actor\ExplosionTilePool.cpp" />
     <ClCompile Include="Actor\Ground.cpp" />
     <ClCompile Include="Actor\Player.cpp" />
     <ClCompile Include="Actor\Wall.cpp" />
@@ -105,7 +108,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor\Bubble.h" />
+    <ClInclude Include="Actor\BubbleExplosion.h" />
     <ClInclude Include="Actor\Enemy.h" />
+    <ClInclude Include="Actor\ExplosionTile.h" />
+    <ClInclude Include="Actor\ExplosionTilePool.h" />
     <ClInclude Include="Actor\Ground.h" />
     <ClInclude Include="Actor\Player.h" />
     <ClInclude Include="Actor\Wall.h" />

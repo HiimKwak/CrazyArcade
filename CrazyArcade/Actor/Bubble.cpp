@@ -1,17 +1,21 @@
 #include "Bubble.h"
+#include "BubbleExplosion.h"
+#include "ExplosionTilePool.h"
 
-Bubble::Bubble(const Vector2& newPosition)
-	:super("B", newPosition, Color::Blue)
+Bubble::Bubble(const Vector2& newPosition, int explosionRange)
+	: super("@", newPosition, Color::Blue),
+	range(explosionRange),
+	segmentPool(nullptr)
 {
 	sortingOrder = 5;
+	explodeTimer.SetTargetTime(countDown);
 }
 
 void Bubble::Tick(float deltaTime)
 {
-	elapsedTime += deltaTime;
+	super::Tick(deltaTime);
 
-	if (!exploded && elapsedTime >= countDown)
-		Explode();
+	Explode(deltaTime);
 }
 
 bool Bubble::IsExploded() const
@@ -19,23 +23,22 @@ bool Bubble::IsExploded() const
 	return exploded;
 }
 
-bool Bubble::IsInExplosionRange(const Actor* other) const
+void Bubble::SetExplosionTilePool(ExplosionTilePool* pool)
 {
-	Vector2 myTile = GetPosition();
-	Vector2 otherTile = other->GetPosition();
-
-	Vector2 diff = otherTile - myTile;
-
-	if (diff == Vector2(0, 0)) return true;
-	if (diff == Vector2(1, 0)) return true;
-	if (diff == Vector2(-1, 0)) return true;
-	if (diff == Vector2(0, 1)) return true;
-	if (diff == Vector2(0, -1)) return true;
-
-	return false;
+	segmentPool = pool;
 }
 
-void Bubble::Explode()
+void Bubble::Explode(float deltaTime)
 {
+	explodeTimer.Tick(deltaTime);
+	if (!explodeTimer.IsTimeout())
+		// todo: 폭발시간이 가까워질수록 깜빡이는 효과
+		return;
+	explodeTimer.Reset();
 	exploded = true;
+
+	if (segmentPool)
+		BubbleExplosion* explosion = new BubbleExplosion(GetPosition(), range, segmentPool);
+
+	Destroy();
 }

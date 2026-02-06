@@ -5,14 +5,19 @@
 
 using namespace engine;
 
-class GameLevel : public engine::Level, public IGameRuleManager
+class ExplosionTilePool;
+
+class GameLevel : public Level, public IGameRuleManager
 {
 	RTTI_DECLARATIONS(GameLevel, Level)
 
 public:
 	GameLevel();
+	~GameLevel();
 
 	virtual void Draw() override;
+
+	inline ExplosionTilePool* GetExplosionTilePool() const { return explosionPool; }
 
 private:
 	virtual void Tick(float deltaTime) override;
@@ -20,12 +25,13 @@ private:
 
 	void LoadMap(const char* filename);
 
-	virtual bool CanMove(const engine::Vector2& playerPosition, const engine::Vector2& nextPosition) override;
-	virtual bool HasBubbleAt(const engine::Vector2& position) override;
+	virtual bool CanMove(const Vector2& playerPosition, const Vector2& nextPosition) override;
+	virtual bool HasBubbleAt(const Vector2& position) override;
 
 	bool CheckGameClear();
 private:
 	int targetScore = 0;
 	bool isGameClear = false;
+	ExplosionTilePool* explosionPool = nullptr;
 };
 
