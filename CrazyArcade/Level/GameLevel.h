@@ -3,6 +3,8 @@
 #include "Common/Common.h"
 #include "Interface/IGameRuleManager.h"
 
+using namespace engine;
+
 class GameLevel : public engine::Level, public IGameRuleManager
 {
 	RTTI_DECLARATIONS(GameLevel, Level)
@@ -19,7 +21,7 @@ private:
 	void LoadMap(const char* filename);
 
 	virtual bool CanMove(const engine::Vector2& playerPosition, const engine::Vector2& nextPosition) override;
-	virtual bool HasBubbleAt(const Vector2& position) override;
+	virtual bool HasBubbleAt(const engine::Vector2& position) override;
 
 	bool CheckGameClear();
 private:

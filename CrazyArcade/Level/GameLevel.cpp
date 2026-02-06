@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+using namespace engine;
+
 GameLevel::GameLevel()
 {
 	LoadMap("Stage1.txt");
@@ -22,7 +24,7 @@ void GameLevel::Tick(float deltaTime)
 void GameLevel::ProcessExplosionCollision()
 {
 	std::vector<Bubble*> bubbles;
-	Player* player;
+	Player* player = nullptr;
 	std::vector<Enemy*> enemies;
 
 	for (Actor* actor : actors)
@@ -41,7 +43,7 @@ void GameLevel::ProcessExplosionCollision()
 	{
 		if (!bubble->IsExploded()) continue;
 
-		if (bubble->IsInExplosionRange(player))
+		if (player && bubble->IsInExplosionRange(player))
 			player->OnDamaged();
 
 		for (Enemy* enemy : enemies)
@@ -90,7 +92,7 @@ void GameLevel::LoadMap(const char* filename)
 
 	/** 읽어온 문자열 분석(parsing)해서 출력 **/
 	int index = 0;
-	engine::Vector2 position;
+	Vector2 position;
 
 	while (index < fileSize) // todo: 조건 수정했음 안돌아가면 이거 봐야함
 	{
@@ -130,7 +132,7 @@ void GameLevel::LoadMap(const char* filename)
 	fclose(file);
 }
 
-bool GameLevel::CanMove(const engine::Vector2& playerPosition, const engine::Vector2& nextPosition)
+bool GameLevel::CanMove(const Vector2& playerPosition, const Vector2& nextPosition)
 {
 	std::vector<Actor*> bubbles;
 	for (Actor* const actor : actors)
