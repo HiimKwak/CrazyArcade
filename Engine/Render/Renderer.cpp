@@ -26,7 +26,7 @@ namespace engine
 
 		for (int y = 0; y < height; ++y)
 		{
-			for (int x = 0; x < height; ++x)
+			for (int x = 0; x < width; ++x)
 			{
 				// 2차원 배열처럼 사용하는 1차원 배열에서 인덱스 구하기
 				const int index = (y * width) + x;
