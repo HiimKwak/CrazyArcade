@@ -17,6 +17,9 @@ public:
 	// 목표 시간 설정
 	void SetTargetTime(float newTargetTime);
 
+	// 남은 시간 반환
+	float GetRemainingTime() const;
+
 private:
 	// 경과 시간 확인
 	float elapsedTime = 0.0f;

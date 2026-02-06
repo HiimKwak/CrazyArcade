@@ -25,3 +25,8 @@ void Timer::SetTargetTime(float newTargetTime)
 {
 	targetTime = newTargetTime;
 }
+
+float Timer::GetRemainingTime() const
+{
+	return targetTime - elapsedTime;
+}

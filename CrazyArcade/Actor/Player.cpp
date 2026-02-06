@@ -4,7 +4,7 @@
 #include "Player.h"
 #include "Engine/Engine.h"
 #include "Game/Game.h"
-#include "Level/Level.h"
+#include "Level/GameLevel.h"
 #include "Core/Input.h"
 #include "Actor/Bubble.h"
 
@@ -42,7 +42,14 @@ void Player::Tick(float deltaTime)
 	{
 		if (owner)
 		{
-			owner->AddNewActor(new Bubble(GetPosition()));
+			Bubble* bubble = new Bubble(GetPosition());
+
+			GameLevel* gameLevel = dynamic_cast<GameLevel*>(owner);
+			ExplosionTilePool* gameLevelPool = gameLevel->GetExplosionTilePool();
+			if (gameLevel && gameLevelPool)
+				bubble->SetExplosionTilePool(gameLevelPool);
+
+			owner->AddNewActor(bubble);
 		}
 	}
 

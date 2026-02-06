@@ -13,7 +13,7 @@ class BubbleExplosion : public Actor
 	RTTI_DECLARATIONS(BubbleExplosion, Actor)
 
 public:
-	BubbleExplosion(const Vector2& origin, int explosionRange = 1, ExplosionTilePool* pool);
+	BubbleExplosion(const Vector2& origin, int explosionRange, ExplosionTilePool* pool);
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
