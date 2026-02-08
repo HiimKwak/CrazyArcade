@@ -1,13 +1,13 @@
 #include <iostream>
 #include <Windows.h>
 
-//#include "Engine/Engine.h"
 #include "Player.h"
 #include "Core/Input.h"
 #include "Game/Game.h"
 #include "Level/GameLevel.h"
 #include "Actor/Bubble.h"
 #include "Util/Timer.h"
+#include "Math/Vector2.h"
 
 #include "Interface/IGameRuleManager.h"
 
@@ -26,31 +26,61 @@ void Player::BeginPlay()
 
 static IGameRuleManager* GameRuleManager = nullptr;
 
-void Player::TryMove(Vector2& vector)
+void Player::SetMoveTarget(Vector2& direction)
 {
-	Vector2 newPosition(GetPosition() + vector);
-	if (GameRuleManager->CanMove(GetPosition(), newPosition))
-		SetPosition(newPosition);
+	if (isMoving)
+		return;
+
+	Vector2 targetPosition(GetPosition() + direction);
+	if (GameRuleManager->CanMove(GetPosition(), targetPosition))
+	{
+		moveStartPos = GetPosition();
+		moveTargetPos = targetPosition;
+		isMoving = true;
+		moveProgress = 0.0f;
+		moveTimer.Reset();
+		moveTimer.SetTargetTime(moveSpeed);
+	}
 }
 
-void Player::HandleMovementInput()
+void Player::HandleMovementInput(float deltaTime)
 {
-	if (!GetOwner())
-		return;
+	if (isMoving)
+	{
+		moveTimer.Tick(deltaTime);
+
+		moveProgress = 1.0f - (moveTimer.GetRemainingTime() / moveSpeed);
+
+		float eased = 1.0f - (1.0f - moveProgress) * (1.0f - moveProgress);
+
+		Vector2 currentPos = Vector2::Lerp(moveStartPos, moveTargetPos, eased);
+		SetPosition(currentPos);
+
+		if (moveTimer.IsTimeout())
+		{
+			SetPosition(moveTargetPos);  // 정확한 위치로 스냅
+			isMoving = false;
+		}
+	}
+	else
+	{
+		if (!GetOwner())
+			return;
 	
-	GameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
+		GameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
 
-	if (!GameRuleManager)
-		return;
+		if (!GameRuleManager)
+			return;
 
-	if (Input::Get().GetKeyDown(VK_RIGHT))
-		TryMove(Vector2::Right);
-	if (Input::Get().GetKeyDown(VK_LEFT))
-		TryMove(Vector2::Left);
-	if (Input::Get().GetKeyDown(VK_DOWN))
-		TryMove(Vector2::Up);
-	if (Input::Get().GetKeyDown(VK_UP))
-		TryMove(Vector2::Down);
+		if (Input::Get().GetKey(VK_RIGHT))
+			SetMoveTarget(Vector2::Right);
+		else if (Input::Get().GetKey(VK_LEFT))
+			SetMoveTarget(Vector2::Left);
+		else if (Input::Get().GetKey(VK_DOWN))
+			SetMoveTarget(Vector2::Up);
+		else if (Input::Get().GetKey(VK_UP))
+			SetMoveTarget(Vector2::Down);
+	}
 }
 
 void Player::HandleActionInput()
@@ -69,7 +99,7 @@ void Player::Tick(float deltaTime)
 	if (currentState != NORMAL)
 		return;
 
-	HandleMovementInput();
+	HandleMovementInput(deltaTime);
 	HandleActionInput();
 }
 
@@ -81,7 +111,7 @@ void Player::Draw()
 void Player::TrappedInBubble()
 {
 	currentState = TRAPPED_IN_BUBBLE;
-	moveSpeed = 1.0f;
+	moveSpeed = MoveSpeed::SLOW;
 	bubbleTrapTimer.SetTargetTime(bubbleTrapDuration);
 	remainingBubbleEscapeCount--;
 	SetSprite("0", Color::Blue);

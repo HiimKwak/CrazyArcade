@@ -14,6 +14,12 @@ class Player : public Actor
 		DEAD
 	};
 
+	struct MoveSpeed {
+		static constexpr float FAST = 0.0125f;
+		static constexpr float NORMAL = 0.125f;
+		static constexpr float SLOW = 0.75f;
+	};
+
 public:
 	Player(const Vector2& position);
 
@@ -21,8 +27,6 @@ public:
 
 	void TrappedInBubble();
 
-	void HandleMovementInput();
-	void HandleActionInput();
 
 	inline bool IsDead() const { return currentState == DEAD; }
 
@@ -31,10 +35,19 @@ protected:
 	virtual void Tick(float deltaTime) override;
 	virtual void Draw() override;
 
-	void TryMove(Vector2& vector);
+	void HandleMovementInput(float deltaTime);
+	void SetMoveTarget(Vector2& direction);
+
+	void HandleActionInput();
 
 	PlayerState currentState = NORMAL;
-	float moveSpeed = 3.0f;
+
+	Timer moveTimer;
+	float moveSpeed = MoveSpeed::NORMAL;
+	Vector2 moveStartPos;
+	Vector2 moveTargetPos;
+	bool isMoving = false;
+	float moveProgress = 0.0f;
 
 	Timer bubbleTrapTimer;
 	float bubbleTrapDuration = 3.0f;

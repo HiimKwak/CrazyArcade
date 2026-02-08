@@ -35,6 +35,9 @@ namespace engine
 		static Vector2 Down;
 		static Vector2 Left;
 
+		// 선형 보간
+		static Vector2 Lerp(const Vector2& a, const Vector2& b, float t);
+
 	public:
 		// x, y 좌표. 콘솔은 정수 좌표만 가능하다
 		int x = 0;
