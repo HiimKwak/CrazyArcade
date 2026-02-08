@@ -33,15 +33,12 @@ namespace engine
 		Renderer::Get().Submit(sprite.GetImage(), position, sprite.GetColor(), sortingOrder);
 	}
 
-	void Actor::Destroy()
+	void Actor::Destroy(std::function<void()> onDestroy)
 	{
 		destroyRequested = true;
-
-		OnDestroy();
-	}
-
-	void Actor::OnDestroy()
-	{
+		
+		if (onDestroy)
+			onDestroy();
 	}
 
 	void Actor::SetPosition(const Vector2& newPosition)

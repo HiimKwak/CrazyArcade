@@ -5,6 +5,8 @@
 #include "Math/Color.h"
 #include "Util/Util.h"
 
+#include <functional>
+
 namespace engine
 {
 	class Level;
@@ -65,9 +67,8 @@ namespace engine
 		virtual void Tick(float deltaTime);
 		virtual void Draw();
 
-		void Destroy();
-		virtual void OnDestroy();
-
+		void Destroy(std::function<void()> onDestroy = nullptr);
+		
 		inline Vector2 GetPosition()const { return position; }
 		void SetPosition(const Vector2& newPosition);
 
