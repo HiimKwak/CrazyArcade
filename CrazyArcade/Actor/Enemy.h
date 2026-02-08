@@ -2,7 +2,6 @@
 
 #include "Actor/Actor.h"
 #include "Util/Timer.h"
-#include "Interface/IGameRuleManager.h"
 
 using namespace engine;
 

@@ -8,17 +8,16 @@
 namespace engine
 {
 	Actor::Actor(const char* image, const Vector2& position, Color color)
-		: position(position), color(color)
+		: position(position), sprite(image, color)
 	{
-		// RAII?
-		size_t length = strlen(image) + 1;
-		this->image = new char[length];
-		strcpy_s(this->image, length, image);
 	}
 
 	Actor::~Actor()
 	{
-		SafeDeleteArray(image);
+		// 1. Actor의 소멸자 본문 실행
+		// 2. 멤버 변수들의 소멸자가 역순으로 자동 호출
+		//    -> sprite.~Sprite() 자동 호출
+		//    -> position.~Vector2() 자동 호출
 	}
 
 	void Actor::BeginPlay()
@@ -31,7 +30,7 @@ namespace engine
 	}
 	void Actor::Draw()
 	{
-		Renderer::Get().Submit(image, position, color, sortingOrder);
+		Renderer::Get().Submit(sprite.GetImage(), position, sprite.GetColor(), sortingOrder);
 	}
 
 	void Actor::Destroy()
@@ -47,7 +46,6 @@ namespace engine
 
 	void Actor::SetPosition(const Vector2& newPosition)
 	{
-		// 변경하려는 위치가 현재 위치와 같으면 건너뜀
 		if (position == newPosition)
 			return;
 
@@ -55,4 +53,8 @@ namespace engine
 		position = newPosition;
 	}
 
+	void Actor::SetSprite(const char* src, Color color)
+	{
+		sprite = Sprite(src, color);
+	}
 }

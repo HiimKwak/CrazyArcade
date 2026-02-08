@@ -1,12 +1,13 @@
 #include <iostream>
 #include <Windows.h>
 
+//#include "Engine/Engine.h"
 #include "Player.h"
-#include "Engine/Engine.h"
+#include "Core/Input.h"
 #include "Game/Game.h"
 #include "Level/GameLevel.h"
-#include "Core/Input.h"
 #include "Actor/Bubble.h"
+#include "Util/Timer.h"
 
 #include "Interface/IGameRuleManager.h"
 
@@ -20,83 +21,99 @@ Player::Player(const Vector2& position)
 
 void Player::BeginPlay()
 {
-	Actor::BeginPlay();
+	super::BeginPlay();
+}
+
+static IGameRuleManager* GameRuleManager = nullptr;
+
+void Player::TryMove(Vector2& vector)
+{
+	Vector2 newPosition(GetPosition() + vector);
+	if (GameRuleManager->CanMove(GetPosition(), newPosition))
+		SetPosition(newPosition);
+}
+
+void Player::HandleMovementInput()
+{
+	if (!GetOwner())
+		return;
+	
+	GameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
+
+	if (!GameRuleManager)
+		return;
+
+	if (Input::Get().GetKeyDown(VK_RIGHT))
+		TryMove(Vector2::Right);
+	if (Input::Get().GetKeyDown(VK_LEFT))
+		TryMove(Vector2::Left);
+	if (Input::Get().GetKeyDown(VK_DOWN))
+		TryMove(Vector2::Up);
+	if (Input::Get().GetKeyDown(VK_UP))
+		TryMove(Vector2::Down);
+}
+
+void Player::HandleActionInput()
+{
+	if (!GetOwner())
+		return;
+
+	if (Input::Get().GetKeyDown((VK_SPACE)))
+	{
+		Bubble* bubble = new Bubble(GetPosition());
+
+		GameLevel* gameLevel = dynamic_cast<GameLevel*>(GetOwner());
+		ExplosionTilePool* gameLevelPool = gameLevel->GetExplosionTilePool();
+
+		if (gameLevel && gameLevelPool)
+			bubble->SetExplosionTilePool(gameLevelPool);
+
+		GetOwner()->AddNewActor(bubble);
+	}
 }
 
 void Player::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
 
-	if (Input::Get().GetKeyDown(VK_ESCAPE))
-	{
-		Game::Get().ToggleMenu();
+	if (currentState != NORMAL)
 		return;
-	}
 
-	if (Input::Get().GetKeyDown('Q'))
-	{
-		Engine::Get().Quit();
-	}
-
-	if (Input::Get().GetKeyDown((VK_SPACE)))
-	{
-		if (owner)
-		{
-			Bubble* bubble = new Bubble(GetPosition());
-
-			GameLevel* gameLevel = dynamic_cast<GameLevel*>(owner);
-			ExplosionTilePool* gameLevelPool = gameLevel->GetExplosionTilePool();
-			if (gameLevel && gameLevelPool)
-				bubble->SetExplosionTilePool(gameLevelPool);
-
-			owner->AddNewActor(bubble);
-		}
-	}
-
-	static IGameRuleManager* canPlayerMoveInterface = nullptr;
-	if (GetOwner() && !canPlayerMoveInterface)
-	{
-		canPlayerMoveInterface = dynamic_cast<IGameRuleManager*>(GetOwner());
-	}
-
-	if (Input::Get().GetKeyDown(VK_RIGHT) && GetPosition().x < Engine::Get().GetWidth())
-	{
-		Vector2 newPosition(GetPosition().x + 1, GetPosition().y);
-		if (canPlayerMoveInterface->CanMove(GetPosition(), newPosition))
-			SetPosition(newPosition);
-
-	}
-	if (Input::Get().GetKeyDown(VK_LEFT) && GetPosition().x > 0)
-	{
-		Vector2 newPosition(GetPosition().x - 1, GetPosition().y);
-		if (canPlayerMoveInterface->CanMove(GetPosition(), newPosition))
-			SetPosition(newPosition);
-
-	}
-	if (Input::Get().GetKeyDown(VK_DOWN) && GetPosition().y < Engine::Get().GetHeight())
-	{
-		Vector2 newPosition(GetPosition().x, GetPosition().y + 1);
-		if (canPlayerMoveInterface->CanMove(GetPosition(), newPosition))
-			SetPosition(newPosition);
-	}
-	if (Input::Get().GetKeyDown(VK_UP) && GetPosition().y > 0)
-	{
-		Vector2 newPosition(GetPosition().x, GetPosition().y - 1);
-		if (canPlayerMoveInterface->CanMove(GetPosition(), newPosition))
-			SetPosition(newPosition);
-	}
+	HandleMovementInput();
+	HandleActionInput();
 }
+
+
 
 void Player::Draw()
 {
-	Actor::Draw();
+	super::Draw();
 }
+
+void Player::TrappedInBubble()
+{
+	currentState = TRAPPED_IN_BUBBLE;
+	moveSpeed = 1.0f;
+	bubbleTrapTimer.SetTargetTime(bubbleTrapDuration);
+	remainingBubbleEscapeCount--;
+	SetSprite("0", Color::Blue);
+}  
 
 void Player::OnDamaged()
 {
-	// todo: bubble capsule
-
-	Destroy();
-
-	// todo: effect
+	if (currentState == NORMAL)
+	{
+		if (remainingBubbleEscapeCount > 0)
+		{
+			TrappedInBubble();
+		}
+		else
+		{
+			currentState = DEAD;
+		}
+	}
+	else if (currentState == TRAPPED_IN_BUBBLE)
+	{
+		currentState = DEAD;
+	}
 }

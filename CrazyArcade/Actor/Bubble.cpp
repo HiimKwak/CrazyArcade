@@ -36,23 +36,17 @@ void Bubble::Explode(float deltaTime)
 	if (!explodeTimer.IsTimeout())
 	{
 		float remainingTime = explodeTimer.GetRemainingTime();
+		int blink;
 		if (remainingTime <= 1.0f)
-		{
-			int blink = static_cast<int>(remainingTime * 10) % 2;
-			this->color = blink == 0 ? Color::Blue : Color::Skyblue;
-		}
+		blink = static_cast<int>(remainingTime * 10) % 2;
+		
 		else if (remainingTime <= 2.0f)
-		{
-			int blink = static_cast<int>(remainingTime * 5) % 2;
-			this->color = blink == 0 ? Color::Blue : Color::Skyblue;
-		}
+		blink = static_cast<int>(remainingTime * 5) % 2;
+		
 		else if (remainingTime <= 3.0f)
-		{
-			int blink = static_cast<int>(remainingTime * 3.33f) % 2;
-			this->color = blink == 0 ? Color::Blue : Color::Skyblue;
-		}
-
-		return;
+		blink = static_cast<int>(remainingTime * 3.33f) % 2;
+		
+		return this->sprite.SetColor(blink == 0 ? Color::Blue : Color::Skyblue);
 	}
 
 	explodeTimer.Reset();

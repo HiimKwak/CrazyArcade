@@ -1,4 +1,6 @@
+#include "Game/Game.h"
 #include "GameLevel.h"
+#include "Core/Input.h"
 #include "Util/Util.h"
 #include "Actor/Bubble.h"
 #include "Actor/Ground.h"
@@ -29,6 +31,17 @@ void GameLevel::Tick(float deltaTime)
 	super::Tick(deltaTime);
 
 	ProcessExplosionCollision();
+
+	if (Input::Get().GetKeyDown(VK_ESCAPE))
+	{
+		Game::Get().ToggleMenu();
+		return;
+	}
+
+	if (Input::Get().GetKeyDown('Q'))
+	{
+		Game::Get().Quit();
+	}
 }
 
 void GameLevel::ProcessExplosionCollision()

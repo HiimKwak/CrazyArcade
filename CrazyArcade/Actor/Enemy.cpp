@@ -1,8 +1,9 @@
+#include <cstdlib>
 #include "Enemy.h"
 #include "Actor/Bubble.h"
 #include "Level/Level.h"
 #include "Util/Util.h"
-#include <cstdlib>
+#include "Interface/IGameRuleManager.h"
 
 using namespace engine;
 

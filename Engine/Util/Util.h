@@ -7,6 +7,27 @@
 
 using namespace engine;
 
+// 메모리 정리 함수
+template<typename T>
+void SafeDelete(T*& t)
+{
+	if (t)
+	{
+		delete t;
+		t = nullptr;
+	}
+}
+
+template<typename T>
+void SafeDeleteArray(T*& tArray)
+{
+	if (tArray)
+	{
+		delete[] tArray;
+		tArray = nullptr;
+	}
+}
+
 namespace Util // Helper
 {
 	// 콘솔 커서 위치 이동시키는 함수
@@ -95,25 +116,12 @@ namespace Util // Helper
 
 		return value;
 	}
-}
 
-// 메모리 정리 함수
-template<typename T>
-void SafeDelete(T*& t)
-{
-	if (t)
+	inline void DeepCopyString(char*& dest, const char* src)
 	{
-		delete t;
-		t = nullptr;
-	}
-}
-
-template<typename T>
-void SafeDeleteArray(T*& tArray)
-{
-	if (tArray)
-	{
-		delete[] tArray;
-		tArray = nullptr;
+		SafeDeleteArray(dest);
+		size_t length = strlen(src) + 1;
+		dest = new char[length];
+		strcpy_s(dest, length, src);
 	}
 }

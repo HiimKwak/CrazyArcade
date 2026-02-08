@@ -32,6 +32,7 @@ private:
 private:
 	int targetScore = 0;
 	bool isGameClear = false;
+	bool isGameOver = false;
 	ExplosionTilePool* explosionPool = nullptr;
 };
 
