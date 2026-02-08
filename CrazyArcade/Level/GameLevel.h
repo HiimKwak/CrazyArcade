@@ -25,6 +25,7 @@ private:
 
 	virtual bool CanMove(const Vector2& playerPosition, const Vector2& nextPosition) override;
 	virtual bool HasBubbleAt(const Vector2& position) override;
+	virtual bool CanExplosionPenetrate(const Vector2& position) override;
 
 	bool CheckGameClear();
 private:

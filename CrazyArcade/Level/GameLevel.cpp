@@ -222,6 +222,16 @@ bool GameLevel::HasBubbleAt(const Vector2& position)
 	return false;
 }
 
+bool GameLevel::CanExplosionPenetrate(const Vector2& position)
+{
+	for (Actor* actor : actors)
+	{
+		if (actor->GetPosition() == position && (actor->IsTypeOf<Wall>() || actor->IsTypeOf<Bubble>()))
+			return false;
+	}
+	return true;
+}
+
 bool GameLevel::CheckGameClear()
 {
 	std::vector<Actor*> enemies;

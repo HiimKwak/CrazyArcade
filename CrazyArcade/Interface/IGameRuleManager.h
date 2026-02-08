@@ -12,4 +12,5 @@ public:
 		const Vector2& to
 	) = 0;
 	virtual bool HasBubbleAt(const Vector2& position) = 0;
+	virtual bool CanExplosionPenetrate(const Vector2& position) = 0;
 };

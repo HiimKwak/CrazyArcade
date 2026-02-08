@@ -1,6 +1,7 @@
 #include "Level/Level.h"
 #include "BubbleExplosion.h"
 #include "ExplosionTile.h"
+#include "Interface/IGameRuleManager.h"
 
 BubbleExplosion::BubbleExplosion(const Vector2& origin, int explosionRange)
 	: super("", origin, Color::White),
@@ -49,6 +50,17 @@ void BubbleExplosion::PropagateInDirection(const Vector2& direction, int range)
 		Vector2 tilePos = origin + (i * direction);
 
 		if (owner)
-			owner->AddNewActor(new ExplosionTile(tilePos));
+		{
+			IGameRuleManager* gameRuleManager = dynamic_cast<IGameRuleManager*>(owner);
+			if (gameRuleManager && !gameRuleManager->CanExplosionPenetrate(tilePos))
+				break;
+		}
+
+		if (owner)
+		{
+			ExplosionTile* tile = new ExplosionTile(tilePos, 0.5f);
+			tile->Activate();
+			owner->AddNewActor(tile);
+		}
 	}
 }
