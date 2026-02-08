@@ -51,9 +51,6 @@
     <ClCompile Include="Actor\BubbleExplosion.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Actor\ExplosionTilePool.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Util\Timer.h">
@@ -90,9 +87,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\BubbleExplosion.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Actor\ExplosionTilePool.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

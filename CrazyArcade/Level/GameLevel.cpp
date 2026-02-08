@@ -8,22 +8,18 @@
 #include "Actor/Enemy.h"
 #include "Actor/Wall.h"
 #include "Actor/ExplosionTile.h"
-#include "Actor/ExplosionTilePool.h"
 
 #include <iostream>
 
 using namespace engine;
 
 GameLevel::GameLevel()
-	: explosionPool(new ExplosionTilePool(128)) // todo: magic number -> settings size¸¸Å­
 {
 	LoadMap("Stage1.txt");
 }
 
 GameLevel::~GameLevel()
 {
-	delete explosionPool;
-	explosionPool = nullptr;
 }
 
 void GameLevel::Tick(float deltaTime)

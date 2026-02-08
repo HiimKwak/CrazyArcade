@@ -1,12 +1,10 @@
 ﻿#include "Bubble.h"
 #include "Level/Level.h"
 #include "BubbleExplosion.h"
-#include "ExplosionTilePool.h"
 
 Bubble::Bubble(const Vector2& newPosition, int explosionRange)
 	: super("@", newPosition, Color::Blue),
-	range(explosionRange),
-	segmentPool(nullptr)
+	range(explosionRange)
 {
 	sortingOrder = 5;
 	explodeTimer.SetTargetTime(countDown);
@@ -24,11 +22,6 @@ bool Bubble::IsExploded() const
 	return exploded;
 }
 
-void Bubble::SetExplosionTilePool(ExplosionTilePool* pool)
-{
-	segmentPool = pool;
-}
-
 void Bubble::Explode(float deltaTime)
 {
 	explodeTimer.Tick(deltaTime);
@@ -36,7 +29,7 @@ void Bubble::Explode(float deltaTime)
 	if (!explodeTimer.IsTimeout())
 	{
 		float remainingTime = explodeTimer.GetRemainingTime();
-		int blink;
+		int blink = 0;
 		if (remainingTime <= 1.0f)
 		blink = static_cast<int>(remainingTime * 10) % 2;
 		
@@ -52,12 +45,8 @@ void Bubble::Explode(float deltaTime)
 	explodeTimer.Reset();
 	exploded = true;
 
-	if (segmentPool)
-	{
-		BubbleExplosion* explosion = new BubbleExplosion(GetPosition(), range, segmentPool);
-		if (owner)
-			owner->AddNewActor(explosion);
-	}
+	if (owner)
+		owner->AddNewActor(new BubbleExplosion(GetPosition(), range));
 
 	Destroy();
 }

@@ -1,11 +1,9 @@
 #include "ExplosionTile.h"
-#include "ExplosionTilePool.h"
 
 ExplosionTile::ExplosionTile(const Vector2& tilePos, float lifetime)
 	: super("#", tilePos, Color::Blue),
 	lifetime(lifetime),
-	active(false),
-	pool(nullptr)
+	active(true)
 {
 	sortingOrder = 6;
 	lifeTimer.SetTargetTime(lifetime);
@@ -13,18 +11,13 @@ ExplosionTile::ExplosionTile(const Vector2& tilePos, float lifetime)
 
 void ExplosionTile::Tick(float deltaTime)
 {
-	if (!active) return;
-
 	super::Tick(deltaTime);
+
+	if (!active) return;
 
 	lifeTimer.Tick(deltaTime);
 	if (lifeTimer.IsTimeout())
-	{
-		if (pool)
-			pool->Release(this);
-		else
-			Destroy();
-	}
+		Destroy();
 }
 
 void ExplosionTile::Reset(const Vector2& tilePos, float newLifetime)
@@ -47,7 +40,3 @@ void ExplosionTile::Deactivate()
 	lifeTimer.Reset();
 }
 
-void ExplosionTile::SetPool(ExplosionTilePool* ownerPool)
-{
-	pool = ownerPool;
-}

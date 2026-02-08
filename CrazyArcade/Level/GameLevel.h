@@ -17,8 +17,6 @@ public:
 
 	virtual void Draw() override;
 
-	inline ExplosionTilePool* GetExplosionTilePool() const { return explosionPool; }
-
 private:
 	virtual void Tick(float deltaTime) override;
 	void ProcessExplosionCollision();
@@ -33,6 +31,5 @@ private:
 	int targetScore = 0;
 	bool isGameClear = false;
 	bool isGameOver = false;
-	ExplosionTilePool* explosionPool = nullptr;
 };
 

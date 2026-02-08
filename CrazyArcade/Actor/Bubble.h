@@ -18,8 +18,6 @@ public:
 
 	bool IsExploded() const;
 
-	void SetExplosionTilePool(ExplosionTilePool* pool);
-
 private:
 	void Explode(float deltaTime);
 
@@ -27,6 +25,5 @@ private:
 	float countDown = 3.0f;
 	bool exploded = false;
 	int range;
-	ExplosionTilePool* segmentPool;
 };
 

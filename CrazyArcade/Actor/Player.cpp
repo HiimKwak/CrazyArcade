@@ -59,17 +59,7 @@ void Player::HandleActionInput()
 		return;
 
 	if (Input::Get().GetKeyDown((VK_SPACE)))
-	{
-		Bubble* bubble = new Bubble(GetPosition());
-
-		GameLevel* gameLevel = dynamic_cast<GameLevel*>(GetOwner());
-		ExplosionTilePool* gameLevelPool = gameLevel->GetExplosionTilePool();
-
-		if (gameLevel && gameLevelPool)
-			bubble->SetExplosionTilePool(gameLevelPool);
-
-		GetOwner()->AddNewActor(bubble);
-	}
+		GetOwner()->AddNewActor(new Bubble(GetPosition()));
 }
 
 void Player::Tick(float deltaTime)
@@ -82,8 +72,6 @@ void Player::Tick(float deltaTime)
 	HandleMovementInput();
 	HandleActionInput();
 }
-
-
 
 void Player::Draw()
 {

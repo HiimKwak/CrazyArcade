@@ -5,14 +5,13 @@
 
 using namespace engine;
 
-class ExplosionTilePool;
-
 class ExplosionTile : public Actor
 {
 	RTTI_DECLARATIONS(ExplosionTile, Actor)
 
 public:
-	ExplosionTile(const Vector2& tilePos, float lifetime = 1.0f);
+	static constexpr float DefaultLifetime = 0.5f;
+	ExplosionTile(const Vector2& tilePos, float lifetime = DefaultLifetime);
 
 	virtual void Tick(float deltaTime) override;
 
@@ -21,11 +20,8 @@ public:
 	void Deactivate();
 	inline bool IsActive() const { return active; }
 
-	void SetPool(ExplosionTilePool* ownerPool);
-
 private:
 	Timer lifeTimer;
-	float lifetime;
+	float lifetime = DefaultLifetime;
 	bool active;
-	ExplosionTilePool* pool;
 };
