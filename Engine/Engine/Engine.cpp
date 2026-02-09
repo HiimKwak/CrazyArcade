@@ -29,6 +29,9 @@ namespace engine
 
 		// 타이머 시드 설정
 		Util::SetRandomSeed();
+
+		// UTF-8 코드페이지 설정
+		SetConsoleOutputCP(CP_UTF8);
 	}
 	Engine::~Engine()
 	{

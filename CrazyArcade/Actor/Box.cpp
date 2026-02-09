@@ -6,7 +6,7 @@
 #include <ctime>
 
 Box::Box(const Vector2& position)
-	: super("д▒", position, Color::Yellow)
+	: super("бр", position, Color::Yellow)
 {
 	sortingOrder = 3;
 }
