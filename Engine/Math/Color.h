@@ -14,5 +14,6 @@ namespace engine
 		Red = FOREGROUND_RED, // 4(100)
 		White = Blue | Green | Red,
 		Skyblue = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
+		Yellow = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
 	};
 }

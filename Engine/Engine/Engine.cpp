@@ -22,7 +22,7 @@ namespace engine
 		LoadSettings();
 
 		// 렌더러 객체 생성
-		renderer = new Renderer(Vector2(settings.width, settings.height));
+		renderer = new Renderer(Vector2(settings.viewportWidth, settings.viewportHeight));
 
 		// 커서 끄기
 		Util::TurnOffCursor();
@@ -177,15 +177,18 @@ namespace engine
 			}
 			else if (strcmp(header, "width") == 0)
 			{
-				sscanf_s(token, "width = %d", &settings.width);
+				sscanf_s(token, "width = %d", &settings.gameScreenWidth);
 			}
 			else if (strcmp(header, "height") == 0)
 			{
-				sscanf_s(token, "height = %d", &settings.height);
+				sscanf_s(token, "height = %d", &settings.gameScreenHeight);
 			}
 			// 개행문자로 문자열 분리
 			token = strtok_s(nullptr, "\n", &context);
 		}
+
+		settings.viewportWidth = settings.gameScreenWidth;
+		settings.viewportHeight = settings.gameScreenHeight + settings.hudHeight;
 
 		fclose(file);
 	}

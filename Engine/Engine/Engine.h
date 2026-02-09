@@ -17,8 +17,11 @@ namespace engine
 			float frameRate = 0.0f;
 
 			// 화면 크기
-			int width = 0;
-			int height = 0;
+			int gameScreenWidth = 0;
+			int gameScreenHeight = 0;
+			int hudHeight = 10;
+			int viewportWidth = 0;
+			int viewportHeight = 0;
 		};
 
 	public:
@@ -35,9 +38,9 @@ namespace engine
 		static Engine& Get();
 
 		// 화면 너비 반환 함수
-		inline int GetWidth() const { return settings.width; }
+		inline int GetWidth() const { return settings.viewportWidth; }
 		// 화면 높이 반환 함수
-		inline int GetHeight() const { return settings.height; }
+		inline int GetHeight() const { return settings.viewportHeight; }
 
 	protected:
 		// 정리 함수

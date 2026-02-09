@@ -27,9 +27,9 @@ private:
 	virtual bool CanExplosionPenetrate(const Vector2& position) override;
 
 	bool CheckGameClear();
+	bool CheckGameOver();
+
 private:
 	int targetScore = 0;
-	bool isGameClear = false;
-	bool isGameOver = false;
 };
 

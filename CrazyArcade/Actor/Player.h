@@ -73,7 +73,7 @@ private:
 
 	Timer bubbleTrapTimer;
 	float bubbleTrapDuration = 3.0f;
-	int lives = 1;
+	int lives = 2;
 
 	static constexpr int maxBubbleAmmo = 3;
 	int bubbleAmmo = maxBubbleAmmo;

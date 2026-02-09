@@ -81,7 +81,7 @@ void GameLevel::Draw()
 {
 	super::Draw();
 
-	if (isGameClear)
+	if (CheckGameClear())
 	{
 		Util::SetConsolePosition(Vector2(30, 0));
 		Util::SetConsoleTextColor(Color::White);
@@ -264,4 +264,18 @@ bool GameLevel::CheckGameClear()
 	}
 
 	return enemies.size() == 0;
+}
+
+bool GameLevel::CheckGameOver()
+{
+	for (Actor* const actor : actors)
+	{
+		if (actor->IsTypeOf<Player>())
+		{
+			Player* player = actor->As<Player>();
+			if (!player->IsDead())
+				return false;
+		}
+	}
+	return true;
 }
