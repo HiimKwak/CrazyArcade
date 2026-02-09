@@ -45,11 +45,31 @@ void Player::SetMoveTarget(Vector2& direction)
 
 void Player::HandleMovementInput(float deltaTime)
 {
+	if (currentState == PlayerState::TRAPPED_IN_BUBBLE)
+	{
+		bubbleTrapTimer.Tick(deltaTime);
+
+		if (bubbleTrapTimer.IsTimeout())
+		{
+			currentState = PlayerState::NORMAL;
+			moveSpeed = MoveSpeed::NORMAL;
+			SetSprite("P", Color::Red);
+
+			if (isMoving)
+			{
+				SetPosition(moveTargetPos);
+				isMoving = false;
+			}
+		}
+
+	}
+
 	if (isMoving)
 	{
 		moveTimer.Tick(deltaTime);
 
 		moveProgress = 1.0f - (moveTimer.GetRemainingTime() / moveSpeed);
+		moveProgress = Util::Clamp(moveProgress, 0.0f, 1.0f);
 
 		float eased = 1.0f - (1.0f - moveProgress) * (1.0f - moveProgress);
 
@@ -107,7 +127,7 @@ void Player::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
 
-	if (currentState != NORMAL)
+	if (currentState == PlayerState::DEAD)
 		return;
 
 	HandleMovementInput(deltaTime);
@@ -121,16 +141,23 @@ void Player::Draw()
 
 void Player::TrappedInBubble()
 {
-	currentState = TRAPPED_IN_BUBBLE;
+	currentState = PlayerState::TRAPPED_IN_BUBBLE;
 	moveSpeed = MoveSpeed::SLOW;
+	bubbleTrapTimer.Reset();
 	bubbleTrapTimer.SetTargetTime(bubbleTrapDuration);
-	remainingBubbleEscapeCount--;
 	SetSprite("0", Color::Blue);
+
+	// 움직이던 도중에 갇혔을 때 다음 틱부터 바로 물감옥 이동 로직 타도록 제어
+	if (isMoving)
+	{
+		SetPosition(moveTargetPos);
+		isMoving = false;
+	}
 }
 
 void Player::OnDamaged()
 {
-	if (currentState == NORMAL)
+	if (currentState == PlayerState::NORMAL)
 	{
 		if (remainingBubbleEscapeCount > 0)
 		{
@@ -138,12 +165,12 @@ void Player::OnDamaged()
 		}
 		else
 		{
-			currentState = DEAD;
+			currentState = PlayerState::DEAD;
 		}
 	}
-	else if (currentState == TRAPPED_IN_BUBBLE)
+	else if (currentState == PlayerState::TRAPPED_IN_BUBBLE)
 	{
-		currentState = DEAD;
+		currentState = PlayerState::DEAD;
 	}
 }
 

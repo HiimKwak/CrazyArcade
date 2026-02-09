@@ -11,10 +11,10 @@ class Bubble;
 namespace MoveSpeed {
 	constexpr float FAST = 0.0125f;
 	constexpr float NORMAL = 0.125f;
-	constexpr float SLOW = 0.75f;
+	constexpr float SLOW = 0.5f;
 };
 
-enum PlayerState {
+enum class PlayerState {
 	NORMAL,
 	TRAPPED_IN_BUBBLE,
 	DEAD
@@ -31,7 +31,7 @@ public:
 	void OnBubbleExploded();
 	void TrappedInBubble();
 
-	inline bool IsDead() const { return currentState == DEAD; }
+	inline PlayerState GetState() const { return currentState; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -43,7 +43,7 @@ protected:
 
 	void HandleActionInput();
 
-	PlayerState currentState = NORMAL;
+	PlayerState currentState = PlayerState::NORMAL;
 
 	Timer moveTimer;
 	float moveSpeed = MoveSpeed::NORMAL;

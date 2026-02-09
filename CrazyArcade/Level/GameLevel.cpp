@@ -66,7 +66,7 @@ void GameLevel::ProcessExplosionCollision()
 	{
 		Vector2 explosionPos = explosion->GetPosition();
 
-		if (player && player->GetPosition() == explosionPos)
+		if (player && player->GetState() == PlayerState::NORMAL && player->GetPosition() == explosionPos)
 			player->OnDamaged();
 
 		for (Enemy* enemy : enemies)
