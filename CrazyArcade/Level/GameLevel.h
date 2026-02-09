@@ -21,7 +21,8 @@ private:
 
 	void LoadMap(const char* filename);
 
-	virtual bool CanMove(const Vector2& playerPosition, const Vector2& nextPosition) override;
+	virtual bool CanMove(const Vector2& currentPos, const Vector2& nextPos) override;
+	virtual bool Push(const Vector2& pusherPos, const Vector2& targetPos) override;
 	virtual bool HasBubbleAt(const Vector2& position) override;
 	virtual bool CanExplosionPenetrate(const Vector2& position) override;
 

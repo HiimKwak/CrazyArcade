@@ -4,7 +4,7 @@
 #include "Player.h"
 #include "Core/Input.h"
 #include "Game/Game.h"
-#include "Level/GameLevel.h"
+#include "Level/Level.h"
 #include "Actor/Bubble.h"
 #include "Util/Timer.h"
 #include "Math/Vector2.h"
@@ -14,7 +14,7 @@
 using namespace engine;
 
 Player::Player(const Vector2& position)
-	: super("P", position, Color::Red)
+	: super("P", position, Color::Green)
 {
 	sortingOrder = 10;
 }
@@ -22,48 +22,99 @@ Player::Player(const Vector2& position)
 void Player::BeginPlay()
 {
 	super::BeginPlay();
+	gameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
 }
 
-static IGameRuleManager* gameRuleManager = nullptr;
+void Player::ChangeState(PlayerState newState)
+{
+	if (currentState == newState)
+		return;
 
-void Player::SetMoveTarget(Vector2& direction)
+	if (isMoving)
+	{
+		SetPosition(moveTargetPos);
+		isMoving = false;
+	}
+
+	currentState = newState;
+
+	switch (newState)
+	{
+	case PlayerState::NORMAL:
+		OnEnterNormal();
+		break;
+
+	case PlayerState::TRAPPED_IN_BUBBLE:
+		OnEnterBubbleTrap();
+		break;
+
+	case PlayerState::DEAD:
+		OnEnterDead();
+		break;
+	}
+}
+
+void Player::UpdateStateTick(float deltaTime)
+{
+	switch (currentState)
+	{
+	case PlayerState::DEAD:
+		UpdateDeadTick(deltaTime);
+		break;
+
+	case PlayerState::TRAPPED_IN_BUBBLE:
+		UpdateBubbleTrapTick(deltaTime);
+		break;
+
+	case PlayerState::NORMAL:
+		UpdateNormalTick(deltaTime);
+		break;
+	}
+}
+
+void Player::UpdateDeadTick(float deltaTime)
+{
+}
+
+void Player::UpdateBubbleTrapTick(float deltaTime)
+{
+	bubbleTrapTimer.Tick(deltaTime);
+
+	if (!bubbleTrapTimer.IsTimeout())
+		return;
+
+	lives--;
+	ChangeState(PlayerState::NORMAL);
+}
+
+void Player::UpdateNormalTick(float deltaTime)
+{
+}
+
+void Player::TryMove(Vector2& direction)
 {
 	if (isMoving)
 		return;
 
 	Vector2 targetPosition(GetPosition() + direction);
-	if (gameRuleManager->CanMove(GetPosition(), targetPosition))
-	{
-		moveStartPos = GetPosition();
-		moveTargetPos = targetPosition;
-		isMoving = true;
-		moveProgress = 0.0f;
-		moveTimer.Reset();
-		moveTimer.SetTargetTime(moveSpeed);
-	}
+
+	if (!gameRuleManager->CanMove(GetPosition(), targetPosition))
+		return;
+
+	bool hasBubbleAtTarget = gameRuleManager->HasBubbleAt(targetPosition);
+	if (currentState == PlayerState::NORMAL && hasBubbleAtTarget && !gameRuleManager->Push(GetPosition(), targetPosition))
+		return;
+
+	moveStartPos = GetPosition();
+	moveTargetPos = targetPosition;
+	isMoving = true;
+	moveProgress = 0.0f;
+	moveTimer.Reset();
+	moveTimer.SetTargetTime(moveSpeed);
 }
 
 void Player::HandleMovementInput(float deltaTime)
 {
-	if (currentState == PlayerState::TRAPPED_IN_BUBBLE)
-	{
-		bubbleTrapTimer.Tick(deltaTime);
-
-		if (bubbleTrapTimer.IsTimeout())
-		{
-			currentState = PlayerState::NORMAL;
-			moveSpeed = MoveSpeed::NORMAL;
-			SetSprite("P", Color::Red);
-
-			if (isMoving)
-			{
-				SetPosition(moveTargetPos);
-				isMoving = false;
-			}
-		}
-
-	}
-
 	if (isMoving)
 	{
 		moveTimer.Tick(deltaTime);
@@ -71,48 +122,41 @@ void Player::HandleMovementInput(float deltaTime)
 		moveProgress = 1.0f - (moveTimer.GetRemainingTime() / moveSpeed);
 		moveProgress = Util::Clamp(moveProgress, 0.0f, 1.0f);
 
-		float eased = 1.0f - (1.0f - moveProgress) * (1.0f - moveProgress);
+		/*float eased = 1.0f - (1.0f - moveProgress) * (1.0f - moveProgress);*/
 
-		Vector2 currentPos = Vector2::Lerp(moveStartPos, moveTargetPos, eased);
+		Vector2 currentPos = Vector2::Lerp(moveStartPos, moveTargetPos, moveProgress);
 		SetPosition(currentPos);
 
 		if (moveTimer.IsTimeout())
 		{
-			SetPosition(moveTargetPos);  // 정확한 위치로 스냅
+			SetPosition(moveTargetPos);
 			isMoving = false;
 		}
 	}
 	else
 	{
-		if (!GetOwner())
-			return;
-
-		gameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
-
 		if (!gameRuleManager)
 			return;
 
 		if (Input::Get().GetKey(VK_RIGHT))
-			SetMoveTarget(Vector2::Right);
-		else if (Input::Get().GetKey(VK_LEFT))
-			SetMoveTarget(Vector2::Left);
-		else if (Input::Get().GetKey(VK_DOWN))
-			SetMoveTarget(Vector2::Up);
-		else if (Input::Get().GetKey(VK_UP))
-			SetMoveTarget(Vector2::Down);
+			TryMove(Vector2::Right);
+		if (Input::Get().GetKey(VK_LEFT))
+			TryMove(Vector2::Left);
+		if (Input::Get().GetKey(VK_DOWN))
+			TryMove(Vector2::Up);
+		if (Input::Get().GetKey(VK_UP))
+			TryMove(Vector2::Down);
 	}
 }
 
 void Player::HandleActionInput()
 {
-	if (!GetOwner())
+	if (!gameRuleManager)
 		return;
-
-	gameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
 
 	if (Input::Get().GetKey((VK_SPACE)) && 0 < bubbleAmmo)
 	{
-		if (gameRuleManager && gameRuleManager->HasBubbleAt(GetPosition()))
+		if (gameRuleManager->HasBubbleAt(GetPosition()))
 			return;
 
 		bubbleAmmo--;
@@ -127,11 +171,16 @@ void Player::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
 
+	UpdateStateTick(deltaTime);
+
 	if (currentState == PlayerState::DEAD)
 		return;
 
-	HandleMovementInput(deltaTime);
-	HandleActionInput();
+	if (CanMove())
+		HandleMovementInput(deltaTime);
+
+	if (CanAct())
+		HandleActionInput();
 }
 
 void Player::Draw()
@@ -139,43 +188,40 @@ void Player::Draw()
 	super::Draw();
 }
 
-void Player::TrappedInBubble()
+void Player::OnEnterNormal()
 {
-	currentState = PlayerState::TRAPPED_IN_BUBBLE;
+	moveSpeed = MoveSpeed::NORMAL;
+	SetSprite("P", Color::Green);
+}
+
+void Player::OnEnterBubbleTrap()
+{
 	moveSpeed = MoveSpeed::SLOW;
 	bubbleTrapTimer.Reset();
 	bubbleTrapTimer.SetTargetTime(bubbleTrapDuration);
 	SetSprite("0", Color::Blue);
+}
 
-	// 움직이던 도중에 갇혔을 때 다음 틱부터 바로 물감옥 이동 로직 타도록 제어
-	if (isMoving)
-	{
-		SetPosition(moveTargetPos);
-		isMoving = false;
-	}
+void Player::OnEnterDead()
+{
+	SetSprite("X", Color::Red);
 }
 
 void Player::OnDamaged()
 {
 	if (currentState == PlayerState::NORMAL)
 	{
-		if (remainingBubbleEscapeCount > 0)
-		{
-			TrappedInBubble();
-		}
+		if (lives > 0)
+			ChangeState(PlayerState::TRAPPED_IN_BUBBLE);
 		else
-		{
-			currentState = PlayerState::DEAD;
-		}
+			ChangeState(PlayerState::DEAD);
 	}
 	else if (currentState == PlayerState::TRAPPED_IN_BUBBLE)
-	{
-		currentState = PlayerState::DEAD;
-	}
+		ChangeState(PlayerState::DEAD);
 }
 
 void Player::OnBubbleExploded()
 {
-	if (bubbleAmmo < maxBubbleRounds)
+	if (bubbleAmmo < maxBubbleAmmo)
 		bubbleAmmo++;
 }

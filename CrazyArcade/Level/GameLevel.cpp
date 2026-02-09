@@ -155,61 +155,82 @@ void GameLevel::LoadMap(const char* filename)
 	fclose(file);
 }
 
-bool GameLevel::CanMove(const Vector2& playerPosition, const Vector2& nextPosition)
+bool GameLevel::CanMove(const Vector2& currentPos, const Vector2& nextPos)
 {
-	std::vector<Actor*> bubbles;
-	for (Actor* const actor : actors)
+	Actor* targetActor = nullptr;
+	for (Actor* actor : actors)
 	{
-		if (actor->IsTypeOf<Bubble>())
+		if (actor->GetPosition() == nextPos)
 		{
-			bubbles.emplace_back(actor);
-			continue;
-		}
-	}
-
-	Actor* bubbleActor = nullptr;
-	for (Actor* const bubble : bubbles)
-	{
-		if (bubble->GetPosition() == nextPosition)
-		{
-			bubbleActor = bubble;
+			targetActor = actor;
 			break;
 		}
 	}
 
-	if (bubbleActor)
-	{
-		Vector2 direction = nextPosition - playerPosition;
-		Vector2 newPosition = bubbleActor->GetPosition() + direction;
+	if (!targetActor || targetActor->IsTypeOf<Wall>())
+		return false;
 
-		for (Actor* const actor : actors)
+	if (targetActor->IsTypeOf<Bubble>())
+	{
+		Vector2 direction = nextPos - currentPos;
+		Vector2 bubbleNextPos = nextPos + direction;
+
+		for (Actor* actor : actors)
 		{
-			if (newPosition == actor->GetPosition())
+			if (actor->GetPosition() == bubbleNextPos)
 			{
-				if (actor->IsTypeOf<Wall>() || actor->IsTypeOf<Bubble>() || actor->IsTypeOf<Player>())
+				if (actor->IsTypeOf<Wall>() ||
+					actor->IsTypeOf<Bubble>() ||
+					actor->IsTypeOf<Player>() ||
+					actor->IsTypeOf<Enemy>())
 				{
 					return false;
 				}
-				if (actor->IsTypeOf<Ground>() || actor->IsTypeOf<Enemy>()) // todo: bush?
-				{
-					bubbleActor->SetPosition(newPosition);
-
-					return true;
-				}
 			}
 		}
+		return true;
 	}
-	else {
-		for (Actor* const actor : actors)
+
+	return true;
+}
+
+bool GameLevel::Push(const Vector2& pusherPos, const Vector2& targetPos)
+{
+	Actor* pusher = nullptr;
+	Actor* target = nullptr;
+
+	for (Actor* actor : actors)
+	{
+		if (actor->GetPosition() == pusherPos)
+			pusher = actor;
+		if (actor->GetPosition() == targetPos)
+			target = actor;
+	}
+
+	if (!pusher || !target)
+		return false;
+
+	Vector2 direction = targetPos - pusherPos;
+	Vector2 targetNextPos = targetPos + direction;
+
+	for (Actor* actor : actors)
+	{
+		if (actor->GetPosition() == targetNextPos)
 		{
-			if (nextPosition == actor->GetPosition())
+			if (actor->IsTypeOf<Wall>() ||
+				actor->IsTypeOf<Bubble>() ||
+				actor->IsTypeOf<Player>() ||
+				actor->IsTypeOf<Enemy>())
 			{
-				return actor->IsTypeOf<Wall>() ? false : true;
+				return false;
 			}
 		}
 	}
 
-	return false;
+	target->SetPosition(targetNextPos);
+	pusher->SetPosition(targetPos);
+
+	return true;
 }
 
 bool GameLevel::HasBubbleAt(const Vector2& position)

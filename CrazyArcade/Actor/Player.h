@@ -7,6 +7,7 @@
 using namespace engine;
 
 class Bubble;
+class IGameRuleManager;
 
 namespace MoveSpeed {
 	constexpr float FAST = 0.0125f;
@@ -27,35 +28,55 @@ class Player : public Actor
 public:
 	Player(const Vector2& position);
 
+	bool CanMove() const
+	{
+		return currentState == PlayerState::NORMAL || currentState == PlayerState::TRAPPED_IN_BUBBLE;
+	}
+	bool CanAct() const
+	{
+		return currentState == PlayerState::NORMAL;
+	}
+
+	inline bool IsDead() const { return currentState == PlayerState::DEAD; }
+	inline PlayerState GetState() const { return currentState; }
+
 	void OnDamaged();
 	void OnBubbleExploded();
-	void TrappedInBubble();
-
-	inline PlayerState GetState() const { return currentState; }
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
 	virtual void Draw() override;
 
-	void HandleMovementInput(float deltaTime);
-	void SetMoveTarget(Vector2& direction);
+	PlayerState currentState = PlayerState::NORMAL;
+	void ChangeState(PlayerState newState);
 
+private:
+	void OnEnterBubbleTrap();
+	void OnEnterDead();
+	void OnEnterNormal();
+
+	void TryMove(Vector2& direction);
+	void UpdateStateTick(float deltaTime);
+	void UpdateDeadTick(float deltaTime);
+	void UpdateBubbleTrapTick(float deltaTime);
+	void UpdateNormalTick(float deltaTime);
+	void HandleMovementInput(float deltaTime);
 	void HandleActionInput();
 
-	PlayerState currentState = PlayerState::NORMAL;
-
+	bool isMoving = false;
 	Timer moveTimer;
 	float moveSpeed = MoveSpeed::NORMAL;
+	float moveProgress = 0.0f;
 	Vector2 moveStartPos;
 	Vector2 moveTargetPos;
-	bool isMoving = false;
-	float moveProgress = 0.0f;
 
 	Timer bubbleTrapTimer;
 	float bubbleTrapDuration = 3.0f;
-	int remainingBubbleEscapeCount = 2;
+	int lives = 1;
 
-	static constexpr int maxBubbleRounds = 3;
-	int bubbleAmmo = maxBubbleRounds;
+	static constexpr int maxBubbleAmmo = 3;
+	int bubbleAmmo = maxBubbleAmmo;
+
+	IGameRuleManager* gameRuleManager = nullptr;
 };
