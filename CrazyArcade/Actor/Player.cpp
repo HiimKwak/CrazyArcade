@@ -24,7 +24,7 @@ void Player::BeginPlay()
 	super::BeginPlay();
 }
 
-static IGameRuleManager* GameRuleManager = nullptr;
+static IGameRuleManager* gameRuleManager = nullptr;
 
 void Player::SetMoveTarget(Vector2& direction)
 {
@@ -32,7 +32,7 @@ void Player::SetMoveTarget(Vector2& direction)
 		return;
 
 	Vector2 targetPosition(GetPosition() + direction);
-	if (GameRuleManager->CanMove(GetPosition(), targetPosition))
+	if (gameRuleManager->CanMove(GetPosition(), targetPosition))
 	{
 		moveStartPos = GetPosition();
 		moveTargetPos = targetPosition;
@@ -66,10 +66,10 @@ void Player::HandleMovementInput(float deltaTime)
 	{
 		if (!GetOwner())
 			return;
-	
-		GameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
 
-		if (!GameRuleManager)
+		gameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
+
+		if (!gameRuleManager)
 			return;
 
 		if (Input::Get().GetKey(VK_RIGHT))
@@ -88,8 +88,19 @@ void Player::HandleActionInput()
 	if (!GetOwner())
 		return;
 
-	if (Input::Get().GetKeyDown((VK_SPACE)))
-		GetOwner()->AddNewActor(new Bubble(GetPosition()));
+	gameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
+
+	if (Input::Get().GetKey((VK_SPACE)) && 0 < bubbleAmmo)
+	{
+		if (gameRuleManager && gameRuleManager->HasBubbleAt(GetPosition()))
+			return;
+
+		bubbleAmmo--;
+		Bubble* bubble = new Bubble(GetPosition());
+		bubble->SetOwnerPlayer(this);
+
+		GetOwner()->AddNewActor(bubble);
+	}
 }
 
 void Player::Tick(float deltaTime)
@@ -115,7 +126,7 @@ void Player::TrappedInBubble()
 	bubbleTrapTimer.SetTargetTime(bubbleTrapDuration);
 	remainingBubbleEscapeCount--;
 	SetSprite("0", Color::Blue);
-}  
+}
 
 void Player::OnDamaged()
 {
@@ -134,4 +145,10 @@ void Player::OnDamaged()
 	{
 		currentState = DEAD;
 	}
+}
+
+void Player::OnBubbleExploded()
+{
+	if (bubbleAmmo < maxBubbleRounds)
+		bubbleAmmo++;
 }

@@ -5,8 +5,6 @@
 
 using namespace engine;
 
-class ExplosionTilePool;
-
 class GameLevel : public Level, public IGameRuleManager
 {
 	RTTI_DECLARATIONS(GameLevel, Level)

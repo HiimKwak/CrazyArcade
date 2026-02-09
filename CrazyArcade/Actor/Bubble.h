@@ -5,7 +5,7 @@
 
 using namespace engine;
 
-class ExplosionTilePool;
+class Player;
 
 class Bubble : public Actor
 {
@@ -18,8 +18,13 @@ public:
 
 	bool IsExploded() const;
 
+	inline Player* GetOwner() const { return ownerPlayer; }
+	void SetOwnerPlayer(Player* player) { ownerPlayer = player; }
+
 private:
 	void Explode(float deltaTime);
+
+	Player* ownerPlayer = nullptr;
 
 	Timer explodeTimer;
 	float countDown = 3.0f;

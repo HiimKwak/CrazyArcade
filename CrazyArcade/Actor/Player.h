@@ -1,32 +1,35 @@
 #pragma once
+
+#include <vector>
 #include "Util/Timer.h"
 #include "Actor/Actor.h"
 
 using namespace engine;
 
+class Bubble;
+
+namespace MoveSpeed {
+	constexpr float FAST = 0.0125f;
+	constexpr float NORMAL = 0.125f;
+	constexpr float SLOW = 0.75f;
+};
+
+enum PlayerState {
+	NORMAL,
+	TRAPPED_IN_BUBBLE,
+	DEAD
+};
+
 class Player : public Actor
 {
 	RTTI_DECLARATIONS(Player, Actor)
-
-	enum PlayerState {
-		NORMAL,
-		TRAPPED_IN_BUBBLE,
-		DEAD
-	};
-
-	struct MoveSpeed {
-		static constexpr float FAST = 0.0125f;
-		static constexpr float NORMAL = 0.125f;
-		static constexpr float SLOW = 0.75f;
-	};
 
 public:
 	Player(const Vector2& position);
 
 	void OnDamaged();
-
+	void OnBubbleExploded();
 	void TrappedInBubble();
-
 
 	inline bool IsDead() const { return currentState == DEAD; }
 
@@ -52,4 +55,7 @@ protected:
 	Timer bubbleTrapTimer;
 	float bubbleTrapDuration = 3.0f;
 	int remainingBubbleEscapeCount = 2;
+
+	static constexpr int maxBubbleRounds = 3;
+	int bubbleAmmo = maxBubbleRounds;
 };

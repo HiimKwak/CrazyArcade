@@ -216,7 +216,7 @@ bool GameLevel::HasBubbleAt(const Vector2& position)
 {
 	for (Actor* actor : actors)
 	{
-		if (actor->GetPosition() == position)
+		if (actor->IsTypeOf<Bubble>() && actor->GetPosition() == position)
 			return true;
 	}
 	return false;
