@@ -8,7 +8,7 @@
 #include "Actor/Bubble.h"
 #include "Util/Timer.h"
 #include "Math/Vector2.h"
-
+#include "Actor/Item.h"
 #include "Interface/IGameRuleManager.h"
 
 using namespace engine;
@@ -149,6 +149,27 @@ void Player::HandleMovementInput(float deltaTime)
 	}
 }
 
+
+void Player::AddItem(ItemType type)
+{
+	inventory.push_back(type);
+
+	switch (type)
+	{
+	case ItemType::BubbleUpgrade:
+		bubbleRange++;
+		break;
+
+	case ItemType::Roller:
+		moveSpeed = MoveSpeed::FAST;
+		break;
+
+	case ItemType::Shield:
+		hasShield = true;
+		break;
+	}
+}
+
 void Player::HandleActionInput()
 {
 	if (!gameRuleManager)
@@ -160,7 +181,7 @@ void Player::HandleActionInput()
 			return;
 
 		bubbleAmmo--;
-		Bubble* bubble = new Bubble(GetPosition());
+		Bubble* bubble = new Bubble(GetPosition(), bubbleRange);
 		bubble->SetOwnerPlayer(this);
 
 		GetOwner()->AddNewActor(bubble);
@@ -209,6 +230,13 @@ void Player::OnEnterDead()
 
 void Player::OnDamaged()
 {
+	if (hasShield)
+	{
+		hasShield = false;
+		// todo: ½¯µå ±úÁö´Â ÀÌÆåÆ®
+		return;
+	}
+
 	if (currentState == PlayerState::NORMAL)
 	{
 		if (lives > 0)

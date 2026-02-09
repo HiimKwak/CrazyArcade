@@ -3,6 +3,7 @@
 #include <vector>
 #include "Util/Timer.h"
 #include "Actor/Actor.h"
+#include "Actor/Item.h"
 
 using namespace engine;
 
@@ -10,7 +11,7 @@ class Bubble;
 class IGameRuleManager;
 
 namespace MoveSpeed {
-	constexpr float FAST = 0.0125f;
+	constexpr float FAST = 0.0625f;
 	constexpr float NORMAL = 0.125f;
 	constexpr float SLOW = 0.5f;
 };
@@ -40,6 +41,9 @@ public:
 	inline bool IsDead() const { return currentState == PlayerState::DEAD; }
 	inline PlayerState GetState() const { return currentState; }
 
+	void AddItem(ItemType type);
+	inline const std::vector<ItemType>& GetItems() const { return inventory; }
+
 	void OnDamaged();
 	void OnBubbleExploded();
 
@@ -50,6 +54,8 @@ protected:
 
 	PlayerState currentState = PlayerState::NORMAL;
 	void ChangeState(PlayerState newState);
+
+	std::vector<ItemType> inventory;
 
 private:
 	void OnEnterBubbleTrap();
@@ -77,6 +83,9 @@ private:
 
 	static constexpr int maxBubbleAmmo = 3;
 	int bubbleAmmo = maxBubbleAmmo;
+	int bubbleRange = 1;
+
+	bool hasShield = false;
 
 	IGameRuleManager* gameRuleManager = nullptr;
 };

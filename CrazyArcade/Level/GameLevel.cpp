@@ -8,6 +8,7 @@
 #include "Actor/Enemy.h"
 #include "Actor/Wall.h"
 #include "Actor/ExplosionTile.h"
+#include "Actor/Box.h"
 
 #include <iostream>
 
@@ -45,6 +46,7 @@ void GameLevel::ProcessExplosionCollision()
 	std::vector<ExplosionTile*> activeExplosions;
 	Player* player = nullptr;
 	std::vector<Enemy*> enemies;
+	std::vector<Box*> boxes;
 
 	for (Actor* actor : actors)
 	{
@@ -60,6 +62,9 @@ void GameLevel::ProcessExplosionCollision()
 
 		if (actor->IsTypeOf<Enemy>())
 			enemies.push_back(actor->As<Enemy>());
+
+		if (actor->IsTypeOf<Box>())
+			boxes.push_back(actor->As<Box>());
 	}
 
 	for (ExplosionTile* explosion : activeExplosions)
@@ -73,6 +78,12 @@ void GameLevel::ProcessExplosionCollision()
 		{
 			if (enemy->GetPosition() == explosionPos)
 				enemy->OnDamaged();
+		}
+
+		for (Box* box : boxes)
+		{
+			if (box->GetPosition() == explosionPos)
+				box->OnDamaged();
 		}
 	}
 }
@@ -241,6 +252,50 @@ bool GameLevel::HasBubbleAt(const Vector2& position)
 			return true;
 	}
 	return false;
+}
+
+bool GameLevel::HasPlayerAt(const Vector2& position)
+{
+	for (Actor* actor : actors)
+	{
+		if (actor->IsTypeOf<Player>() && actor->GetPosition() == position)
+			return true;
+	}
+	return false;
+}
+
+bool GameLevel::HasExplosionAt(const Vector2& position)
+{
+	for (Actor* actor : actors)
+	{
+		if (actor->IsTypeOf<ExplosionTile>() && actor->GetPosition() == position)
+			return true;
+	}
+	return false;
+}
+
+bool GameLevel::HasBoxAt(const Vector2& position)
+{
+	for (Actor* actor : actors)
+	{
+		if (actor->IsTypeOf<Box>() && actor->GetPosition() == position)
+			return true;
+	}
+	return false;
+}
+
+void GameLevel::SendItemToPlayer(const Vector2& itemPos, ItemType itemType)
+{
+	for (Actor* actor : actors)
+	{
+		// todo: 좌표 판별로는 아이템 획득 순서 보장을 완벽히 해주지 못함
+		if (actor->IsTypeOf<Player>() && actor->GetPosition() == itemPos)
+		{
+			Player* player = actor->As<Player>();
+			player->AddItem(itemType);
+			break;
+		}
+	}
 }
 
 bool GameLevel::CanExplosionPenetrate(const Vector2& position)

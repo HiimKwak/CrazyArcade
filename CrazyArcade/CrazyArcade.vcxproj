@@ -92,11 +92,13 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Actor\Box.cpp" />
     <ClCompile Include="Actor\Bubble.cpp" />
     <ClCompile Include="Actor\BubbleExplosion.cpp" />
     <ClCompile Include="Actor\Enemy.cpp" />
     <ClCompile Include="Actor\ExplosionTile.cpp" />
     <ClCompile Include="Actor\Ground.cpp" />
+    <ClCompile Include="Actor\Item.cpp" />
     <ClCompile Include="Actor\Player.cpp" />
     <ClCompile Include="Actor\Wall.cpp" />
     <ClCompile Include="Game\Game.cpp" />
@@ -106,11 +108,13 @@
     <ClCompile Include="Util\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Actor\Box.h" />
     <ClInclude Include="Actor\Bubble.h" />
     <ClInclude Include="Actor\BubbleExplosion.h" />
     <ClInclude Include="Actor\Enemy.h" />
     <ClInclude Include="Actor\ExplosionTile.h" />
     <ClInclude Include="Actor\Ground.h" />
+    <ClInclude Include="Actor\Item.h" />
     <ClInclude Include="Actor\Player.h" />
     <ClInclude Include="Actor\Wall.h" />
     <ClInclude Include="Game\Game.h" />
