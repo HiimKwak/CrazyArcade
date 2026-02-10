@@ -49,13 +49,8 @@ namespace engine
 		}
 
 		// Ä¿¼­ ²ô±â
-		CONSOLE_CURSOR_INFO info;
-		SetConsoleCursorInfo(
-			buffer,
-			&info
-		);
-
-		// ²ôµµ·Ï ¼³Á¤
+		CONSOLE_CURSOR_INFO info{};
+		info.dwSize = 1;
 		info.bVisible = false;
 		SetConsoleCursorInfo(buffer, &info);
 	}

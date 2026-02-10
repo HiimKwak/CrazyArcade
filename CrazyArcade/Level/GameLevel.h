@@ -25,13 +25,15 @@ private:
 	virtual bool CanExplosionPenetrate(const Vector2& position) override;
 
 	virtual bool Push(const Vector2& pusherPos, const Vector2& targetPos) override;
-	
+
 	virtual bool HasBubbleAt(const Vector2& position) override;
 	virtual bool HasPlayerAt(const Vector2& position) override;
 	virtual bool HasExplosionAt(const Vector2& position) override;
 	virtual bool HasBoxAt(const Vector2& position) override;
 
 	virtual void SendItemToPlayer(const Vector2& itemPos, ItemType itemType) override;
+
+	virtual Vector2 GetPlayerPosition() override;
 
 	bool CheckGameClear();
 	bool CheckGameOver();

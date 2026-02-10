@@ -58,7 +58,7 @@ void BubbleExplosion::PropagateInDirection(const Vector2& direction, int range)
 
 		if (owner)
 		{
-			ExplosionTile* tile = new ExplosionTile(tilePos, 0.5f);
+			ExplosionTile* tile = new ExplosionTile(tilePos);
 			tile->Activate();
 			owner->AddNewActor(tile);
 		}

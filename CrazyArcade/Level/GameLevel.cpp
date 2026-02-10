@@ -7,8 +7,10 @@
 #include "Actor/Player.h"
 #include "Actor/Enemy.h"
 #include "Actor/Wall.h"
+#include "Actor/Bush.h"
 #include "Actor/ExplosionTile.h"
 #include "Actor/Box.h"
+#include "Actor/Item.h"
 
 #include <iostream>	
 #include <Windows.h>
@@ -143,18 +145,26 @@ void GameLevel::LoadMap(const char* filename)
 
 		switch (mapCharacter)
 		{
+		case '0':
+			AddNewActor(new Ground(position));
+			break;
 		case '1':
 			AddNewActor(new Wall(position));
 			break;
-		case '.':
+		case '2':
+			AddNewActor(new Box(position));
 			AddNewActor(new Ground(position));
 			break;
-		case 'p':
+		case '3':
 			AddNewActor(new Player(position));
 			AddNewActor(new Ground(position));
 			break;
-		case 'e':
+		case '4':
 			AddNewActor(new Enemy(position));
+			AddNewActor(new Ground(position));
+			break;
+		case '5':
+			AddNewActor(new Bush(position));
 			AddNewActor(new Ground(position));
 			break;
 		}
@@ -179,7 +189,7 @@ bool GameLevel::CanMove(const Vector2& currentPos, const Vector2& nextPos)
 		}
 	}
 
-	if (!targetActor || targetActor->IsTypeOf<Wall>())
+	if (!targetActor || targetActor->IsTypeOf<Wall>() || targetActor->IsTypeOf<Box>())
 		return false;
 
 	if (targetActor->IsTypeOf<Bubble>())
@@ -192,6 +202,7 @@ bool GameLevel::CanMove(const Vector2& currentPos, const Vector2& nextPos)
 			if (actor->GetPosition() == bubbleNextPos)
 			{
 				if (actor->IsTypeOf<Wall>() ||
+					actor->IsTypeOf<Box>() ||
 					actor->IsTypeOf<Bubble>() ||
 					actor->IsTypeOf<Player>() ||
 					actor->IsTypeOf<Enemy>())
@@ -230,6 +241,7 @@ bool GameLevel::Push(const Vector2& pusherPos, const Vector2& targetPos)
 		if (actor->GetPosition() == targetNextPos)
 		{
 			if (actor->IsTypeOf<Wall>() ||
+				actor->IsTypeOf<Box>() ||
 				actor->IsTypeOf<Bubble>() ||
 				actor->IsTypeOf<Player>() ||
 				actor->IsTypeOf<Enemy>())
@@ -297,6 +309,19 @@ void GameLevel::SendItemToPlayer(const Vector2& itemPos, ItemType itemType)
 			break;
 		}
 	}
+}
+
+Vector2 GameLevel::GetPlayerPosition()
+{
+	for (Actor* actor : actors)
+	{
+		if (actor->IsTypeOf<Player>())
+		{
+			Player* player = actor->As<Player>();
+			return player->GetPosition();
+		}
+	}
+	return Vector2::Zero; // 플레이어가 없을 경우?
 }
 
 bool GameLevel::CanExplosionPenetrate(const Vector2& position)

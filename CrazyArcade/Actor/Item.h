@@ -18,6 +18,7 @@ class Item : public Actor
 	RTTI_DECLARATIONS(Item, Actor)
 
 public:
+	Item(const Vector2& position);
 	Item(const Vector2& position, ItemType type);
 
 	virtual void Tick(float deltaTime) override;

@@ -1,8 +1,7 @@
 #include "ExplosionTile.h"
 
-ExplosionTile::ExplosionTile(const Vector2& tilePos, float lifetime)
-	: super(L"#", tilePos, Color::Skyblue),
-	lifetime(lifetime),
+ExplosionTile::ExplosionTile(const Vector2& tilePos)
+	: super(L"%", tilePos, Color::Skyblue),
 	active(true)
 {
 	sortingOrder = 6;
@@ -20,10 +19,9 @@ void ExplosionTile::Tick(float deltaTime)
 		Destroy();
 }
 
-void ExplosionTile::Reset(const Vector2& tilePos, float newLifetime)
+void ExplosionTile::Reset(const Vector2& tilePos)
 {
 	SetPosition(tilePos);
-	lifetime = newLifetime;
 	lifeTimer.Reset();
 	lifeTimer.SetTargetTime(lifetime);
 	active = false;
