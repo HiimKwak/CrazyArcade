@@ -13,6 +13,7 @@ public:
 	static constexpr float lifetime = 0.5f;
 	ExplosionTile(const Vector2& tilePos);
 
+	virtual void Draw() override;
 	virtual void Tick(float deltaTime) override;
 
 	void Reset(const Vector2& tilePos);

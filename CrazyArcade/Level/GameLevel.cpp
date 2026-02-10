@@ -12,10 +12,39 @@
 #include "Actor/Box.h"
 #include "Actor/Item.h"
 
+#include "Engine/Engine.h"
+#include "Math/Vector2.h"
+#include "Render/Renderer.h"
+
 #include <iostream>	
 #include <Windows.h>
 
 using namespace engine;
+
+Vector2 GameLevel::WorldToScreen(const Vector2& worldPos) const
+{
+	return mapOrigin + worldPos;
+}
+
+bool GameLevel::IsInsideGameMap_Screen(const Vector2& screenPos) const
+{
+	if (mapWidth <= 0 || mapHeight <= 0)
+		return false;
+
+	const int left = mapOrigin.x;
+	const int top = mapOrigin.y;
+	const int right = mapOrigin.x + (mapWidth - 1);
+	const int bottom = mapOrigin.y + (mapHeight - 1);
+
+	return (screenPos.x >= left && screenPos.x <= right &&
+		screenPos.y >= top && screenPos.y <= bottom);
+}
+
+bool GameLevel::IsInsideGameMap_World(const Vector2& worldPos) const
+{
+	return IsInsideGameMap_Screen(WorldToScreen(worldPos));
+}
+
 
 GameLevel::GameLevel()
 {
@@ -95,6 +124,11 @@ void GameLevel::Draw()
 {
 	super::Draw();
 
+	const int gameH = Engine::Get().GetGameHeight();
+
+	Renderer::Get().Submit(L"---------------------------------------------", Vector2(0, gameH), Color::White, 100);
+	Renderer::Get().Submit(L"ESC: Menu   Q: Quit", Vector2(0, gameH + 1), Color::White, 100);
+
 	if (CheckGameClear())
 	{
 		Util::SetConsolePosition(Vector2(30, 0));
@@ -126,54 +160,94 @@ void GameLevel::LoadMap(const char* filename)
 
 	char* data = new char[fileSize + 1];
 	size_t readSize = fread(data, sizeof(char), fileSize, file);
+	data[fileSize] = '\0';
 
-	/** 읽어온 문자열 분석(parsing)해서 출력 **/
+	// 1) 맵 크기 산출(mapWidth/mapHeight)
+	int computedMapWidth = 0;
+	int computedMapHeight = 1;
+	int currentLineWidth = 0;
+
+	for (size_t i = 0; i < fileSize; ++i)
+	{
+		if (data[i] == '\r')
+			continue;
+
+		if (data[i] == '\n')
+		{
+			if (currentLineWidth > computedMapWidth) computedMapWidth = currentLineWidth;
+			currentLineWidth = 0;
+			++computedMapHeight;
+			continue;
+		}
+		++currentLineWidth;
+	}
+	if (currentLineWidth > computedMapWidth) computedMapWidth = currentLineWidth;
+
+	mapWidth = computedMapWidth;
+	mapHeight = computedMapHeight;
+
+	const int gameW = Engine::Get().GetGameWidth();
+	const int gameH = Engine::Get().GetGameHeight();
+
+	const Vector2 gameCenter((gameW - 1) / 2, (gameH - 1) / 2);
+	const Vector2 mapHalf(mapWidth / 2, mapHeight / 2);
+
+	mapOrigin = gameCenter - mapHalf;
+
+	/** 읽어온 문자열 분석(parsing) **/
 	int index = 0;
-	Vector2 position;
+	Vector2 worldPos = Vector2::Zero;
 
-	while (index < fileSize)
+	while (index < (int)fileSize)
 	{
 		char mapCharacter = data[index];
 		++index;
 
+		if (mapCharacter == '\r')
+			continue;
+
 		if (mapCharacter == '\n')
 		{
-			++position.y;
-			position.x = 0;
+			++worldPos.y;
+			worldPos.x = 0;
 			continue;
 		}
+
+		// 월드좌표를 화면좌표로 변환해서 '그려질 위치'로 배치
+		// (액터 position 자체를 화면좌표로 둘 거면 여기서 스크린좌표로 넣고,
+		//  월드좌표를 유지하려면 Actor 쪽에 변환로직이 필요합니다.)
+		// 현재 구조상 Actor가 position 그대로 Draw하므로, 여기서는 "스크린좌표"로 세팅합니다.
+		Vector2 screenPos = WorldToScreen(worldPos);
 
 		switch (mapCharacter)
 		{
 		case '0':
-			AddNewActor(new Ground(position));
+			AddNewActor(new Ground(screenPos));
 			break;
 		case '1':
-			AddNewActor(new Wall(position));
+			AddNewActor(new Wall(screenPos));
 			break;
 		case '2':
-			AddNewActor(new Box(position));
-			AddNewActor(new Ground(position));
+			AddNewActor(new Box(screenPos));
+			AddNewActor(new Ground(screenPos));
 			break;
 		case '3':
-			AddNewActor(new Player(position));
-			AddNewActor(new Ground(position));
+			AddNewActor(new Player(screenPos));
+			AddNewActor(new Ground(screenPos));
 			break;
 		case '4':
-			AddNewActor(new Enemy(position));
-			AddNewActor(new Ground(position));
+			AddNewActor(new Enemy(screenPos));
+			AddNewActor(new Ground(screenPos));
 			break;
 		case '5':
-			AddNewActor(new Bush(position));
-			AddNewActor(new Ground(position));
+			AddNewActor(new Bush(screenPos));
 			break;
 		}
 
-		++position.x;
+		++worldPos.x;
 	}
 
 	delete[] data;
-
 	fclose(file);
 }
 

@@ -15,6 +15,11 @@ public:
 
 	virtual void Draw() override;
 
+	Vector2 WorldToScreen(const Vector2& worldPos) const;
+	bool IsInsideGameMap_Screen(const Vector2& worldPos) const;
+	bool IsInsideGameMap_World(const Vector2& worldPos) const;
+	inline Vector2 GetMapOrigin() const { return mapOrigin; }
+
 private:
 	virtual void Tick(float deltaTime) override;
 	void ProcessExplosionCollision();
@@ -39,6 +44,11 @@ private:
 	bool CheckGameOver();
 
 private:
+	Vector2 mapOrigin = Vector2::Zero;
+
+	int mapWidth = 0;
+	int mapHeight = 0;
+
 	int targetScore = 0;
 };
 
