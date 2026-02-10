@@ -24,7 +24,7 @@ void CharacterBase::AddItem(ItemType type)
 		break;
 
 	case ItemType::Roller:
-		moveSpeed = MoveSpeed::FAST;
+		moveSpeed -= 0.01;
 		break;
 
 	case ItemType::Shield:
