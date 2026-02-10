@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Actor/Actor.h"
 #include "Util/Timer.h"
+#include "Actor/CharacterBase.h"
 
 using namespace engine;
 
@@ -18,13 +18,13 @@ public:
 
 	bool IsExploded() const;
 
-	inline Player* GetOwner() const { return ownerPlayer; }
-	void SetOwnerPlayer(Player* player) { ownerPlayer = player; }
+	inline CharacterBase* GetOwnerCharacter() const { return ownerCharacter; }
+	void SetOwnerCharacter(CharacterBase* actor) { ownerCharacter = actor; }
 
 private:
 	void Explode(float deltaTime);
 
-	Player* ownerPlayer = nullptr;
+	CharacterBase* ownerCharacter = nullptr;
 
 	Timer explodeTimer;
 	float countDown = 3.0f;

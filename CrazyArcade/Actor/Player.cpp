@@ -148,7 +148,7 @@ void Player::HandleActionInput()
 
 		bubbleAmmo--;
 		Bubble* bubble = new Bubble(GetPosition(), bubbleRange);
-		bubble->SetOwnerPlayer(this);
+		bubble->SetOwnerCharacter(this);
 
 		GetOwner()->AddNewActor(bubble);
 	}
@@ -157,6 +157,8 @@ void Player::HandleActionInput()
 void Player::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
+
+	TickShieldBlink(deltaTime);
 
 	UpdateStateTick(deltaTime);
 
@@ -168,6 +170,7 @@ void Player::Tick(float deltaTime)
 
 	if (CanAct())
 		HandleActionInput();
+
 }
 
 void Player::Draw()
@@ -191,12 +194,12 @@ void Player::OnEnterBubbleTrap()
 
 void Player::OnEnterDead()
 {
-	SetSprite(L"X", Color::Red);
+	SetSprite(L"X", Color::Green);
 }
 
 void Player::OnDamaged()
 {
-	if (ConsumeShieldIfAny())
+	if (UseShieldItem())
 		return;
 
 	if (currentState == PlayerState::NORMAL)

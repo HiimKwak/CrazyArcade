@@ -59,7 +59,7 @@ void GameLevel::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
 
-	ProcessExplosionCollision();
+	ProcessCollision();
 
 	if (Input::Get().GetKeyDown(VK_ESCAPE))
 	{
@@ -73,7 +73,7 @@ void GameLevel::Tick(float deltaTime)
 	}
 }
 
-void GameLevel::ProcessExplosionCollision()
+void GameLevel::ProcessCollision()
 {
 	std::vector<ExplosionTile*> activeExplosions;
 	Player* player = nullptr;
@@ -116,6 +116,16 @@ void GameLevel::ProcessExplosionCollision()
 		{
 			if (box->GetPosition() == explosionPos)
 				box->OnDamaged();
+		}
+	}
+
+	for (Enemy* enemy : enemies)
+	{
+		if (player && !player->IsDead() &&
+			!enemy->IsDead() &&
+			enemy->GetPosition() == player->GetPosition())
+		{
+			player->OnDamaged();
 		}
 	}
 }

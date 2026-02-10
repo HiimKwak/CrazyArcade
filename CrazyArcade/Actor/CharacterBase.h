@@ -32,8 +32,9 @@ public:
 	virtual void OnBubbleExploded();
 
 protected:
-	bool ConsumeShieldIfAny();
+	bool UseShieldItem();
 	void TickMovementInterpolation(float deltaTime);
+	void TickShieldBlink(float deltaTime);
 
 protected:
 	std::vector<ItemType> inventory;
@@ -55,6 +56,11 @@ protected:
 	int bubbleRange = 1;
 
 	bool hasShield = false;
+	Timer shieldTimer;
+	float shieldBlinkDuration = 2.0f;
+	float shieldBlinkInterval = 0.2f;
+	bool isBlinking = false;
+	Color originalColor;
 
 	IGameRuleManager* gameRuleManager = nullptr;
 };

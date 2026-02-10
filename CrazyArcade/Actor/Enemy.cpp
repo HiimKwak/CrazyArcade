@@ -24,6 +24,8 @@ Enemy::Enemy(const Vector2& position)
 	maxBubbleAmmo = 2;
 	bubbleAmmo = maxBubbleAmmo;
 	bubbleRange = 1;
+
+	brain = new EnemyBrain();
 }
 
 Enemy::~Enemy() = default;
@@ -94,7 +96,7 @@ void Enemy::UpdateNormalTick(float deltaTime)
 {
 }
 
-void Enemy::UpdateMovementTick(float deltaTime)
+void Enemy::HandleMovement(float deltaTime)
 {
 	if (isMoving)
 	{
@@ -107,12 +109,30 @@ void Enemy::UpdateMovementTick(float deltaTime)
 		return;
 
 	thinkTimer.Reset();
-	thinkTimer.SetTargetTime(Util::RandomRange(0.15f, 0.45f));
+	thinkTimer.SetTargetTime(Util::RandomRange(0.45f, 1.25f));
 
 	Vector2 playerPos = gameRuleManager->GetPlayerPosition();
 	desiredDirection = brain ? brain->ChooseDirection(GetPosition(), playerPos, gameRuleManager) : Vector2::Zero;
 
 	TryStartMove(desiredDirection);
+}
+
+void Enemy::HandleAction(float deltaTime)
+{
+	shootTimer.Tick(deltaTime);
+	if (!shootTimer.IsTimeout())
+		return;
+
+	if (!gameRuleManager->HasBubbleAt(GetPosition()) && bubbleAmmo > 0)
+	{
+		bubbleAmmo--;
+		Bubble* bubble = new Bubble(GetPosition(), bubbleRange);
+		bubble->SetOwnerCharacter(this);
+		GetOwner()->AddNewActor(bubble);
+	}
+
+	shootTimer.Reset();
+	shootTimer.SetTargetTime(Util::RandomRange(3.0f, 6.0f));
 }
 
 void Enemy::TryStartMove(const Vector2& direction)
@@ -140,19 +160,16 @@ void Enemy::Tick(float deltaTime)
 	if (!gameRuleManager)
 		return;
 
-	UpdateMovementTick(deltaTime);
+	UpdateStateTick(deltaTime);
 
-	shootTimer.Tick(deltaTime);
-	if (!shootTimer.IsTimeout())
+	if (currentState == EnemyState::DEAD)
 		return;
 
-	if (!gameRuleManager->HasBubbleAt(GetPosition()))
-	{
-		GetOwner()->AddNewActor(new Bubble(GetPosition()));
-	}
+	if (CanMove())
+		HandleMovement(deltaTime);
 
-	shootTimer.Reset();
-	shootTimer.SetTargetTime(Util::RandomRange(3.0f, 6.0f));
+	if (CanAct())
+		HandleAction(deltaTime);
 }
 
 void Enemy::Draw()
@@ -181,7 +198,7 @@ void Enemy::OnEnterDead()
 
 void Enemy::OnDamaged()
 {
-	if (ConsumeShieldIfAny())
+	if (UseShieldItem())
 		return;
 
 	if (currentState == EnemyState::NORMAL)

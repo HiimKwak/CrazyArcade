@@ -49,9 +49,4 @@ namespace engine
 		// 새로운 위치 설정
 		position = newPosition;
 	}
-
-	void Actor::SetSprite(const wchar_t* src, Color color)
-	{
-		sprite = Sprite(src, color);
-	}
 }

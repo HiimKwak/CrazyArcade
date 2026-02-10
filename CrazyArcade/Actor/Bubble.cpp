@@ -50,8 +50,8 @@ void Bubble::Explode(float deltaTime)
 	if (owner)
 		owner->AddNewActor(new BubbleExplosion(GetPosition(), range));
 
-	if (ownerPlayer)
-		ownerPlayer->OnBubbleExploded();
+	if (ownerCharacter)
+		ownerCharacter->OnBubbleExploded();
 
 	Destroy();
 }

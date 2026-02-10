@@ -44,12 +44,13 @@ private:
 	void OnEnterDead();
 	void OnEnterNormal();
 
-	void UpdateMovementTick(float deltaTime);
 	void TryStartMove(const Vector2& direction);
 	void UpdateStateTick(float deltaTime);
 	void UpdateDeadTick(float deltaTime);
 	void UpdateBubbleTrapTick(float deltaTime);
 	void UpdateNormalTick(float deltaTime);
+	void HandleMovement(float deltaTime);
+	void HandleAction(float deltaTime);
 
 	Timer thinkTimer;
 	EnemyBrain* brain = nullptr;

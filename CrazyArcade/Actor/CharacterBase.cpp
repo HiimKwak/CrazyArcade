@@ -10,6 +10,7 @@ void CharacterBase::BeginPlay()
 {
 	super::BeginPlay();
 	gameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
+	originalColor = sprite.GetColor();
 }
 
 void CharacterBase::AddItem(ItemType type)
@@ -38,14 +39,43 @@ void CharacterBase::OnBubbleExploded()
 		bubbleAmmo++;
 }
 
-bool CharacterBase::ConsumeShieldIfAny()
+bool CharacterBase::UseShieldItem()
 {
+	if (isBlinking) // 쉴드 지속시간동안 피격 무시
+		return true;
+
 	if (!hasShield)
 		return false;
 
 	hasShield = false;
-	// todo: 쉴드 깨지는 이펙트
+
+	isBlinking = true;
+	shieldTimer.SetTargetTime(shieldBlinkDuration);
+	shieldTimer.Reset();	
+
 	return true;
+
+}
+void CharacterBase::TickShieldBlink(float deltaTime)
+{
+	if (!isBlinking)
+		return;
+
+	shieldTimer.Tick(deltaTime);
+
+	float elapsedTime = shieldBlinkDuration - shieldTimer.GetRemainingTime();
+	int blinkCount = static_cast<int>(elapsedTime / shieldBlinkInterval);
+
+	if (blinkCount % 2 == 0)
+		super::SetSpriteColor(Color::White);
+	else
+		super::SetSpriteColor(originalColor);
+
+	if (shieldTimer.IsTimeout())
+	{
+		isBlinking = false;
+		super::SetSpriteColor(originalColor);
+	}
 }
 
 void CharacterBase::TickMovementInterpolation(float deltaTime)

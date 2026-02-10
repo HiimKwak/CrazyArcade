@@ -75,7 +75,9 @@ namespace engine
 		inline Level* GetOwner() const { return owner; }
 		void SetOwner(Level* newOwner) { owner = newOwner; }
 
-		void SetSprite(const wchar_t* src, Color color);
+		inline void SetSprite(const wchar_t* src, Color color) { sprite = Sprite(src, color); }
+		inline void SetSpriteImage(const wchar_t* src) { return sprite.SetImage(src); }
+		inline void SetSpriteColor(Color color) { return sprite.SetColor(color); }
 
 		inline bool HasBegunPlay() const { return hasBegunPlay; }
 		inline bool IsActive() const { return isActive && !destroyRequested; }

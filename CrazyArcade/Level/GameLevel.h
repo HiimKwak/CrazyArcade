@@ -22,7 +22,7 @@ public:
 
 private:
 	virtual void Tick(float deltaTime) override;
-	void ProcessExplosionCollision();
+	void ProcessCollision();
 
 	void LoadMap(const char* filename);
 
