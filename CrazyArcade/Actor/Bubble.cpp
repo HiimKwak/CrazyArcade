@@ -4,7 +4,7 @@
 #include "Player.h"
 
 Bubble::Bubble(const Vector2& newPosition, int explosionRange)
-	: super("@", newPosition, Color::Blue),
+	: super(L"●", newPosition, Color::Blue),
 	range(explosionRange)
 {
 	sortingOrder = 5;

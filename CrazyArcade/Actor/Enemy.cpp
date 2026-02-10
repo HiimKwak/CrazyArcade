@@ -8,7 +8,7 @@
 using namespace engine;
 
 Enemy::Enemy(const Vector2& position)
-	: super("E", position, Color::Green)
+	: super(L"¥×", position, Color::Green)
 {
 	sortingOrder = 8;
 

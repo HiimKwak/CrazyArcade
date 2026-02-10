@@ -33,7 +33,7 @@ namespace engine
 		struct RenderCommand
 		{
 			// 화면에 보여줄 문자열 값
-			const char* text = nullptr;
+			const wchar_t* text = nullptr;
 			// 좌표
 			Vector2 position;
 			// 색상
@@ -53,7 +53,7 @@ namespace engine
 
 		// 그려야할 렌더 커맨드를 렌더 큐에 밀어넣는 함수
 		void Submit(
-			const char* text,
+			const wchar_t* text,
 			const Vector2& position,
 			Color color = Color::White,
 			int sortingOrder = 0

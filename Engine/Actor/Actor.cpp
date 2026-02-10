@@ -7,7 +7,7 @@
 
 namespace engine
 {
-	Actor::Actor(const char* image, const Vector2& position, Color color)
+	Actor::Actor(const wchar_t* image, const Vector2& position, Color color)
 		: position(position), sprite(image, color)
 	{
 	}
@@ -36,7 +36,7 @@ namespace engine
 	void Actor::Destroy(std::function<void()> onDestroy)
 	{
 		destroyRequested = true;
-		
+
 		if (onDestroy)
 			onDestroy();
 	}
@@ -50,7 +50,7 @@ namespace engine
 		position = newPosition;
 	}
 
-	void Actor::SetSprite(const char* src, Color color)
+	void Actor::SetSprite(const wchar_t* src, Color color)
 	{
 		sprite = Sprite(src, color);
 	}

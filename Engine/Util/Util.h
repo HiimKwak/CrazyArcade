@@ -117,11 +117,11 @@ namespace Util // Helper
 		return value;
 	}
 
-	inline void DeepCopyString(char*& dest, const char* src)
+	inline void DeepCopyString(wchar_t*& dest, const wchar_t* src)
 	{
 		SafeDeleteArray(dest);
-		size_t length = strlen(src) + 1;
-		dest = new char[length];
-		strcpy_s(dest, length, src);
+		size_t length = wcslen(src) + 1;
+		dest = new wchar_t[length];
+		wcscpy_s(dest, length, src);
 	}
 }

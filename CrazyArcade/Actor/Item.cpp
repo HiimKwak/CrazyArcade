@@ -5,7 +5,7 @@
 #include "Interface/IGameRuleManager.h"
 
 Item::Item(const Vector2& position, ItemType type)
-	: super("?", position, Color::White),
+	: super(L"?", position, Color::White),
 	itemType(type)
 {
 	sortingOrder = 4;
@@ -13,13 +13,13 @@ Item::Item(const Vector2& position, ItemType type)
 	switch (type)
 	{
 	case ItemType::BubbleUpgrade:
-		SetSprite("B", Color::Blue);
+		SetSprite(L"¢Ä", Color::Blue);
 		break;
 	case ItemType::Roller:
-		SetSprite("R", Color::Orange);
+		SetSprite(L"¢Ý", Color::Orange);
 		break;
 	case ItemType::Shield:
-		SetSprite("S", Color::Skyblue);
+		SetSprite(L"S", Color::Skyblue);
 		break;
 	}
 }
@@ -44,7 +44,7 @@ void Item::Tick(float deltaTime)
 		Destroy();
 		return;
 	}
-		
+
 	if (gameRuleManager->HasPlayerAt(position))
 	{
 		gameRuleManager->SendItemToPlayer(position, itemType);

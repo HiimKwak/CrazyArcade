@@ -33,7 +33,7 @@ namespace engine
 
 				// 글자 값 및 속성 설정
 				CHAR_INFO& info = charInfoArray[index];
-				info.Char.AsciiChar = ' ';
+				info.Char.UnicodeChar = L' ';
 				info.Attributes = 0;
 
 				// 그리기 우선순위 초기화
@@ -107,7 +107,7 @@ namespace engine
 				continue;
 
 			// 화면에 그릴 문자열 길이
-			const int length = static_cast<int>(strlen(command.text));
+			const int length = static_cast<int>(wcslen(command.text));
 
 			// 안그려도 되면 건너뜀
 			if (length <= 0)
@@ -137,8 +137,8 @@ namespace engine
 					continue;
 
 				// 데이터 기록
-				frame->charInfoArray[index].Char.AsciiChar = command.text[sourceIndex];
-				frame->charInfoArray[index].Attributes = (WORD)command.color;
+				frame->charInfoArray[index].Char.UnicodeChar = command.text[sourceIndex];
+				frame->charInfoArray[index].Attributes = static_cast<WORD>(command.color);
 
 				// 우선순위 업데이트
 				frame->sortingOrderArray[index] = command.sortingOrder;
@@ -165,7 +165,7 @@ namespace engine
 		GetCurrentBuffer()->Clear();
 	}
 
-	void Renderer::Submit(const char* text, const Vector2& position, Color color, int sortingOrder)
+	void Renderer::Submit(const wchar_t* text, const Vector2& position, Color color, int sortingOrder)
 	{
 		// 렌더 데이터 생성 후 큐에 추가
 		RenderCommand command = {}; // 스택변수로 썼지만 크기가 더 커지면 힙 영역을 쓰도록 바꿔줘도 됨

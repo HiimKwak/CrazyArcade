@@ -10,14 +10,14 @@
 using namespace engine;
 
 struct MenuItem {
-	char* text = nullptr;
+	wchar_t* text = nullptr;
 
 	using OnSelected = void (*)();
 
-	MenuItem(const char* text, OnSelected onSelected) : onSelected(onSelected) {
-		size_t length = strlen(text) + 1;
-		this->text = new char[length];
-		strcpy_s(this->text, length, text);
+	MenuItem(const wchar_t* src, OnSelected onSelected) : onSelected(onSelected) {
+		size_t length = wcslen(src) + 1;
+		text = new wchar_t[length];
+		wcscpy_s(text, length, src);
 	}
 
 	~MenuItem()

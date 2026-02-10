@@ -4,7 +4,7 @@
 #include "Interface/IGameRuleManager.h"
 
 BubbleExplosion::BubbleExplosion(const Vector2& origin, int explosionRange)
-	: super("", origin, Color::White),
+	: super(L"", origin, Color::White),
 	range(explosionRange),
 	propagated(false)
 {

@@ -9,13 +9,13 @@
 MenuLevel::MenuLevel()
 {
 	menuList.emplace_back(new MenuItem(
-		"Resume Game",
+		L"Resume Game",
 		[]() {
 			Game::Get().ToggleMenu();
 		}
 	));
 	menuList.emplace_back(new MenuItem(
-		"Quit Game",
+		L"Quit Game",
 		[]() {
 			Game::Get().Quit();
 		}
@@ -60,17 +60,17 @@ void MenuLevel::Tick(float deltaTime)
 
 void MenuLevel::Draw()
 {
-	const char* title = "Crazy Arcade";
-	size_t title_length = strlen(title) + 1;
+	const wchar_t* title = L"Crazy Arcade";
+	size_t title_length = wcslen(title) + 1;
 	Vector2 title_pos = GetCenterCoord(title_length) - Vector2(0, 5);
-	Renderer::Get().Submit("Crazy Arcade", title_pos);
+	Renderer::Get().Submit(L"Crazy Arcade", title_pos);
 
 	for (int ix = 0; ix < static_cast<int>(menuList.size()); ++ix)
 	{
-		char* text = menuList[ix]->text;
+		wchar_t* text = menuList[ix]->text;
 		Color textColor =
 			(ix == currentIndex) ? selectedColor : unselectedColor;
-		size_t textLength = strlen(text) + 1;
+		size_t textLength = wcslen(text) + 1;
 		Vector2 text_pos = GetCenterCoord(textLength) - Vector2(0, (3 - ix));
 
 		Renderer::Get().Submit(text, text_pos, textColor);

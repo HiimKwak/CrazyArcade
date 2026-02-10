@@ -14,7 +14,7 @@
 using namespace engine;
 
 Player::Player(const Vector2& position)
-	: super("P", position, Color::Green)
+	: super(L"P", position, Color::Green)
 {
 	sortingOrder = 10;
 }
@@ -212,7 +212,7 @@ void Player::Draw()
 void Player::OnEnterNormal()
 {
 	moveSpeed = MoveSpeed::NORMAL;
-	SetSprite("P", Color::Green);
+	SetSprite(L"P", Color::Green);
 }
 
 void Player::OnEnterBubbleTrap()
@@ -220,12 +220,12 @@ void Player::OnEnterBubbleTrap()
 	moveSpeed = MoveSpeed::SLOW;
 	bubbleTrapTimer.Reset();
 	bubbleTrapTimer.SetTargetTime(bubbleTrapDuration);
-	SetSprite("0", Color::Blue);
+	SetSprite(L"0", Color::Blue);
 }
 
 void Player::OnEnterDead()
 {
-	SetSprite("X", Color::Red);
+	SetSprite(L"X", Color::Red);
 }
 
 void Player::OnDamaged()

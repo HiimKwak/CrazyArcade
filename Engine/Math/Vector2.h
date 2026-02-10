@@ -13,7 +13,7 @@ namespace engine
 		Vector2(int x, int y);
 		~Vector2();
 
-		const char* ToString();
+		const wchar_t* ToString();
 
 		// 편의기능
 		Vector2 operator+(const Vector2& other) const;
@@ -45,7 +45,7 @@ namespace engine
 
 	private:
 		// 벡터 값을 문자열로 변환할 때 사용할 변수
-		char* string = nullptr;
+		wchar_t* string = nullptr;
 	};
 }
 

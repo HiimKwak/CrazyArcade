@@ -32,7 +32,7 @@ namespace engine
 		}
 	}
 
-	const char* Vector2::ToString()
+	const wchar_t* Vector2::ToString()
 	{
 		// 기존 문자열이 있다면 제거
 		if (string)
@@ -41,9 +41,9 @@ namespace engine
 			string = nullptr;
 		}
 
-		string = new char[128];
-		memset(string, 0, sizeof(char) * 128);
-		sprintf_s(string, 128, "(%d, %d)", x, y);
+		string = new wchar_t[128];
+		memset(string, 0, sizeof(wchar_t) * 128);
+		swprintf_s(string, 128, L"(%d, %d)", x, y);
 
 		return string;
 	}

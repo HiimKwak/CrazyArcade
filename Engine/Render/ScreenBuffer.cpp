@@ -75,7 +75,7 @@ namespace engine
 
 		// 콘솔 버퍼에 있는 화면 지우기
 		// 그래픽스의 지우기? = 한 색상(or 값)으로 덮어쓰기(memset)
-		FillConsoleOutputCharacterA(buffer, ' ', screenSize.x * screenSize.y, Vector2::Zero, &writtenCount);
+		FillConsoleOutputCharacterW(buffer, ' ', screenSize.x * screenSize.y, Vector2::Zero, &writtenCount);
 	}
 
 	void ScreenBuffer::Draw(CHAR_INFO* charInfo)
@@ -88,7 +88,7 @@ namespace engine
 		writeRegion.Bottom = static_cast<short>(screenSize.y - 1);
 
 		// 버퍼에 전달받은 글자 배열 설정
-		WriteConsoleOutputA(
+		WriteConsoleOutputW(
 			buffer, charInfo, screenSize, Vector2::Zero, &writeRegion
 		);
 	}

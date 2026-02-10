@@ -17,7 +17,7 @@ namespace engine
 		{
 		public:
 			Sprite() = default;
-			Sprite(const char* src, Color color)
+			Sprite(const wchar_t* src, Color color)
 			{
 				Util::DeepCopyString(image, src);
 				this->color = color;
@@ -42,14 +42,14 @@ namespace engine
 			{
 				SafeDeleteArray(image);
 			}
-			
-			inline char* GetImage() const { return image; }
-			inline void SetImage(const char* src) { Util::DeepCopyString(image, src); }
+
+			inline wchar_t* GetImage() const { return image; }
+			inline void SetImage(const wchar_t* src) { Util::DeepCopyString(image, src); }
 			inline Color GetColor() const { return color; }
 			inline void SetColor(Color newColor) { color = newColor; }
 
 		private:
-			char* image = nullptr;
+			wchar_t* image = nullptr;
 			Color color = Color::White;
 		};
 
@@ -57,7 +57,7 @@ namespace engine
 
 	public:
 		Actor(
-			const char* image = " ",
+			const wchar_t* image = L" ",
 			const Vector2& position = Vector2::Zero,
 			Color color = Color::White
 		);
@@ -68,14 +68,14 @@ namespace engine
 		virtual void Draw();
 
 		void Destroy(std::function<void()> onDestroy = nullptr);
-		
+
 		inline Vector2 GetPosition()const { return position; }
 		void SetPosition(const Vector2& newPosition);
 
 		inline Level* GetOwner() const { return owner; }
 		void SetOwner(Level* newOwner) { owner = newOwner; }
 
-		void SetSprite(const char* src, Color color);
+		void SetSprite(const wchar_t* src, Color color);
 
 		inline bool HasBegunPlay() const { return hasBegunPlay; }
 		inline bool IsActive() const { return isActive && !destroyRequested; }

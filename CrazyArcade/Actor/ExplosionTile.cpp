@@ -1,7 +1,7 @@
 #include "ExplosionTile.h"
 
 ExplosionTile::ExplosionTile(const Vector2& tilePos, float lifetime)
-	: super("#", tilePos, Color::Blue),
+	: super(L"#", tilePos, Color::Skyblue),
 	lifetime(lifetime),
 	active(true)
 {
