@@ -155,7 +155,7 @@ void GameLevel::LoadMap(const char* filename)
 	sprintf_s(path, 2048, "../Assets/%s", filename);
 
 	FILE* file = nullptr;
-	fopen_s(&file, path, "rt");
+	fopen_s(&file, path, "rb");
 
 	if (!file)
 	{
@@ -174,8 +174,9 @@ void GameLevel::LoadMap(const char* filename)
 
 	// 1) 맵 크기 산출(mapWidth/mapHeight)
 	int computedMapWidth = 0;
-	int computedMapHeight = 1;
+	int computedMapHeight = 0;
 	int currentLineWidth = 0;
+	bool hasContent = false;
 
 	for (size_t i = 0; i < fileSize; ++i)
 	{
@@ -184,14 +185,22 @@ void GameLevel::LoadMap(const char* filename)
 
 		if (data[i] == '\n')
 		{
-			if (currentLineWidth > computedMapWidth) computedMapWidth = currentLineWidth;
-			currentLineWidth = 0;
-			++computedMapHeight;
+			if (currentLineWidth > 0)
+			{
+				if (currentLineWidth > computedMapWidth) computedMapWidth = currentLineWidth;
+				computedMapHeight++;
+				currentLineWidth = 0;
+			}
 			continue;
 		}
 		++currentLineWidth;
+		hasContent = true;
 	}
-	if (currentLineWidth > computedMapWidth) computedMapWidth = currentLineWidth;
+	if (currentLineWidth > 0)
+	{
+		if (currentLineWidth > computedMapWidth) computedMapWidth = currentLineWidth;
+		computedMapHeight++;
+	}
 
 	mapWidth = computedMapWidth;
 	mapHeight = computedMapHeight;
@@ -259,6 +268,35 @@ void GameLevel::LoadMap(const char* filename)
 
 	delete[] data;
 	fclose(file);
+
+	// 맵 테두리 생성
+	// 상단 테두리 (y = -1)
+	for (int x = -1; x <= mapWidth; ++x)
+	{
+		Vector2 screenPos = WorldToScreen(Vector2(x, -1));
+		AddNewActor(new Wall(screenPos, false));
+	}
+
+	// 하단 테두리 (y = mapHeight)
+	for (int x = -1; x <= mapWidth; ++x)
+	{
+		Vector2 screenPos = WorldToScreen(Vector2(x, mapHeight));
+		AddNewActor(new Wall(screenPos, false));
+	}
+
+	// 좌측 테두리 (x = -1)
+	for (int y = 0; y < mapHeight; ++y)
+	{
+		Vector2 screenPos = WorldToScreen(Vector2(-1, y));
+		AddNewActor(new Wall(screenPos, false));
+	}
+
+	// 우측 테두리 (x = mapWidth)
+	for (int y = 0; y < mapHeight; ++y)
+	{
+		Vector2 screenPos = WorldToScreen(Vector2(mapWidth, y));
+		AddNewActor(new Wall(screenPos, false));
+	}
 }
 
 bool GameLevel::CanMove(const Vector2& currentPos, const Vector2& nextPos)

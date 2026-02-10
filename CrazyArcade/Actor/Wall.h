@@ -10,5 +10,11 @@ class Wall :
 
 public:
 	Wall(const Vector2& position);
+	Wall(const Vector2& position, bool visible);
+
+	virtual void Draw() override;
+
+private:
+	bool isVisible = true;
 };
 
