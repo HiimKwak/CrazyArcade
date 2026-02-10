@@ -2,6 +2,7 @@
 #include "Level/Level.h"
 #include "Common/Common.h"
 #include "Interface/IGameRuleManager.h"
+#include "Util/Timer.h"
 
 using namespace engine;
 
@@ -11,6 +12,7 @@ class GameLevel : public Level, public IGameRuleManager
 
 public:
 	GameLevel();
+	GameLevel(int stage);
 	~GameLevel();
 
 	virtual void Draw() override;
@@ -25,6 +27,7 @@ private:
 	void ProcessCollision();
 
 	void LoadMap(const char* filename);
+	void LoadNextMap();
 
 	virtual bool CanMove(const Vector2& currentPos, const Vector2& nextPos) override;
 	virtual bool CanExplosionPenetrate(const Vector2& position) override;
@@ -45,10 +48,16 @@ private:
 
 private:
 	Vector2 mapOrigin = Vector2::Zero;
+	Vector2 screenCenter;
 
 	int mapWidth = 0;
 	int mapHeight = 0;
 
 	int targetScore = 0;
+
+	int currentStage = 1;
+	bool isClearWaiting = false;
+	Timer clearTimer;
+	float clearWaitTime = 10.0f;
 };
 

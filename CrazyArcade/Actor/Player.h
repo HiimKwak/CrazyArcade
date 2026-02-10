@@ -30,6 +30,7 @@ public:
 	inline PlayerState GetState() const { return currentState; }
 
 	void OnDamaged();
+	void OnKilled();
 
 protected:
 	virtual void Tick(float deltaTime) override;

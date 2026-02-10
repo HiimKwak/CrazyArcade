@@ -10,7 +10,6 @@ void CharacterBase::BeginPlay()
 {
 	super::BeginPlay();
 	gameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
-	originalColor = sprite.GetColor();
 }
 
 void CharacterBase::AddItem(ItemType type)

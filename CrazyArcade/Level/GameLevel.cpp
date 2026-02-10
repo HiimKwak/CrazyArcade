@@ -18,6 +18,7 @@
 
 #include <iostream>	
 #include <Windows.h>
+#include <string>
 
 using namespace engine;
 
@@ -51,6 +52,15 @@ GameLevel::GameLevel()
 	LoadMap("Stage1.txt");
 }
 
+GameLevel::GameLevel(int stage)
+{
+	currentStage = stage;
+
+	char filename[32];
+	sprintf_s(filename, 32, "Stage%d.txt", stage);
+	LoadMap(filename);
+}
+
 GameLevel::~GameLevel()
 {
 }
@@ -58,6 +68,50 @@ GameLevel::~GameLevel()
 void GameLevel::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
+
+	// 게임 오버 처리
+	if (CheckGameOver())
+	{
+		if (Input::Get().GetKeyDown(VK_ESCAPE))
+		{
+			Game::Get().ToggleMenu();
+		}
+		if (Input::Get().GetKeyDown('Q'))
+		{
+			Game::Get().Quit();
+		}
+		return;
+	}
+
+	// 게임 클리어 처리
+	if (CheckGameClear())
+	{
+		if (!isClearWaiting)
+		{
+			isClearWaiting = true;
+			clearTimer.SetTargetTime(clearWaitTime);
+			clearTimer.Reset();
+		}
+
+		clearTimer.Tick(deltaTime);
+
+		// N키를 누르거나 10초가 지나면 다음 스테이지로
+		if (Input::Get().GetKeyDown('N') || clearTimer.IsTimeout())
+		{
+			LoadNextMap();
+			return;
+		}
+
+		if (Input::Get().GetKeyDown(VK_ESCAPE))
+		{
+			Game::Get().ToggleMenu();
+		}
+		if (Input::Get().GetKeyDown('Q'))
+		{
+			Game::Get().Quit();
+		}
+		return;
+	}
 
 	ProcessCollision();
 
@@ -125,7 +179,7 @@ void GameLevel::ProcessCollision()
 			!enemy->IsDead() &&
 			enemy->GetPosition() == player->GetPosition())
 		{
-			player->OnDamaged();
+			player->OnKilled();
 		}
 	}
 }
@@ -134,17 +188,47 @@ void GameLevel::Draw()
 {
 	super::Draw();
 
+
+	Player* player = nullptr;
+	for (Actor* actor : actors)
+	{
+		if (actor->IsTypeOf<Player>())
+		{
+			player = actor->As<Player>();
+			break;
+		}
+	}
 	const int gameH = Engine::Get().GetGameHeight();
 
+	wchar_t stageStr[32] = {};
+	swprintf_s(stageStr, 32, L"Stage: %d", currentStage);
+	Renderer::Get().Submit(stageStr, Vector2(0, 0), Color::White, 100);
+
 	Renderer::Get().Submit(L"---------------------------------------------", Vector2(0, gameH), Color::White, 100);
-	Renderer::Get().Submit(L"ESC: Menu   Q: Quit", Vector2(0, gameH + 1), Color::White, 100);
+	if (player)
+	{
+		wchar_t hpStr[128] = {};
+		swprintf_s(hpStr, 128, L"HP: %d", player->GetLives());
+		Renderer::Get().Submit(hpStr, Vector2(0, gameH + 1), Color::Red, 100);
+
+		wchar_t bubbleStr[1024] = {};
+		swprintf_s(bubbleStr, 1024, L"Bubble: %d/%d  Range: %d",
+			player->GetBubbleAmmo(),
+			player->GetMaxBubbleAmmo(),
+			player->GetBubbleRange());
+		Renderer::Get().Submit(bubbleStr, Vector2(17, gameH + 1), Color::Yellow, 100);
+	}
+
+	Renderer::Get().Submit(L"ESC: Menu   Q: Quit", Vector2(0, gameH + 4), Color::Orange, 100);
+
+	if (CheckGameOver())
+	{
+		Renderer::Get().Submit(L"Game Over!", Vector2(0, gameH + 3), Color::Red, 100);
+	}
 
 	if (CheckGameClear())
 	{
-		Util::SetConsolePosition(Vector2(30, 0));
-		Util::SetConsoleTextColor(Color::White);
-
-		std::cout << "Game Clear!";
+		Renderer::Get().Submit(L"Game Clear!", Vector2(0, gameH + 3), Color::White, 100);
 	}
 }
 
@@ -212,6 +296,7 @@ void GameLevel::LoadMap(const char* filename)
 	const Vector2 mapHalf(mapWidth / 2, mapHeight / 2);
 
 	mapOrigin = gameCenter - mapHalf;
+	screenCenter = gameCenter;
 
 	/** 읽어온 문자열 분석(parsing) **/
 	int index = 0;
@@ -232,10 +317,6 @@ void GameLevel::LoadMap(const char* filename)
 			continue;
 		}
 
-		// 월드좌표를 화면좌표로 변환해서 '그려질 위치'로 배치
-		// (액터 position 자체를 화면좌표로 둘 거면 여기서 스크린좌표로 넣고,
-		//  월드좌표를 유지하려면 Actor 쪽에 변환로직이 필요합니다.)
-		// 현재 구조상 Actor가 position 그대로 Draw하므로, 여기서는 "스크린좌표"로 세팅합니다.
 		Vector2 screenPos = WorldToScreen(worldPos);
 
 		switch (mapCharacter)
@@ -270,34 +351,36 @@ void GameLevel::LoadMap(const char* filename)
 	fclose(file);
 
 	// 맵 테두리 생성
-	// 상단 테두리 (y = -1)
 	for (int x = -1; x <= mapWidth; ++x)
 	{
-		Vector2 screenPos = WorldToScreen(Vector2(x, -1));
-		AddNewActor(new Wall(screenPos, false));
+		Vector2 fenceUp = WorldToScreen(Vector2(x, -1));
+		AddNewActor(new Wall(fenceUp, false));
+		Vector2 fenceDown = WorldToScreen(Vector2(x, mapHeight));
+		AddNewActor(new Wall(fenceDown, false));
 	}
 
-	// 하단 테두리 (y = mapHeight)
-	for (int x = -1; x <= mapWidth; ++x)
-	{
-		Vector2 screenPos = WorldToScreen(Vector2(x, mapHeight));
-		AddNewActor(new Wall(screenPos, false));
-	}
 
-	// 좌측 테두리 (x = -1)
 	for (int y = 0; y < mapHeight; ++y)
 	{
-		Vector2 screenPos = WorldToScreen(Vector2(-1, y));
-		AddNewActor(new Wall(screenPos, false));
-	}
-
-	// 우측 테두리 (x = mapWidth)
-	for (int y = 0; y < mapHeight; ++y)
-	{
-		Vector2 screenPos = WorldToScreen(Vector2(mapWidth, y));
-		AddNewActor(new Wall(screenPos, false));
+		Vector2 fenceLeft = WorldToScreen(Vector2(-1, y));
+		AddNewActor(new Wall(fenceLeft, false));
+		Vector2 fenceRight = WorldToScreen(Vector2(mapWidth, y));
+		AddNewActor(new Wall(fenceRight, false));
 	}
 }
+
+void GameLevel::LoadNextMap()
+{
+	if (currentStage >= 3)
+	{
+		Game::Get().ToggleMenu();
+	}
+	else
+	{
+		Engine::Get().SetNewLevel(new GameLevel(currentStage + 1));
+	}
+}
+
 
 bool GameLevel::CanMove(const Vector2& currentPos, const Vector2& nextPos)
 {
@@ -311,7 +394,10 @@ bool GameLevel::CanMove(const Vector2& currentPos, const Vector2& nextPos)
 		}
 	}
 
-	if (!targetActor || targetActor->IsTypeOf<Wall>() || targetActor->IsTypeOf<Box>())
+	if (targetActor == nullptr)
+		return true;
+
+	if (targetActor->IsTypeOf<Wall>() || targetActor->IsTypeOf<Box>())
 		return false;
 
 	if (targetActor->IsTypeOf<Bubble>())
@@ -458,15 +544,19 @@ bool GameLevel::CanExplosionPenetrate(const Vector2& position)
 
 bool GameLevel::CheckGameClear()
 {
-	std::vector<Actor*> enemies;
+	std::vector<Actor*> aliveEnemies;
 
 	for (Actor* const actor : actors)
 	{
 		if (actor->IsTypeOf<Enemy>())
-			enemies.emplace_back(actor);
+		{
+			Enemy* enemy = actor->As<Enemy>();
+			if (!enemy->IsDead()) 
+				aliveEnemies.emplace_back(actor);
+		}
 	}
 
-	return enemies.size() == 0;
+	return aliveEnemies.size() == 0;
 }
 
 bool GameLevel::CheckGameOver()

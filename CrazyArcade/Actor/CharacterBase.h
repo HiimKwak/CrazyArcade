@@ -18,7 +18,7 @@ class CharacterBase : public Actor
 
 public:
 	CharacterBase(const wchar_t* image, const Vector2& position, Color color)
-		: Actor(image, position, color)
+		: Actor(image, position, color), originalColor(color)
 	{
 	}
 
@@ -30,6 +30,12 @@ public:
 	inline const std::vector<ItemType>& GetItems() const { return inventory; }
 
 	virtual void OnBubbleExploded();
+
+	inline int GetLives() const { return lives; }
+	inline int GetBubbleAmmo() const { return bubbleAmmo; }
+	inline int GetMaxBubbleAmmo() const { return maxBubbleAmmo; }
+	inline int GetBubbleRange() const { return bubbleRange; }
+	inline bool HasShield() const { return hasShield; }
 
 protected:
 	bool UseShieldItem();

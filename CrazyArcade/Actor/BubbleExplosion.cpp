@@ -52,15 +52,16 @@ void BubbleExplosion::PropagateInDirection(const Vector2& direction, int range)
 		if (owner)
 		{
 			IGameRuleManager* gameRuleManager = dynamic_cast<IGameRuleManager*>(owner);
+
 			if (gameRuleManager && !gameRuleManager->CanExplosionPenetrate(tilePos))
 				break;
-		}
-
-		if (owner)
-		{
+		
 			ExplosionTile* tile = new ExplosionTile(tilePos);
 			tile->Activate();
 			owner->AddNewActor(tile);
+
+			if (gameRuleManager && gameRuleManager->HasBoxAt(tilePos))
+				break;
 		}
 	}
 }

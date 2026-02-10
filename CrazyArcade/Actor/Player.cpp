@@ -212,3 +212,11 @@ void Player::OnDamaged()
 	else if (currentState == PlayerState::TRAPPED_IN_BUBBLE)
 		ChangeState(PlayerState::DEAD);
 }
+
+void Player::OnKilled()
+{
+	if (UseShieldItem())
+		return;
+	lives = 0;
+	ChangeState(PlayerState::DEAD);
+}
