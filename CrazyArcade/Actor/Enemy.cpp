@@ -21,7 +21,7 @@ Enemy::Enemy(const Vector2& position)
 	sortingOrder = 8;
 
 	lives = 1;
-	maxBubbleAmmo = 2;
+	maxBubbleAmmo = 0; // 똑똑해질 때까지 압수
 	bubbleAmmo = maxBubbleAmmo;
 	bubbleRange = 1;
 
