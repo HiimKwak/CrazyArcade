@@ -1,94 +1,196 @@
-#include <cstdlib>
+#include <iostream>
+#include <Windows.h>
+
 #include "Enemy.h"
-#include "Actor/Bubble.h"
+#include "AI/EnemyBrain.h"
+
 #include "Level/Level.h"
-#include "Util/Util.h"
 #include "Interface/IGameRuleManager.h"
+
+#include "Actor/Bubble.h"
+#include "Actor/Item.h"
+
+#include "Util/Timer.h"
+#include "Math/Vector2.h"
 
 using namespace engine;
 
 Enemy::Enemy(const Vector2& position)
-	: super(L"Ψ", position, Color::Green)
+	: super(L"Ψ", position, Color::Red)
 {
 	sortingOrder = 8;
 
-	// 초기 타이머 값
-	shootTimer.SetTargetTime(Util::RandomRange(3.0f, 6.0f));
-	shootTimer.Reset();
+	lives = 1;
+	maxBubbleAmmo = 2;
+	bubbleAmmo = maxBubbleAmmo;
+	bubbleRange = 1;
+}
 
-	moveTimer.SetTargetTime(Util::RandomRange(moveIntervalMin, moveIntervalMax));
-	moveTimer.Reset();
+Enemy::~Enemy() = default;
 
-	// 랜덤 초기 방향
-	int r = Util::Random(0, 4);
-	switch (r)
+void Enemy::ChangeState(EnemyState newState)
+{
+	if (currentState == newState)
+		return;
+
+	if (isMoving)
 	{
-	case 0: direction = Vector2(1, 0); break;
-	case 1: direction = Vector2(-1, 0); break;
-	case 2: direction = Vector2(0, 1); break;
-	default: direction = Vector2(0, -1); break;
+		SetPosition(moveTargetPos);
+		isMoving = false;
+	}
+
+	currentState = newState;
+
+	switch (newState)
+	{
+	case EnemyState::NORMAL:
+		OnEnterNormal();
+		break;
+
+	case EnemyState::TRAPPED_IN_BUBBLE:
+		OnEnterBubbleTrap();
+		break;
+
+	case EnemyState::DEAD:
+		OnEnterDead();
+		break;
 	}
 }
 
-Enemy::~Enemy()
+void Enemy::UpdateStateTick(float deltaTime)
 {
+	switch (currentState)
+	{
+	case EnemyState::DEAD:
+		UpdateDeadTick(deltaTime);
+		break;
+
+	case EnemyState::TRAPPED_IN_BUBBLE:
+		UpdateBubbleTrapTick(deltaTime);
+		break;
+
+	case EnemyState::NORMAL:
+		UpdateNormalTick(deltaTime);
+		break;
+	}
+}
+
+void Enemy::UpdateDeadTick(float deltaTime)
+{
+}
+
+void Enemy::UpdateBubbleTrapTick(float deltaTime)
+{
+	bubbleTrapTimer.Tick(deltaTime);
+
+	if (!bubbleTrapTimer.IsTimeout())
+		return;
+
+	lives--;
+	ChangeState(EnemyState::NORMAL);
+}
+
+void Enemy::UpdateNormalTick(float deltaTime)
+{
+}
+
+void Enemy::UpdateMovementTick(float deltaTime)
+{
+	if (isMoving)
+	{
+		TickMovementInterpolation(deltaTime);
+		return;
+	}
+
+	thinkTimer.Tick(deltaTime);
+	if (!thinkTimer.IsTimeout())
+		return;
+
+	thinkTimer.Reset();
+	thinkTimer.SetTargetTime(Util::RandomRange(0.15f, 0.45f));
+
+	Vector2 playerPos = gameRuleManager->GetPlayerPosition();
+	desiredDirection = brain ? brain->ChooseDirection(GetPosition(), playerPos, gameRuleManager) : Vector2::Zero;
+
+	TryStartMove(desiredDirection);
+}
+
+void Enemy::TryStartMove(const Vector2& direction)
+{
+	if (direction == Vector2::Zero)
+		return;
+
+	Vector2 targetPosition = GetPosition() + direction;
+	if (!gameRuleManager->CanMove(GetPosition(), targetPosition))
+		return;
+
+	moveStartPos = GetPosition();
+	moveTargetPos = targetPosition;
+	isMoving = true;
+	moveProgress = 0.0f;
+
+	moveTimer.Reset();
+	moveTimer.SetTargetTime(moveSpeed);
 }
 
 void Enemy::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
 
-	moveTimer.Tick(deltaTime);
-	if (!moveTimer.IsTimeout())
+	if (!gameRuleManager)
 		return;
 
-	IGameRuleManager* level = dynamic_cast<IGameRuleManager*>(GetOwner());
-	if (!level)
-		return;
-
-	Vector2 nextPosition = GetPosition() + direction;
-
-	if (level->CanMove(GetPosition(), nextPosition))
-	{
-		SetPosition(nextPosition);
-	}
-	else
-	{
-		int r = Util::Random(0, 3);
-		switch (r)
-		{
-		case 0: direction = Vector2(1, 0);
-			break;
-		case 1: direction = Vector2(-1, 0);
-			break;
-		case 2: direction = Vector2(0, 1);
-			break;
-		default: direction = Vector2(0, -1);
-			break;
-		}
-	}
-
-	moveTimer.Reset();
+	UpdateMovementTick(deltaTime);
 
 	shootTimer.Tick(deltaTime);
 	if (!shootTimer.IsTimeout())
 		return;
 
-	if (!level->HasBubbleAt(GetPosition()))
+	if (!gameRuleManager->HasBubbleAt(GetPosition()))
 	{
 		GetOwner()->AddNewActor(new Bubble(GetPosition()));
 	}
 
 	shootTimer.Reset();
 	shootTimer.SetTargetTime(Util::RandomRange(3.0f, 6.0f));
+}
 
+void Enemy::Draw()
+{
+	super::Draw();
+}
+
+void Enemy::OnEnterNormal()
+{
+	moveSpeed = MoveSpeed::NORMAL;
+	SetSprite(L"Ψ", Color::Red);
+}
+
+void Enemy::OnEnterBubbleTrap()
+{
+	moveSpeed = MoveSpeed::SLOW;
+	bubbleTrapTimer.Reset();
+	bubbleTrapTimer.SetTargetTime(bubbleTrapDuration);
+	SetSprite(L"0", Color::Orange);
+}
+
+void Enemy::OnEnterDead()
+{
+	SetSprite(L"X", Color::Red);
 }
 
 void Enemy::OnDamaged()
 {
-	// todo: bubble capsule
+	if (ConsumeShieldIfAny())
+		return;
 
-	Destroy();
-
-	// todo: effect
+	if (currentState == EnemyState::NORMAL)
+	{
+		if (lives > 0)
+			ChangeState(EnemyState::TRAPPED_IN_BUBBLE);
+		else
+			ChangeState(EnemyState::DEAD);
+	}
+	else if (currentState == EnemyState::TRAPPED_IN_BUBBLE)
+		ChangeState(EnemyState::DEAD);
 }

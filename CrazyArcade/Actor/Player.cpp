@@ -3,26 +3,27 @@
 
 #include "Player.h"
 #include "Core/Input.h"
-#include "Game/Game.h"
+
 #include "Level/Level.h"
-#include "Actor/Bubble.h"
+#include "Interface/IGameRuleManager.h"
+
+#include "Bubble.h"
+#include "Item.h"
+
 #include "Util/Timer.h"
 #include "Math/Vector2.h"
-#include "Actor/Item.h"
-#include "Interface/IGameRuleManager.h"
 
 using namespace engine;
 
 Player::Player(const Vector2& position)
 	: super(L"P", position, Color::Green)
 {
-	sortingOrder = 10;
-}
+	sortingOrder = 8;
 
-void Player::BeginPlay()
-{
-	super::BeginPlay();
-	gameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
+	lives = 2;
+	maxBubbleAmmo = 3;
+	bubbleAmmo = maxBubbleAmmo;
+	bubbleRange = 1;
 }
 
 void Player::ChangeState(PlayerState newState)
@@ -117,21 +118,7 @@ void Player::HandleMovementInput(float deltaTime)
 {
 	if (isMoving)
 	{
-		moveTimer.Tick(deltaTime);
-
-		moveProgress = 1.0f - (moveTimer.GetRemainingTime() / moveSpeed);
-		moveProgress = Util::Clamp(moveProgress, 0.0f, 1.0f);
-
-		/*float eased = 1.0f - (1.0f - moveProgress) * (1.0f - moveProgress);*/
-
-		Vector2 currentPos = Vector2::Lerp(moveStartPos, moveTargetPos, moveProgress);
-		SetPosition(currentPos);
-
-		if (moveTimer.IsTimeout())
-		{
-			SetPosition(moveTargetPos);
-			isMoving = false;
-		}
+		TickMovementInterpolation(deltaTime);
 	}
 	else
 	{
@@ -146,27 +133,6 @@ void Player::HandleMovementInput(float deltaTime)
 			TryMove(Vector2::Up);
 		if (Input::Get().GetKey(VK_UP))
 			TryMove(Vector2::Down);
-	}
-}
-
-
-void Player::AddItem(ItemType type)
-{
-	inventory.push_back(type);
-
-	switch (type)
-	{
-	case ItemType::BubbleUpgrade:
-		bubbleRange++;
-		break;
-
-	case ItemType::Roller:
-		moveSpeed = MoveSpeed::FAST;
-		break;
-
-	case ItemType::Shield:
-		hasShield = true;
-		break;
 	}
 }
 
@@ -220,7 +186,7 @@ void Player::OnEnterBubbleTrap()
 	moveSpeed = MoveSpeed::SLOW;
 	bubbleTrapTimer.Reset();
 	bubbleTrapTimer.SetTargetTime(bubbleTrapDuration);
-	SetSprite(L"0", Color::Blue);
+	SetSprite(L"0", Color::Skyblue);
 }
 
 void Player::OnEnterDead()
@@ -230,12 +196,8 @@ void Player::OnEnterDead()
 
 void Player::OnDamaged()
 {
-	if (hasShield)
-	{
-		hasShield = false;
-		// todo: ½¯µå ±úÁö´Â ÀÌÆåÆ®
+	if (ConsumeShieldIfAny())
 		return;
-	}
 
 	if (currentState == PlayerState::NORMAL)
 	{
@@ -246,10 +208,4 @@ void Player::OnDamaged()
 	}
 	else if (currentState == PlayerState::TRAPPED_IN_BUBBLE)
 		ChangeState(PlayerState::DEAD);
-}
-
-void Player::OnBubbleExploded()
-{
-	if (bubbleAmmo < maxBubbleAmmo)
-		bubbleAmmo++;
 }

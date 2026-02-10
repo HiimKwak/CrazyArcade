@@ -1,29 +1,59 @@
 #pragma once
 
-#include "Actor/Actor.h"
-#include "Util/Timer.h"
+#include "Actor/CharacterBase.h"
 
-using namespace engine;
+class EnemyBrain;
 
-class Enemy : public Actor
+enum class EnemyState {
+	NORMAL,
+	TRAPPED_IN_BUBBLE,
+	DEAD
+};
+
+class Enemy : public CharacterBase
 {
-	RTTI_DECLARATIONS(Enemy, Actor)
+	RTTI_DECLARATIONS(Enemy, CharacterBase)
 
 public:
 	Enemy(const Vector2& position);
 	~Enemy();
 
-	virtual void Tick(float deltaTime) override;
+	bool CanMove() const
+	{
+		return currentState == EnemyState::NORMAL || currentState == EnemyState::TRAPPED_IN_BUBBLE;
+	}
+	bool CanAct() const
+	{
+		return currentState == EnemyState::NORMAL;
+	}
+
+	inline bool IsDead() const { return currentState == EnemyState::DEAD; }
+	inline EnemyState GetState() const { return currentState; }
 
 	void OnDamaged();
 
+protected:
+	virtual void Tick(float deltaTime) override;
+	virtual void Draw() override;
+
+	EnemyState currentState = EnemyState::NORMAL;
+	void ChangeState(EnemyState newState);
+
 private:
-	Vector2 direction = Vector2::Zero;
-	float moveIntervalMin = 0.25f;
-	float moveIntervalMax = 0.6f;
-	float moveSpeed = 1.0f;
+	void OnEnterBubbleTrap();
+	void OnEnterDead();
+	void OnEnterNormal();
 
-	Timer moveTimer;
+	void UpdateMovementTick(float deltaTime);
+	void TryStartMove(const Vector2& direction);
+	void UpdateStateTick(float deltaTime);
+	void UpdateDeadTick(float deltaTime);
+	void UpdateBubbleTrapTick(float deltaTime);
+	void UpdateNormalTick(float deltaTime);
+
+	Timer thinkTimer;
+	EnemyBrain* brain = nullptr;
+	Vector2 desiredDirection = Vector2::Zero;
+
 	Timer shootTimer;
-
 };

@@ -1,20 +1,8 @@
 #pragma once
 
-#include <vector>
-#include "Util/Timer.h"
-#include "Actor/Actor.h"
-#include "Actor/Item.h"
-
-using namespace engine;
+#include "CharacterBase.h"
 
 class Bubble;
-class IGameRuleManager;
-
-namespace MoveSpeed {
-	constexpr float FAST = 0.0625f;
-	constexpr float NORMAL = 0.125f;
-	constexpr float SLOW = 0.5f;
-};
 
 enum class PlayerState {
 	NORMAL,
@@ -22,9 +10,9 @@ enum class PlayerState {
 	DEAD
 };
 
-class Player : public Actor
+class Player : public CharacterBase
 {
-	RTTI_DECLARATIONS(Player, Actor)
+	RTTI_DECLARATIONS(Player, CharacterBase)
 
 public:
 	Player(const Vector2& position);
@@ -41,21 +29,14 @@ public:
 	inline bool IsDead() const { return currentState == PlayerState::DEAD; }
 	inline PlayerState GetState() const { return currentState; }
 
-	void AddItem(ItemType type);
-	inline const std::vector<ItemType>& GetItems() const { return inventory; }
-
 	void OnDamaged();
-	void OnBubbleExploded();
 
 protected:
-	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
 	virtual void Draw() override;
 
 	PlayerState currentState = PlayerState::NORMAL;
 	void ChangeState(PlayerState newState);
-
-	std::vector<ItemType> inventory;
 
 private:
 	void OnEnterBubbleTrap();
@@ -69,23 +50,4 @@ private:
 	void UpdateNormalTick(float deltaTime);
 	void HandleMovementInput(float deltaTime);
 	void HandleActionInput();
-
-	bool isMoving = false;
-	Timer moveTimer;
-	float moveSpeed = MoveSpeed::NORMAL;
-	float moveProgress = 0.0f;
-	Vector2 moveStartPos;
-	Vector2 moveTargetPos;
-
-	Timer bubbleTrapTimer;
-	float bubbleTrapDuration = 3.0f;
-	int lives = 2;
-
-	static constexpr int maxBubbleAmmo = 3;
-	int bubbleAmmo = maxBubbleAmmo;
-	int bubbleRange = 1;
-
-	bool hasShield = false;
-
-	IGameRuleManager* gameRuleManager = nullptr;
 };
