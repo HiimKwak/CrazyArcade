@@ -2,7 +2,12 @@
 
 #include "Player.h"
 #include "PlayerController.h"
-#include "../Component/CharacterComponent.h"
+#include "../Component/StatsComponent.h"
+#include "../Component/InventoryComponent.h"
+#include "../Component/MovementComponent.h"
+#include "../Component/BubbleComponent.h"
+#include "../Component/Item/ItemComponent.h"
+#include "../Component/State/StateComponent.h"
 #include "Actor/MoveSpeed.h"
 
 using namespace engine;
@@ -56,5 +61,5 @@ void Player::OnKilled()
 {
 	auto stateComp = GetComponent<StateComponent>();
 	if (stateComp)
-		stateComp->ChangeState(ECharacterState::Dead);
+		stateComp->ChangeState(StateType::Dead);
 }

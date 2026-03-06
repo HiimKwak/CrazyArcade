@@ -1,9 +1,10 @@
 #include "ShieldEffect.h"
-#include "Actor/Character/Character.h"
+#include "Actor/Actor.h"
 
-void ShieldEffect::Apply(Character* target)
+void ShieldEffect::Apply(Actor* target)
 {
 	this->target = target;
+	originalColor = target->GetSpriteColor();
 	blinking = true;
 	blinkTimer = 0.0f;
 }
@@ -25,7 +26,7 @@ void ShieldEffect::Tick(float deltaTime)
 	else
 	{
 		if (target)
-			target->ResetSpriteColor();
+			target->SetSpriteColor(originalColor);
 	}
 
 	if (blinkTimer >= blinkDuration)
@@ -33,6 +34,6 @@ void ShieldEffect::Tick(float deltaTime)
 		blinking = false;
 		blinkTimer = 0.0f;
 		if (target)
-			target->ResetSpriteColor();
+			target->SetSpriteColor(originalColor);
 	}
 }

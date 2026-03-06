@@ -1,5 +1,5 @@
 #include "BubbleTrappedState.h"
-#include "../Component/StateComponent.h"
+#include "../StateComponent.h"
 
 void BubbleTrappedState::OnEnter(StateComponent* stateComp)
 {
@@ -16,6 +16,6 @@ void BubbleTrappedState::Tick(StateComponent* stateComp, float deltaTime)
 	trapTimer -= deltaTime;
 	if (trapTimer <= 0.0f)
 	{
-		stateComp->ChangeState(ECharacterState::Normal);
+		stateComp->ChangeState(StateType::Normal);
 	}
 }

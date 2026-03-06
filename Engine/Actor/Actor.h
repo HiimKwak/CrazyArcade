@@ -119,6 +119,7 @@ namespace engine
 		inline void SetSprite(const wchar_t* src, Color color) { sprite = Sprite(src, color); }
 		inline void SetSpriteImage(const wchar_t* src) { return sprite.SetImage(src); }
 		inline void SetSpriteColor(Color color) { return sprite.SetColor(color); }
+		inline Color GetSpriteColor() const { return sprite.GetColor(); }
 
 		inline bool HasBegunPlay() const { return hasBegunPlay; }
 		inline bool IsActive() const { return isActive && !destroyRequested; }

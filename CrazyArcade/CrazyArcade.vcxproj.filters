@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="소스 파일">
@@ -45,7 +45,7 @@
     <ClCompile Include="Actor\Effects\BubbleExplosion.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Actor\Items\Item.cpp">
+    <ClCompile Include="Actor\Environments\Item.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Actor\Environments\Box.cpp">
@@ -69,19 +69,13 @@
     <ClCompile Include="Actor\Character\Component\MovementComponent.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Actor\Character\Component\StateComponent.cpp">
+    <ClCompile Include="Actor\Character\Component\State\StateComponent.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Actor\Character\Component\BubbleComponent.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Actor\Items\Effects\ShieldEffect.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Actor\Items\Usable\ShieldItem.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Actor\Character\Component\ItemComponent.cpp">
+    <ClCompile Include="Actor\Character\Component\Item\ItemComponent.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Actor\Character\Enemy\Enemy.cpp">
@@ -96,13 +90,19 @@
     <ClCompile Include="Actor\Character\Player\PlayerController.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Actor\Character\State\NormalState.cpp">
+    <ClCompile Include="Actor\Character\Component\State\BubbleTrapped\BubbleTrappedState.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Actor\Character\State\BubbleTrappedState.cpp">
+    <ClCompile Include="Actor\Character\Component\State\Dead\DeadState.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Actor\Character\State\DeadState.cpp">
+    <ClCompile Include="Actor\Character\Component\State\Normal\NormalState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Actor\Character\Component\Item\Shield\ShieldEffect.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Actor\Character\Component\Item\Shield\ShieldItem.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -137,7 +137,7 @@
     <ClInclude Include="Actor\Effects\BubbleExplosion.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Items\Item.h">
+    <ClInclude Include="Actor\Environments\Item.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Environments\Box.h">
@@ -155,12 +155,6 @@
     <ClInclude Include="Actor\Character\Character.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Character\Component\CharacterComponent.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Actor\Character\State\CharacterState.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Actor\Character\Component\ICharacterComponent.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -173,28 +167,13 @@
     <ClInclude Include="Actor\Character\Component\MovementComponent.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Character\Component\StateComponent.h">
+    <ClInclude Include="Actor\Character\Component\State\StateComponent.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Character\Component\BubbleComponent.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Items\Effects\IItemEffect.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Actor\Items\Effects\ShieldEffect.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Actor\Items\ItemType.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Actor\Items\IUsableItem.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Actor\Items\Usable\ShieldItem.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Actor\Character\Component\ItemComponent.h">
+    <ClInclude Include="Actor\Character\Component\Item\ItemComponent.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Character\Enemy\Enemy.h">
@@ -209,19 +188,37 @@
     <ClInclude Include="Actor\Character\Player\PlayerController.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Character\State\Enum.h">
+    <ClInclude Include="Actor\Character\Component\State\BubbleTrapped\BubbleTrappedState.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Character\State\ICharacterState.h">
+    <ClInclude Include="Actor\Character\Component\State\Dead\DeadState.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Character\State\NormalState.h">
+    <ClInclude Include="Actor\Character\Component\State\Normal\NormalState.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Character\State\BubbleTrappedState.h">
+    <ClInclude Include="Actor\Character\Component\Item\IEffect.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Character\State\DeadState.h">
+    <ClInclude Include="Actor\Character\Component\Item\Shield\ShieldEffect.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Character\Component\Item\ItemType.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Character\Component\Item\IUsableItem.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Character\Component\Item\Shield\ShieldItem.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Character\Component\State\StateType.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Character\Component\State\IState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Character\Component\index.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

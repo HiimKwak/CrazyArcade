@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Actor/Actor.h"
-#include "ItemType.h"
+#include "Actor/Character/Component/Item/ItemType.h"
 
 using namespace engine;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-enum class ECharacterState
+enum class StateType
 {
 	Normal,
 	BubbleTrapped,

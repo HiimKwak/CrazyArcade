@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ICharacterState.h"
+#include "../IState.h"
 
-class BubbleTrappedState : public ICharacterState
+class BubbleTrappedState : public IState
 {
 public:
 	virtual void OnEnter(StateComponent* stateComp) override;

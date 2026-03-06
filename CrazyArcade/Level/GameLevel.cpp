@@ -3,16 +3,17 @@
 #include "Core/Input.h"
 #include "Util/Util.h"
 #include "Actor/Effects/Bubble.h"
-#include "Actor/Environments/Ground.h"
+#include "Actor/Effects/ExplosionTile.h"
 #include "Actor/Character/Player/Player.h"
 #include "Actor/Character/Enemy/Enemy.h"
-#include "Actor/Character/Component/CharacterComponent.h"
-#include "Actor/Character/State/CharacterState.h"
+#include "Actor/Character/Component/State/StateComponent.h"
+#include "Actor/Character/Component/Item/ItemComponent.h"
+#include "Actor/Character/Component/StatsComponent.h"
+#include "Actor/Environments/Ground.h"
 #include "Actor/Environments/Wall.h"
 #include "Actor/Environments/Bush.h"
-#include "Actor/Effects/ExplosionTile.h"
 #include "Actor/Environments/Box.h"
-#include "Actor/Items/Item.h"
+#include "Actor/Environments/Item.h"
 
 #include "Engine/Engine.h"
 #include "Math/Vector2.h"
@@ -162,7 +163,7 @@ void GameLevel::ProcessCollision()
 		if (player && player->GetPosition() == explosionPos)
 		{
 			auto stateComp = player->GetComponent<StateComponent>();
-			if (stateComp && stateComp->GetCurrentState() == ECharacterState::Normal)
+			if (stateComp && stateComp->GetCurrentState() == StateType::Normal)
 				player->OnDamaged();
 		}
 
@@ -346,16 +347,16 @@ void GameLevel::LoadMap(const char* filename)
 		case '3':
 		{
 			Player* player = new Player(screenPos);
-				player->SetDelegate(this);
-				AddNewActor(player);
+			player->SetDelegate(this);
+			AddNewActor(player);
 			AddNewActor(new Ground(screenPos));
 			break;
 		}
 		case '4':
 		{
 			Enemy* enemy = new Enemy(screenPos);
-				enemy->SetDelegate(this);
-				AddNewActor(enemy);
+			enemy->SetDelegate(this);
+			AddNewActor(enemy);
 			AddNewActor(new Ground(screenPos));
 			break;
 		}
@@ -606,7 +607,7 @@ bool GameLevel::OnRequestMove(Character* character, const Vector2& targetPos)
 		return false;
 
 	auto stateComp = character->GetComponent<StateComponent>();
-	if (stateComp && stateComp->GetCurrentState() == ECharacterState::Normal && HasBubbleAt(targetPos))
+	if (stateComp && stateComp->GetCurrentState() == StateType::Normal && HasBubbleAt(targetPos))
 	{
 		if (!Push(currentPos, targetPos))
 			return false;

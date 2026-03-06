@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Enum.h"
+#include "StateType.h"
 
 class StateComponent;
 
-class ICharacterState
+class IState
 {
 public:
-	virtual ~ICharacterState() = default;
+	virtual ~IState() = default;
 
 	virtual void OnEnter(StateComponent* stateComp) = 0;
 	virtual void OnExit(StateComponent* stateComp) = 0;

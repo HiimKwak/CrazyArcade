@@ -2,10 +2,12 @@
 
 #include <map>
 
-#include "ICharacterComponent.h"
-#include "Actor/Items/ItemType.h"
+#include "Actor/IComponent.h"
+#include "Item/ItemType.h"
 
-class InventoryComponent : public ICharacterComponent
+using namespace engine;
+
+class InventoryComponent : public IComponent
 {
 public:
 	virtual void Tick(float deltaTime) override;

@@ -1,6 +1,9 @@
 #include "PlayerController.h"
 #include "Player.h"
-#include "../Component/CharacterComponent.h"
+#include "../Component/State/StateComponent.h"
+#include "../Component/MovementComponent.h"
+#include "../Component/BubbleComponent.h"
+#include "../Component/ItemComponent.h"
 #include "Core/Input.h"
 
 using namespace engine;

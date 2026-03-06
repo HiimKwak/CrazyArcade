@@ -1,9 +1,9 @@
 #include "ItemComponent.h"
-#include "InventoryComponent.h"
-#include "../Character.h"
-#include "Actor/Items/IUsableItem.h"
-#include "Actor/Items/Effects/IItemEffect.h"
-#include "Actor/Items/Usable/ShieldItem.h"
+#include "../InventoryComponent.h"
+#include "Actor/Actor.h"
+#include "IUsableItem.h"
+#include "IEffect.h"
+#include "Shield/ShieldItem.h"
 
 #include <algorithm>
 
@@ -20,7 +20,7 @@ void ItemComponent::Tick(float deltaTime)
 
 	activeEffects.erase(
 		std::remove_if(activeEffects.begin(), activeEffects.end(),
-			[](const std::unique_ptr<IItemEffect>& e) { return !e->IsActive(); }),
+			[](const std::unique_ptr<IEffect>& e) { return !e->IsActive(); }),
 		activeEffects.end());
 }
 
@@ -62,10 +62,10 @@ bool ItemComponent::RequestUseItem(ItemType type)
 	if (it == usableItems.end())
 		return false;
 
-	if (!it->second->CanUse(GetCharacter()))
+	if (!it->second->CanUse(owner))
 		return false;
 
-	auto effect = it->second->Use(GetCharacter());
+	auto effect = it->second->Use(owner);
 	inventory->RemoveItem(type);
 
 	if (effect)

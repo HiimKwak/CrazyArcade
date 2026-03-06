@@ -1,5 +1,5 @@
 #include "Box.h"
-#include "../Items/Item.h"
+#include "Item.h"
 #include "../Effects/ExplosionTile.h"
 #include "Util/Util.h"
 #include "Level/GameLevel.h"

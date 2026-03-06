@@ -1,5 +1,8 @@
 #include "StateComponent.h"
-#include "../Character.h"
+#include "../../Character.h"
+#include "Normal/NormalState.h"
+#include "BubbleTrapped/BubbleTrappedState.h"
+#include "Dead/DeadState.h"
 
 StateComponent::StateComponent()
 {
@@ -20,35 +23,35 @@ void StateComponent::Initialize(Actor* inOwner)
 
 void StateComponent::Tick(float deltaTime)
 {
-	ICharacterState* statePtr = GetStateObject(currentState);
+	IState* statePtr = GetStateObject(currentState);
 	if (statePtr)
 		statePtr->Tick(this, deltaTime);
 }
 
-void StateComponent::ChangeState(ECharacterState newState)
+void StateComponent::ChangeState(StateType newState)
 {
 	if (currentState == newState)
 		return;
 
-	ICharacterState* currentStatePtr = GetStateObject(currentState);
+	IState* currentStatePtr = GetStateObject(currentState);
 	if (currentStatePtr)
 		currentStatePtr->OnExit(this);
 
 	currentState = newState;
 
-	ICharacterState* newStatePtr = GetStateObject(newState);
+	IState* newStatePtr = GetStateObject(newState);
 
 	if (GetCharacter())
 	{
 		switch (newState)
 		{
-		case ECharacterState::Normal:
+		case StateType::Normal:
 			GetCharacter()->NotifyNormal();
 			break;
-		case ECharacterState::BubbleTrapped:
+		case StateType::BubbleTrapped:
 			GetCharacter()->NotifyBubbleTrapped();
 			break;
-		case ECharacterState::Dead:
+		case StateType::Dead:
 			GetCharacter()->NotifyDied();
 			break;
 		}
@@ -60,23 +63,23 @@ void StateComponent::ChangeState(ECharacterState newState)
 
 bool StateComponent::CanMove() const
 {
-	return currentState == ECharacterState::Normal || currentState == ECharacterState::BubbleTrapped;
+	return currentState == StateType::Normal || currentState == StateType::BubbleTrapped;
 }
 
 bool StateComponent::CanAct() const
 {
-	return currentState == ECharacterState::Normal;
+	return currentState == StateType::Normal;
 }
 
-ICharacterState* StateComponent::GetStateObject(ECharacterState state)
+IState* StateComponent::GetStateObject(StateType state)
 {
 	switch (state)
 	{
-	case ECharacterState::Normal:
+	case StateType::Normal:
 		return stateNormal.get();
-	case ECharacterState::BubbleTrapped:
+	case StateType::BubbleTrapped:
 		return stateBubbleTrapped.get();
-	case ECharacterState::Dead:
+	case StateType::Dead:
 		return stateDead.get();
 	}
 	return nullptr;

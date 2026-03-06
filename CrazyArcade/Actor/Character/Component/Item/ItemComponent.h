@@ -4,13 +4,15 @@
 #include <memory>
 #include <map>
 
-#include "ICharacterComponent.h"
-#include "Actor/Items/ItemType.h"
+#include "Actor/IComponent.h"
+#include "ItemType.h"
+
+using namespace engine;
 
 class IUsableItem;
-class IItemEffect;
+class IEffect;
 
-class ItemComponent : public ICharacterComponent
+class ItemComponent : public IComponent
 {
 public:
 	ItemComponent();
@@ -25,5 +27,5 @@ private:
 	std::unique_ptr<IUsableItem> CreateUsableItem(ItemType type);
 
 	std::map<ItemType, std::unique_ptr<IUsableItem>> usableItems;
-	std::vector<std::unique_ptr<IItemEffect>> activeEffects;
+	std::vector<std::unique_ptr<IEffect>> activeEffects;
 };

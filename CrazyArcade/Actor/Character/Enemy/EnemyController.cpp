@@ -1,6 +1,8 @@
 #include "EnemyController.h"
 #include "Enemy.h"
-#include "../Component/CharacterComponent.h"
+#include "../Component/State/StateComponent.h"
+#include "../Component/MovementComponent.h"
+#include "../Component/BubbleComponent.h"
 #include "AI/EnemyBrain.h"
 
 EnemyController::EnemyController(Enemy* owner)

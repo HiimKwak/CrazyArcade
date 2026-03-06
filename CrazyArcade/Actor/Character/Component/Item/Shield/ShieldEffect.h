@@ -1,16 +1,20 @@
 #pragma once
 
-#include "IItemEffect.h"
+#include "../IEffect.h"
+#include "Math/Color.h"
 
-class ShieldEffect : public IItemEffect
+using namespace engine;
+
+class ShieldEffect : public IEffect
 {
 public:
-	virtual void Apply(Character* target) override;
+	virtual void Apply(Actor* target) override;
 	virtual void Tick(float deltaTime) override;
 	virtual bool IsActive() const override { return blinking; }
 
 private:
-	Character* target = nullptr;
+	Actor* target = nullptr;
+	Color originalColor;
 	float blinkTimer = 0.0f;
 	float blinkDuration = 2.0f;
 	float blinkInterval = 0.2f;

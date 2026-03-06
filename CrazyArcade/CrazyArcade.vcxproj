@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -94,13 +94,13 @@
   <ItemGroup>
     <ClCompile Include="Actor\Character\Component\BubbleComponent.cpp" />
     <ClCompile Include="Actor\Character\Component\InventoryComponent.cpp" />
-    <ClCompile Include="Actor\Character\Component\ItemComponent.cpp" />
+    <ClCompile Include="Actor\Character\Component\Item\ItemComponent.cpp" />
     <ClCompile Include="Actor\Character\Component\MovementComponent.cpp" />
-    <ClCompile Include="Actor\Character\Component\StateComponent.cpp" />
+    <ClCompile Include="Actor\Character\Component\State\StateComponent.cpp" />
     <ClCompile Include="Actor\Character\Component\StatsComponent.cpp" />
-    <ClCompile Include="Actor\Character\State\BubbleTrappedState.cpp" />
-    <ClCompile Include="Actor\Character\State\DeadState.cpp" />
-    <ClCompile Include="Actor\Character\State\NormalState.cpp" />
+    <ClCompile Include="Actor\Character\Component\State\BubbleTrapped\BubbleTrappedState.cpp" />
+    <ClCompile Include="Actor\Character\Component\State\Dead\DeadState.cpp" />
+    <ClCompile Include="Actor\Character\Component\State\Normal\NormalState.cpp" />
     <ClCompile Include="Actor\Environments\Box.cpp" />
     <ClCompile Include="Actor\Effects\Bubble.cpp" />
     <ClCompile Include="Actor\Effects\BubbleExplosion.cpp" />
@@ -112,10 +112,10 @@
     <ClCompile Include="Actor\Character\Player\PlayerController.cpp" />
     <ClCompile Include="Actor\Effects\ExplosionTile.cpp" />
     <ClCompile Include="Actor\Environments\Ground.cpp" />
-    <ClCompile Include="Actor\Items\Effects\ShieldEffect.cpp" />
-    <ClCompile Include="Actor\Items\Item.cpp" />
+    <ClCompile Include="Actor\Character\Component\Item\Shield\ShieldEffect.cpp" />
+    <ClCompile Include="Actor\Environments\Item.cpp" />
     <ClCompile Include="Actor\Environments\Wall.cpp" />
-    <ClCompile Include="Actor\Items\Usable\ShieldItem.cpp" />
+    <ClCompile Include="Actor\Character\Component\Item\Shield\ShieldItem.cpp" />
     <ClCompile Include="AI\EnemyBrain.cpp" />
     <ClCompile Include="Game\Game.cpp" />
     <ClCompile Include="Level\GameLevel.cpp" />
@@ -126,35 +126,34 @@
   <ItemGroup>
     <ClInclude Include="Actor\Character\Component\BubbleComponent.h" />
     <ClInclude Include="Actor\Character\Component\ICharacterComponent.h" />
+    <ClInclude Include="Actor\Character\Component\index.h" />
     <ClInclude Include="Actor\Character\Component\InventoryComponent.h" />
-    <ClInclude Include="Actor\Character\Component\ItemComponent.h" />
+    <ClInclude Include="Actor\Character\Component\Item\ItemComponent.h" />
     <ClInclude Include="Actor\Character\Component\MovementComponent.h" />
-    <ClInclude Include="Actor\Character\Component\StateComponent.h" />
+    <ClInclude Include="Actor\Character\Component\State\StateComponent.h" />
     <ClInclude Include="Actor\Character\Component\StatsComponent.h" />
-    <ClInclude Include="Actor\Character\State\BubbleTrappedState.h" />
-    <ClInclude Include="Actor\Character\State\DeadState.h" />
-    <ClInclude Include="Actor\Character\State\Enum.h" />
-    <ClInclude Include="Actor\Character\State\ICharacterState.h" />
-    <ClInclude Include="Actor\Character\State\NormalState.h" />
+    <ClInclude Include="Actor\Character\Component\State\BubbleTrapped\BubbleTrappedState.h" />
+    <ClInclude Include="Actor\Character\Component\State\Dead\DeadState.h" />
+    <ClInclude Include="Actor\Character\Component\State\StateType.h" />
+    <ClInclude Include="Actor\Character\Component\State\IState.h" />
+    <ClInclude Include="Actor\Character\Component\State\Normal\NormalState.h" />
     <ClInclude Include="Actor\Environments\Box.h" />
     <ClInclude Include="Actor\Effects\Bubble.h" />
     <ClInclude Include="Actor\Effects\BubbleExplosion.h" />
     <ClInclude Include="Actor\Environments\Bush.h" />
     <ClInclude Include="Actor\Character\Character.h" />
-    <ClInclude Include="Actor\Character\Component\CharacterComponent.h" />
-    <ClInclude Include="Actor\Character\State\CharacterState.h" />
     <ClInclude Include="Actor\Character\Enemy\Enemy.h" />
     <ClInclude Include="Actor\Character\Enemy\EnemyController.h" />
     <ClInclude Include="Actor\Character\Player\Player.h" />
     <ClInclude Include="Actor\Character\Player\PlayerController.h" />
     <ClInclude Include="Actor\Effects\ExplosionTile.h" />
     <ClInclude Include="Actor\Environments\Ground.h" />
-    <ClInclude Include="Actor\Items\Effects\IItemEffect.h" />
-    <ClInclude Include="Actor\Items\Effects\ShieldEffect.h" />
-    <ClInclude Include="Actor\Items\Item.h" />
-    <ClInclude Include="Actor\Items\ItemType.h" />
-    <ClInclude Include="Actor\Items\IUsableItem.h" />
-    <ClInclude Include="Actor\Items\Usable\ShieldItem.h" />
+    <ClInclude Include="Actor\Character\Component\Item\IEffect.h" />
+    <ClInclude Include="Actor\Character\Component\Item\Shield\ShieldEffect.h" />
+    <ClInclude Include="Actor\Environments\Item.h" />
+    <ClInclude Include="Actor\Character\Component\Item\ItemType.h" />
+    <ClInclude Include="Actor\Character\Component\Item\IUsableItem.h" />
+    <ClInclude Include="Actor\Character\Component\Item\Shield\ShieldItem.h" />
     <ClInclude Include="Actor\MoveSpeed.h" />
     <ClInclude Include="Actor\Environments\Wall.h" />
     <ClInclude Include="AI\EnemyBrain.h" />

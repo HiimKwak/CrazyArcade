@@ -2,7 +2,7 @@
 #include "Level/Level.h"
 #include "BubbleExplosion.h"
 #include "Actor/Character/Player/Player.h"
-#include "Actor/Character/Component/CharacterComponent.h"
+#include "Actor/Character/Component/BubbleComponent.h"
 #include "Interface/IGameRuleManager.h"
 
 Bubble::Bubble(const Vector2& newPosition, int explosionRange)

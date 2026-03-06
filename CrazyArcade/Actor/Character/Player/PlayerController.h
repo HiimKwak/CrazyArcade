@@ -3,7 +3,7 @@
 #include <map>
 
 #include "Actor/Character/Character.h"
-#include "Actor/Items/ItemType.h"
+#include "Actor/Character/Component/Item/ItemType.h"
 #include "Math/Vector2.h"
 
 using namespace engine;
