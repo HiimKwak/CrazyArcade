@@ -11,24 +11,19 @@ Enemy::Enemy(const Vector2& position)
 	: Character(L"●", position, Color::Red)
 {
 	sortingOrder = 8;
-	controller = new EnemyController(this);
+	CreateController<EnemyController>(this);
 
 	// Add components
 	auto stats = AddComponent<StatsComponent>();
 	stats->SetLives(1);
-	stats->SetMaxBubbleAmmo(0); // 몬스터는 버블을 발사하지 않음
-	stats->SetBubbleAmmo(0);
+	stats->SetMaxBubbleAmmo(2);
+	stats->SetBubbleAmmo(2);
 	stats->SetBubbleRange(1);
 
 	AddComponent<InventoryComponent>();
 	AddComponent<MovementComponent>();
 	AddComponent<StateComponent>();
 	AddComponent<BubbleComponent>();
-}
-
-Enemy::~Enemy()
-{
-	delete controller;
 }
 
 void Enemy::BeginPlay()

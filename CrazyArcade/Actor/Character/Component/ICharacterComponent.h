@@ -1,15 +1,12 @@
 #pragma once
 
-class Character;
+#include "Actor/IComponent.h"
+#include "../Character.h"
 
-class ICharacterComponent
+using namespace engine;
+
+class ICharacterComponent : public IComponent
 {
 public:
-	virtual ~ICharacterComponent() = default;
-
-	virtual void Initialize(Character* inOwner) { owner = inOwner; }
-	virtual void Tick(float deltaTime) = 0;
-
-protected:
-	Character* owner = nullptr;
+	Character* GetCharacter() const { return static_cast<Character*>(owner); }
 };

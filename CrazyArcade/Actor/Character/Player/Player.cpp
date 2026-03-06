@@ -11,14 +11,14 @@ Player::Player(const Vector2& position)
 	: Character(L"P", position, Color::Green)
 {
 	sortingOrder = 8;
-	controller = new PlayerController(this);
-	controller->BindItemToKey('S', ItemType::Shield);
+	auto playerCtrl = CreateController<PlayerController>(this);
+	playerCtrl->BindItemToKey('S', ItemType::Shield);
 
 	// Add components
 	auto stats = AddComponent<StatsComponent>();
 	stats->SetLives(2);
-	stats->SetMaxBubbleAmmo(3);
-	stats->SetBubbleAmmo(3);
+	stats->SetMaxBubbleAmmo(2);
+	stats->SetBubbleAmmo(2);
 	stats->SetBubbleRange(1);
 
 	AddComponent<InventoryComponent>();
@@ -28,19 +28,12 @@ Player::Player(const Vector2& position)
 	AddComponent<BubbleComponent>();
 }
 
-Player::~Player()
-{
-	delete controller;
-}
-
 void Player::BeginPlay()
 {
 	super::BeginPlay();
 	auto movementComp = GetComponent<MovementComponent>();
 	if (movementComp)
-	{
 		movementComp->SetMoveSpeed(MoveSpeed::NORMAL);
-	}
 }
 
 void Player::Tick(float deltaTime)
@@ -49,18 +42,14 @@ void Player::Tick(float deltaTime)
 
 	auto stateComp = GetComponent<StateComponent>();
 	if (stateComp && !stateComp->IsDead())
-	{
 		controller->Tick(deltaTime);
-	}
 }
 
 void Player::OnDamaged()
 {
 	auto stats = GetComponent<StatsComponent>();
 	if (stats)
-	{
 		stats->SetLives(stats->GetLives() - 1);
-	}
 }
 
 void Player::OnKilled()

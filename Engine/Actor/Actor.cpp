@@ -1,5 +1,5 @@
 #include <iostream>
-#include <Windows.h> // 윈도우의 콘솔 API. 다른 운영체제 API는 헤더가 다르다
+#include <Windows.h>
 
 #include "Util/Util.h"
 #include "Actor.h"
@@ -14,19 +14,22 @@ namespace engine
 
 	Actor::~Actor()
 	{
-		// 1. Actor의 소멸자 본문 실행
-		// 2. 멤버 변수들의 소멸자가 역순으로 자동 호출
-		//    -> sprite.~Sprite() 자동 호출
-		//    -> position.~Vector2() 자동 호출
+
 	}
 
 	void Actor::BeginPlay()
 	{
 		// toggle after receiving begin play call
 		hasBegunPlay = true;
+
+		for (auto& component : components)
+			component->Initialize(this);
 	}
+
 	void Actor::Tick(float deltaTime)
 	{
+		for (auto& component : components)
+			component->Tick(deltaTime);
 	}
 	void Actor::Draw()
 	{
@@ -45,8 +48,6 @@ namespace engine
 	{
 		if (position == newPosition)
 			return;
-
-		// 새로운 위치 설정
 		position = newPosition;
 	}
 }

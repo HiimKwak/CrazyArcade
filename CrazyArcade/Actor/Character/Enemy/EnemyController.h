@@ -7,13 +7,13 @@ using namespace engine;
 
 class EnemyBrain;
 
-class EnemyController
+class EnemyController : public IController
 {
 public:
 	EnemyController(class Enemy* owner);
 	~EnemyController();
 
-	void Tick(float deltaTime);
+	virtual void Tick(float deltaTime) override;
 
 private:
 	void HandleMovement(float deltaTime);

@@ -47,13 +47,13 @@ bool MovementComponent::RequestMove(const Vector2& direction)
 	if (!owner || moving)
 		return false;
 
-	auto delegate = owner->GetDelegate();
+	auto delegate = GetCharacter()->GetDelegate();
 	if (!delegate)
 		return false;
 
 	Vector2 targetPos = owner->GetPosition() + direction;
 
-	if (delegate->OnRequestMove(owner, targetPos))
+	if (delegate->OnRequestMove(GetCharacter(), targetPos))
 	{
 		StartMove(targetPos);
 		return true;

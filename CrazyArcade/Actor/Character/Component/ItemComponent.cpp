@@ -62,10 +62,10 @@ bool ItemComponent::RequestUseItem(ItemType type)
 	if (it == usableItems.end())
 		return false;
 
-	if (!it->second->CanUse(owner))
+	if (!it->second->CanUse(GetCharacter()))
 		return false;
 
-	auto effect = it->second->Use(owner);
+	auto effect = it->second->Use(GetCharacter());
 	inventory->RemoveItem(type);
 
 	if (effect)

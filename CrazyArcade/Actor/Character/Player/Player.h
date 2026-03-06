@@ -5,22 +5,16 @@
 
 using namespace engine;
 
-class PlayerController;
-
 class Player : public Character
 {
 	RTTI_DECLARATIONS(Player, Character)
 
 public:
 	Player(const Vector2& position);
-	~Player();
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
 
 	void OnDamaged();
 	void OnKilled();
-
-private:
-	PlayerController* controller;
 };

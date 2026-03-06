@@ -8,12 +8,12 @@ StateComponent::StateComponent()
 	stateDead = std::make_unique<DeadState>();
 }
 
-void StateComponent::Initialize(Character* owner)
+void StateComponent::Initialize(Actor* inOwner)
 {
 	if (initialized)
 		return;
 	initialized = true;
-	ICharacterComponent::Initialize(owner);
+	ICharacterComponent::Initialize(inOwner);
 	if (stateNormal)
 		stateNormal->OnEnter(this);
 }
@@ -38,18 +38,18 @@ void StateComponent::ChangeState(ECharacterState newState)
 
 	ICharacterState* newStatePtr = GetStateObject(newState);
 
-	if (owner)
+	if (GetCharacter())
 	{
 		switch (newState)
 		{
 		case ECharacterState::Normal:
-			owner->NotifyNormal();
+			GetCharacter()->NotifyNormal();
 			break;
 		case ECharacterState::BubbleTrapped:
-			owner->NotifyBubbleTrapped();
+			GetCharacter()->NotifyBubbleTrapped();
 			break;
 		case ECharacterState::Dead:
-			owner->NotifyDied();
+			GetCharacter()->NotifyDied();
 			break;
 		}
 	}

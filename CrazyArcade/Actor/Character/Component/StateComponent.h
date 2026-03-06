@@ -10,7 +10,7 @@ class StateComponent : public ICharacterComponent
 public:
 	StateComponent();
 
-	virtual void Initialize(Character* owner) override;
+	virtual void Initialize(Actor* owner) override;
 	virtual void Tick(float deltaTime) override;
 
 	void ChangeState(ECharacterState newState);

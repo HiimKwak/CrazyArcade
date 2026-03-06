@@ -8,13 +8,13 @@
 
 using namespace engine;
 
-class PlayerController
+class PlayerController : public IController
 {
 public:
 	PlayerController(class Player* owner);
 	~PlayerController();
 
-	void Tick(float deltaTime);
+	virtual void Tick(float deltaTime) override;
 	void BindItemToKey(int key, ItemType type);
 
 private:

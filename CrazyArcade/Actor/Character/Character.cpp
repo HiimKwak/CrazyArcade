@@ -1,5 +1,4 @@
 #include "Character.h"
-#include "Component/CharacterComponent.h"
 
 using namespace engine;
 
@@ -15,28 +14,6 @@ Character::~Character()
 		observer = nullptr;
 	}
 	observers.clear();
-}
-
-void Character::BeginPlay()
-{
-	super::BeginPlay();
-
-	// Initialize all components
-	for (auto& component : components)
-	{
-		component->Initialize(this);
-	}
-}
-
-void Character::Tick(float deltaTime)
-{
-	super::Tick(deltaTime);
-
-	// Update all components
-	for (auto& component : components)
-	{
-		component->Tick(deltaTime);
-	}
 }
 
 void Character::Subscribe(CharacterObserver* observer)
@@ -89,18 +66,20 @@ void Character::NotifyBubbleExploded(const Vector2& position)
 
 bool Character::QueryCanMove(const Vector2& from, const Vector2& to) const
 {
-	if (!delegate)
+	CharacterDelegate* charDelegate = GetDelegate();
+	if (!charDelegate)
 		return false;
 
-	return delegate->OnQueryCanMove(from, to);
+	return charDelegate->OnQueryCanMove(from, to);
 }
 
 Vector2 Character::QueryPlayerPosition() const
 {
-	if (!delegate)
+	CharacterDelegate* charDelegate = GetDelegate();
+	if (!charDelegate)
 		return Vector2::Zero;
 
-	return delegate->OnQueryPlayerPosition();
+	return charDelegate->OnQueryPlayerPosition();
 }
 
 void Character::SetSpriteColor(Color color)

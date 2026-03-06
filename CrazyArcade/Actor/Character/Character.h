@@ -1,14 +1,11 @@
 #pragma once
 
-#include <memory>
 #include <vector>
 
 #include "Actor/Actor.h"
 #include "Math/Vector2.h"
 
 using namespace engine;
-
-class ICharacterComponent;
 
 class CharacterObserver
 {
@@ -21,7 +18,7 @@ public:
 	virtual void OnBubbleExploded(const Vector2& position) {}
 };
 
-class CharacterDelegate
+class CharacterDelegate : public IDelegate
 {
 public:
 	virtual ~CharacterDelegate() = default;
@@ -41,35 +38,10 @@ public:
 	Character(const wchar_t* image, const Vector2& position, Color color);
 	virtual ~Character();
 
-	virtual void BeginPlay() override;
-	virtual void Tick(float deltaTime) override;
-
-	template<typename T>
-	T* GetComponent()
-	{
-		for (auto& component : components)
-		{
-			T* comp = dynamic_cast<T*>(component.get());
-			if (comp)
-				return comp;
-		}
-		return nullptr;
-	}
-
-	template<typename T, typename... Args>
-	T* AddComponent(Args&&... args)
-	{
-		auto component = std::make_unique<T>(std::forward<Args>(args)...);
-		T* ptr = component.get();
-		components.push_back(std::move(component));
-		ptr->Initialize(this);
-		return ptr;
-	}
-
 	void Subscribe(CharacterObserver* observer);
 	void Unsubscribe(CharacterObserver* observer);
-	void SetDelegate(CharacterDelegate* newDelegate) { delegate = newDelegate; }
-	CharacterDelegate* GetDelegate() const { return delegate; }
+	void SetDelegate(CharacterDelegate* newDelegate) { Actor::SetDelegate(newDelegate); }
+	CharacterDelegate* GetDelegate() const { return static_cast<CharacterDelegate*>(Actor::GetDelegate()); }
 
 	void NotifyDied();
 	void NotifyBubbleTrapped();
@@ -84,9 +56,7 @@ public:
 
 protected:
 	Color originalColor;
-	std::vector<std::unique_ptr<ICharacterComponent>> components;
 
 private:
 	std::vector<CharacterObserver*> observers;
-	CharacterDelegate* delegate = nullptr;
 };

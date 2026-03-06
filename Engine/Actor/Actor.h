@@ -4,8 +4,13 @@
 #include "Math/Vector2.h"
 #include "Math/Color.h"
 #include "Util/Util.h"
+#include "IComponent.h"
+#include "IController.h"
+#include "IDelegate.h"
 
 #include <functional>
+#include <memory>
+#include <vector>
 
 namespace engine
 {
@@ -69,6 +74,42 @@ namespace engine
 
 		void Destroy(std::function<void()> onDestroy = nullptr);
 
+		template<typename T>
+		T* GetComponent()
+		{
+			for (auto& component : components)
+			{
+				T* comp = dynamic_cast<T*>(component.get());
+				if (comp)
+					return comp;
+			}
+			return nullptr;
+		}
+
+		template<typename T, typename... Args>
+		T* AddComponent(Args&&... args)
+		{
+			auto component = std::make_unique<T>(std::forward<Args>(args)...);
+			T* ptr = component.get();
+			components.push_back(std::move(component));
+			ptr->Initialize(this);
+			return ptr;
+		}
+
+		template<typename T, typename... Args>
+		T* CreateController(Args&&... args)
+		{
+			auto ctrl = std::make_unique<T>(std::forward<Args>(args)...);
+			T* ptr = ctrl.get();
+			controller = std::move(ctrl);
+			return ptr;
+		}
+
+		IController* GetController() const { return controller.get(); }
+
+		void SetDelegate(IDelegate* newDelegate) { delegate = newDelegate; }
+		IDelegate* GetDelegate() const { return delegate; }
+
 		inline Vector2 GetPosition()const { return position; }
 		void SetPosition(const Vector2& newPosition);
 
@@ -91,13 +132,17 @@ namespace engine
 
 		bool destroyRequested = false;
 
-		Sprite sprite; // Actor가 스택에 생성되면 Sprite도 스택에, 힙에 생성되면 Sprite도 힙에 생성된다
+		Sprite sprite;
 
 		Level* owner = nullptr;
 
 		int sortingOrder = 0;
 
+		std::vector<std::unique_ptr<IComponent>> components;
+		std::unique_ptr<IController> controller;
+
 	private:
 		Vector2 position;
+		IDelegate* delegate = nullptr;
 	};
 }

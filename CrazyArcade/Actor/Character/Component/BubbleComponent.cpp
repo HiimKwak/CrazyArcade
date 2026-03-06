@@ -15,11 +15,11 @@ bool BubbleComponent::RequestGenerateBubble()
 	if (!stats || stats->GetBubbleAmmo() <= 0)
 		return false;
 
-	auto delegate = owner->GetDelegate();
+	auto delegate = GetCharacter()->GetDelegate();
 	if (!delegate)
 		return false;
 
-	if (delegate->OnRequestGenerateBubble(owner, owner->GetPosition(), stats->GetBubbleRange()))
+	if (delegate->OnRequestGenerateBubble(GetCharacter(), owner->GetPosition(), stats->GetBubbleRange()))
 	{
 		stats->SetBubbleAmmo(stats->GetBubbleAmmo() - 1);
 		return true;
