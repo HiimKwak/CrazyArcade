@@ -2,11 +2,12 @@
 #include "Level/Level.h"
 #include "Common/Common.h"
 #include "Interface/IGameRuleManager.h"
+#include "Actor/Character/Character.h"
 #include "Util/Timer.h"
 
 using namespace engine;
 
-class GameLevel : public Level, public IGameRuleManager
+class GameLevel : public Level, public IGameRuleManager, public CharacterDelegate
 {
 	RTTI_DECLARATIONS(GameLevel, Level)
 
@@ -29,6 +30,7 @@ private:
 	void LoadMap(const char* filename);
 	void LoadNextMap();
 
+	// IGameRuleManager (used by Item, BubbleExplosion, etc.)
 	virtual bool CanMove(const Vector2& currentPos, const Vector2& nextPos) override;
 	virtual bool CanExplosionPenetrate(const Vector2& position) override;
 
@@ -42,6 +44,12 @@ private:
 	virtual void SendItemToPlayer(const Vector2& itemPos, ItemType itemType) override;
 
 	virtual Vector2 GetPlayerPosition() override;
+
+	// CharacterDelegate
+	virtual bool OnRequestMove(Character* character, const Vector2& targetPos) override;
+	virtual bool OnRequestGenerateBubble(Character* character, const Vector2& position, int range) override;
+	virtual bool OnQueryCanMove(const Vector2& from, const Vector2& to) override;
+	virtual Vector2 OnQueryPlayerPosition() override;
 
 	bool CheckGameClear();
 	bool CheckGameOver();

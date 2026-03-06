@@ -2,15 +2,17 @@
 #include "GameLevel.h"
 #include "Core/Input.h"
 #include "Util/Util.h"
-#include "Actor/Bubble.h"
-#include "Actor/Ground.h"
-#include "Actor/Player.h"
-#include "Actor/Enemy.h"
-#include "Actor/Wall.h"
-#include "Actor/Bush.h"
-#include "Actor/ExplosionTile.h"
-#include "Actor/Box.h"
-#include "Actor/Item.h"
+#include "Actor/Effects/Bubble.h"
+#include "Actor/Environments/Ground.h"
+#include "Actor/Character/Player/Player.h"
+#include "Actor/Character/Enemy/Enemy.h"
+#include "Actor/Character/Component/CharacterComponent.h"
+#include "Actor/Character/State/CharacterState.h"
+#include "Actor/Environments/Wall.h"
+#include "Actor/Environments/Bush.h"
+#include "Actor/Effects/ExplosionTile.h"
+#include "Actor/Environments/Box.h"
+#include "Actor/Items/Item.h"
 
 #include "Engine/Engine.h"
 #include "Math/Vector2.h"
@@ -69,7 +71,7 @@ void GameLevel::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
 
-	// °ÔÀÓ ¿À¹ö Ã³¸®
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
 	if (CheckGameOver())
 	{
 		if (Input::Get().GetKeyDown(VK_ESCAPE))
@@ -83,7 +85,7 @@ void GameLevel::Tick(float deltaTime)
 		return;
 	}
 
-	// °ÔÀÓ Å¬¸®¾î Ã³¸®
+	// ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
 	if (CheckGameClear())
 	{
 		if (!isClearWaiting)
@@ -95,7 +97,7 @@ void GameLevel::Tick(float deltaTime)
 
 		clearTimer.Tick(deltaTime);
 
-		// NÅ°¸¦ ´©¸£°Å³ª 10ÃÊ°¡ Áö³ª¸é ´ÙÀ½ ½ºÅ×ÀÌÁö·Î
+		// NÅ°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Å³ï¿½ 10ï¿½Ê°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if (Input::Get().GetKeyDown('N') || clearTimer.IsTimeout())
 		{
 			LoadNextMap();
@@ -157,8 +159,12 @@ void GameLevel::ProcessCollision()
 	{
 		Vector2 explosionPos = explosion->GetPosition();
 
-		if (player && player->GetState() == PlayerState::NORMAL && player->GetPosition() == explosionPos)
-			player->OnDamaged();
+		if (player && player->GetPosition() == explosionPos)
+		{
+			auto stateComp = player->GetComponent<StateComponent>();
+			if (stateComp && stateComp->GetCurrentState() == ECharacterState::Normal)
+				player->OnDamaged();
+		}
 
 		for (Enemy* enemy : enemies)
 		{
@@ -175,11 +181,15 @@ void GameLevel::ProcessCollision()
 
 	for (Enemy* enemy : enemies)
 	{
-		if (player && !player->IsDead() &&
-			!enemy->IsDead() &&
-			enemy->GetPosition() == player->GetPosition())
+		if (player && enemy->GetPosition() == player->GetPosition())
 		{
-			player->OnKilled();
+			auto playerState = player->GetComponent<StateComponent>();
+			auto enemyState = enemy->GetComponent<StateComponent>();
+			if (playerState && !playerState->IsDead() &&
+				enemyState && !enemyState->IsDead())
+			{
+				player->OnKilled();
+			}
 		}
 	}
 }
@@ -208,14 +218,16 @@ void GameLevel::Draw()
 	if (player)
 	{
 		wchar_t hpStr[128] = {};
-		swprintf_s(hpStr, 128, L"HP: %d", player->GetLives());
+		auto statsComp = player->GetComponent<StatsComponent>();
+		swprintf_s(hpStr, 128, L"HP: %d", statsComp ? statsComp->GetLives() : 0);
 		Renderer::Get().Submit(hpStr, Vector2(0, gameH + 1), Color::Red, 100);
 
 		wchar_t bubbleStr[1024] = {};
+		auto statsComp2 = player->GetComponent<StatsComponent>();
 		swprintf_s(bubbleStr, 1024, L"Bubble: %d/%d  Range: %d",
-			player->GetBubbleAmmo(),
-			player->GetMaxBubbleAmmo(),
-			player->GetBubbleRange());
+			statsComp2 ? statsComp2->GetBubbleAmmo() : 0,
+			statsComp2 ? statsComp2->GetMaxBubbleAmmo() : 0,
+			statsComp2 ? statsComp2->GetBubbleRange() : 0);
 		Renderer::Get().Submit(bubbleStr, Vector2(17, gameH + 1), Color::Yellow, 100);
 	}
 
@@ -234,7 +246,7 @@ void GameLevel::Draw()
 
 void GameLevel::LoadMap(const char* filename)
 {
-	/** ÆÄÀÏ ºÒ·¯¿À±â **/
+	/** ï¿½ï¿½ï¿½ï¿½ ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½ **/
 	char path[2048] = {};
 	sprintf_s(path, 2048, "../Assets/%s", filename);
 
@@ -247,7 +259,7 @@ void GameLevel::LoadMap(const char* filename)
 		__debugbreak();
 	}
 
-	/** ¹öÆÛ¿¡ ´ã±â **/
+	/** ï¿½ï¿½ï¿½Û¿ï¿½ ï¿½ï¿½ï¿½ **/
 	fseek(file, 0, SEEK_END);
 	size_t fileSize = ftell(file);
 	rewind(file);
@@ -256,7 +268,7 @@ void GameLevel::LoadMap(const char* filename)
 	size_t readSize = fread(data, sizeof(char), fileSize, file);
 	data[fileSize] = '\0';
 
-	// 1) ¸Ê Å©±â »êÃâ(mapWidth/mapHeight)
+	// 1) ï¿½ï¿½ Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(mapWidth/mapHeight)
 	int computedMapWidth = 0;
 	int computedMapHeight = 0;
 	int currentLineWidth = 0;
@@ -298,7 +310,7 @@ void GameLevel::LoadMap(const char* filename)
 	mapOrigin = gameCenter - mapHalf;
 	screenCenter = gameCenter;
 
-	/** ÀÐ¾î¿Â ¹®ÀÚ¿­ ºÐ¼®(parsing) **/
+	/** ï¿½Ð¾ï¿½ï¿½ ï¿½ï¿½ï¿½Ú¿ï¿½ ï¿½Ð¼ï¿½(parsing) **/
 	int index = 0;
 	Vector2 worldPos = Vector2::Zero;
 
@@ -332,13 +344,21 @@ void GameLevel::LoadMap(const char* filename)
 			AddNewActor(new Ground(screenPos));
 			break;
 		case '3':
-			AddNewActor(new Player(screenPos));
+		{
+			Player* player = new Player(screenPos);
+				player->SetDelegate(this);
+				AddNewActor(player);
 			AddNewActor(new Ground(screenPos));
 			break;
+		}
 		case '4':
-			AddNewActor(new Enemy(screenPos));
+		{
+			Enemy* enemy = new Enemy(screenPos);
+				enemy->SetDelegate(this);
+				AddNewActor(enemy);
 			AddNewActor(new Ground(screenPos));
 			break;
+		}
 		case '5':
 			AddNewActor(new Bush(screenPos));
 			break;
@@ -350,7 +370,7 @@ void GameLevel::LoadMap(const char* filename)
 	delete[] data;
 	fclose(file);
 
-	// ¸Ê Å×µÎ¸® »ý¼º
+	// ï¿½ï¿½ ï¿½×µÎ¸ï¿½ ï¿½ï¿½ï¿½ï¿½
 	for (int x = -1; x <= mapWidth; ++x)
 	{
 		Vector2 fenceUp = WorldToScreen(Vector2(x, -1));
@@ -509,11 +529,14 @@ void GameLevel::SendItemToPlayer(const Vector2& itemPos, ItemType itemType)
 {
 	for (Actor* actor : actors)
 	{
-		// todo: ÁÂÇ¥ ÆÇº°·Î´Â ¾ÆÀÌÅÛ È¹µæ ¼ø¼­ º¸ÀåÀ» ¿Ïº®È÷ ÇØÁÖÁö ¸øÇÔ
 		if (actor->IsTypeOf<Player>() && actor->GetPosition() == itemPos)
 		{
 			Player* player = actor->As<Player>();
-			player->AddItem(itemType);
+			auto itemComp = player->GetComponent<ItemComponent>();
+			if (itemComp)
+			{
+				itemComp->OnItemAcquired(itemType);
+			}
 			break;
 		}
 	}
@@ -529,7 +552,7 @@ Vector2 GameLevel::GetPlayerPosition()
 			return player->GetPosition();
 		}
 	}
-	return Vector2::Zero; // ÇÃ·¹ÀÌ¾î°¡ ¾øÀ» °æ¿ì?
+	return Vector2::Zero; // ï¿½Ã·ï¿½ï¿½Ì¾î°¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½?
 }
 
 bool GameLevel::CanExplosionPenetrate(const Vector2& position)
@@ -551,7 +574,8 @@ bool GameLevel::CheckGameClear()
 		if (actor->IsTypeOf<Enemy>())
 		{
 			Enemy* enemy = actor->As<Enemy>();
-			if (!enemy->IsDead()) 
+			auto stateComp = enemy->GetComponent<StateComponent>();
+			if (stateComp && !stateComp->IsDead())
 				aliveEnemies.emplace_back(actor);
 		}
 	}
@@ -566,9 +590,48 @@ bool GameLevel::CheckGameOver()
 		if (actor->IsTypeOf<Player>())
 		{
 			Player* player = actor->As<Player>();
-			if (!player->IsDead())
+			auto stateComp = player->GetComponent<StateComponent>();
+			if (stateComp && !stateComp->IsDead())
 				return false;
 		}
 	}
 	return true;
+}
+
+bool GameLevel::OnRequestMove(Character* character, const Vector2& targetPos)
+{
+	Vector2 currentPos = character->GetPosition();
+
+	if (!CanMove(currentPos, targetPos))
+		return false;
+
+	auto stateComp = character->GetComponent<StateComponent>();
+	if (stateComp && stateComp->GetCurrentState() == ECharacterState::Normal && HasBubbleAt(targetPos))
+	{
+		if (!Push(currentPos, targetPos))
+			return false;
+	}
+
+	return true;
+}
+
+bool GameLevel::OnRequestGenerateBubble(Character* character, const Vector2& position, int range)
+{
+	if (HasBubbleAt(position))
+		return false;
+
+	Bubble* bubble = new Bubble(position, range);
+	bubble->SetOwnerCharacter(character);
+	AddNewActor(bubble);
+	return true;
+}
+
+bool GameLevel::OnQueryCanMove(const Vector2& from, const Vector2& to)
+{
+	return CanMove(from, to);
+}
+
+Vector2 GameLevel::OnQueryPlayerPosition()
+{
+	return GetPlayerPosition();
 }

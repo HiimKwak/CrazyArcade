@@ -1,17 +1,11 @@
 #pragma once
 
 #include "Actor/Actor.h"
+#include "ItemType.h"
 
 using namespace engine;
 
 class IGameRuleManager;
-
-enum class ItemType // todo: bit map?
-{
-	BubbleUpgrade,
-	Roller,
-	Shield
-};
 
 class Item : public Actor
 {

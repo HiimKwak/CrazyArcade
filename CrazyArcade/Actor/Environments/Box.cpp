@@ -1,11 +1,11 @@
 #include "Box.h"
-#include "Item.h"
-#include "ExplosionTile.h"
+#include "../Items/Item.h"
+#include "../Effects/ExplosionTile.h"
 #include "Util/Util.h"
 #include "Level/GameLevel.h"
 
 Box::Box(const Vector2& position)
-	: super(L"¢Ç", position, Color::Yellow)
+	: super(L"ï¿½ï¿½", position, Color::Yellow)
 {
 	sortingOrder = 4;
 }

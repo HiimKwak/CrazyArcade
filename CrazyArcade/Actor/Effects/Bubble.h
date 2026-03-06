@@ -1,11 +1,9 @@
 #pragma once
 
 #include "Util/Timer.h"
-#include "Actor/CharacterBase.h"
+#include "Actor/Character/Character.h"
 
 using namespace engine;
-
-class Player;
 
 class Bubble : public Actor
 {
@@ -18,13 +16,13 @@ public:
 
 	bool IsExploded() const;
 
-	inline CharacterBase* GetOwnerCharacter() const { return ownerCharacter; }
-	void SetOwnerCharacter(CharacterBase* actor) { ownerCharacter = actor; }
+	inline Character* GetOwnerCharacter() const { return ownerCharacter; }
+	void SetOwnerCharacter(Character* actor) { ownerCharacter = actor; }
 
 private:
 	void Explode(float deltaTime);
 
-	CharacterBase* ownerCharacter = nullptr;
+	Character* ownerCharacter = nullptr;
 
 	Timer explodeTimer;
 	float countDown = 3.0f;

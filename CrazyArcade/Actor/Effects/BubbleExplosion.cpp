@@ -1,6 +1,6 @@
 #include "Level/Level.h"
-#include "BubbleExplosion.h"
-#include "ExplosionTile.h"
+#include "../Effects/BubbleExplosion.h"
+#include "../Effects/ExplosionTile.h"
 #include "Interface/IGameRuleManager.h"
 
 BubbleExplosion::BubbleExplosion(const Vector2& origin, int explosionRange)

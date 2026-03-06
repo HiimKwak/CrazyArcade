@@ -4,7 +4,7 @@
 
 using namespace engine;
 
-class IGameRuleManager;
+class Character;
 
 class EnemyBrain
 {
@@ -23,14 +23,14 @@ public:
 	{
 	}
 
-	Vector2 ChooseDirection(const Vector2& enemyPos, const Vector2& playerPos, IGameRuleManager* rules);
+	Vector2 ChooseDirection(const Vector2& enemyPos, const Vector2& playerPos, Character* character);
 
 	const Settings& GetSettings() const { return settings; }
 
 private:
 	Settings settings;
 
-	Vector2 PickRandomValidDirection(const Vector2& enemyPos, IGameRuleManager* rules);
-	Vector2 PickChaseDirection(const Vector2& enemyPos, const Vector2& playerPos, IGameRuleManager* rules);
-	bool IsDirectionValid(const Vector2& enemyPos, const Vector2& dir, IGameRuleManager* rules) const;
+	Vector2 PickRandomValidDirection(const Vector2& enemyPos, Character* character);
+	Vector2 PickChaseDirection(const Vector2& enemyPos, const Vector2& playerPos, Character* character);
+	bool IsDirectionValid(const Vector2& enemyPos, const Vector2& dir, Character* character) const;
 };

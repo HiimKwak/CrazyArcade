@@ -1,6 +1,6 @@
-#include "Item.h"
-#include "Player.h"
-#include "ExplosionTile.h"
+#include "../Items/Item.h"
+#include "Actor/Character/Player/Player.h"
+#include "../Effects/ExplosionTile.h"
 #include "Level/Level.h"
 #include "Util/Util.h"
 #include "Interface/IGameRuleManager.h"
@@ -14,10 +14,10 @@ Item::Item(const Vector2& position)
 	switch (itemType)
 	{
 	case ItemType::BubbleUpgrade:
-		SetSprite(L"¢Ä", Color::Blue);
+		SetSprite(L"ï¿½ï¿½", Color::Blue);
 		break;
 	case ItemType::Roller:
-		SetSprite(L"¢Ý", Color::Orange);
+		SetSprite(L"ï¿½ï¿½", Color::Orange);
 		break;
 	case ItemType::Shield:
 		SetSprite(L"S", Color::Skyblue);
@@ -34,10 +34,10 @@ Item::Item(const Vector2& position, ItemType type)
 	switch (type)
 	{
 	case ItemType::BubbleUpgrade:
-		SetSprite(L"¢Ä", Color::Blue);
+		SetSprite(L"ï¿½ï¿½", Color::Blue);
 		break;
 	case ItemType::Roller:
-		SetSprite(L"¢Ý", Color::Orange);
+		SetSprite(L"ï¿½ï¿½", Color::Orange);
 		break;
 	case ItemType::Shield:
 		SetSprite(L"S", Color::Skyblue);

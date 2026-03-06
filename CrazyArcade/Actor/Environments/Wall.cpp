@@ -1,12 +1,12 @@
 #include "Wall.h"
 
-Wall::Wall(const Vector2& position) : super(L"¡á", position, Color::White)
+Wall::Wall(const Vector2& position) : super(L"ï¿½ï¿½", position, Color::White)
 {
 	sortingOrder = 0;
 }
 
 Wall::Wall(const Vector2& position, bool visible)
-	: super(L"¡á", position, Color::White), isVisible(visible)
+	: super(L"ï¿½ï¿½", position, Color::White), isVisible(visible)
 {
 	sortingOrder = 0;
 }

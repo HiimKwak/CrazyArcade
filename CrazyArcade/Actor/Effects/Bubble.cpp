@@ -1,7 +1,9 @@
-﻿#include "Bubble.h"
+#include "Bubble.h"
 #include "Level/Level.h"
 #include "BubbleExplosion.h"
-#include "Player.h"
+#include "Actor/Character/Player/Player.h"
+#include "Actor/Character/Component/CharacterComponent.h"
+#include "Interface/IGameRuleManager.h"
 
 Bubble::Bubble(const Vector2& newPosition, int explosionRange)
 	: super(L"●", newPosition, Color::Blue),
@@ -51,7 +53,11 @@ void Bubble::Explode(float deltaTime)
 		owner->AddNewActor(new BubbleExplosion(GetPosition(), range));
 
 	if (ownerCharacter)
-		ownerCharacter->OnBubbleExploded();
+	{
+		auto bubbleComp = ownerCharacter->GetComponent<BubbleComponent>();
+		if (bubbleComp)
+			bubbleComp->OnBubbleExploded();
+	}
 
 	Destroy();
 }
