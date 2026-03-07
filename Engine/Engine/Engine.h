@@ -15,6 +15,7 @@ namespace engine
 		{
 			float frameRate = 0.0f;
 			int tileSize = 3;
+			int displayTileSize = 3;
 
 			int gameScreenWidth = 0;
 			int gameScreenHeight = 0;
@@ -41,6 +42,7 @@ namespace engine
 		inline int GetGameHeight() const { return settings.gameScreenHeight; }
 		inline int GetHudHeight() const { return settings.hudHeight; }
 		inline int GetTileSize() const { return settings.tileSize; }
+		inline int GetDisplayTileSize() const { return settings.displayTileSize; }
 
 	protected:
 		void Shutdown();

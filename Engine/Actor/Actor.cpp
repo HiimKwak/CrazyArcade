@@ -4,6 +4,7 @@
 #include "Util/Util.h"
 #include "Actor.h"
 #include "Render/Renderer.h"
+#include "Render/SpriteAsset.h"
 #include "Engine/Engine.h"
 
 namespace engine
@@ -35,10 +36,19 @@ namespace engine
 	void Actor::Draw()
 	{
 		const int ts = Engine::Get().GetTileSize();
-		Renderer::Get().SubmitRect(
-			position.x, position.y,
-			ts, ts,
-			sprite.GetColor(), sortingOrder);
+		if (const SpriteAsset* ps = sprite.GetPixelSprite())
+		{
+			Renderer::Get().SubmitSprite(
+				position.x, position.y,
+				ps, sortingOrder);
+		}
+		else
+		{
+			Renderer::Get().SubmitRect(
+				position.x, position.y,
+				ts, ts,
+				sprite.GetColor(), sortingOrder);
+		}
 	}
 
 	void Actor::Destroy(std::function<void()> onDestroy)

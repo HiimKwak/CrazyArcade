@@ -1,2 +1,2 @@
 frameRate = 60
-tileSize = 3
+tileSize = 16

@@ -9,6 +9,7 @@
 namespace engine
 {
 	class ScreenBuffer;
+	struct SpriteAsset;
 
 	class ENGINE_API Renderer
 	{
@@ -43,7 +44,7 @@ namespace engine
 		};
 
 	public:
-		Renderer(const Vector2& screenSize);
+		Renderer(const Vector2& screenSize, int tileSize = 3, int displayTileSize = 3);
 		~Renderer();
 
 		static Renderer& Get();
@@ -60,9 +61,10 @@ namespace engine
 		// 픽셀 단위 렌더 명령 제출 (half-block 렌더링 경로)
 		void SubmitPixel(int x, int y, Color color, int sortingOrder = 0);
 		void SubmitRect(int x, int y, int w, int h, Color color, int sortingOrder = 0);
+		void SubmitSprite(int x, int y, const SpriteAsset* sprite, int sortingOrder = 0);
 
-		inline int GetPixelWidth() const { return pixelWidth; }
-		inline int GetPixelHeight() const { return pixelHeight; }
+		inline int GetPixelWidth() const { return virtualWidth; }
+		inline int GetPixelHeight() const { return virtualHeight; }
 
 		void PresentImmediately();
 
@@ -83,6 +85,12 @@ namespace engine
 		PixelBuffer* pixelBuffer = nullptr;
 		int pixelWidth = 0;
 		int pixelHeight = 0;
+
+		// 가상 해상도 (게임 코드가 사용하는 좌표계)
+		int virtualWidth = 0;
+		int virtualHeight = 0;
+		int tileSize = 3;
+		int displayTileSize = 3;
 
 		static Renderer* instance;
 	};

@@ -19,7 +19,9 @@ namespace engine
 		LoadSettings();
 		DetectConsoleSize();
 
-		renderer = new Renderer(Vector2(settings.viewportWidth, settings.viewportHeight));
+		renderer = new Renderer(
+			Vector2(settings.viewportWidth, settings.viewportHeight),
+			settings.tileSize, settings.displayTileSize);
 
 		Util::TurnOffCursor();
 		Util::SetRandomSeed();

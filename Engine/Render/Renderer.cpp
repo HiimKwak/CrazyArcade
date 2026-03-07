@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "ScreenBuffer.h"
+#include "SpriteAsset.h"
 #include "Util/Util.h"
 
 namespace engine
@@ -68,8 +69,8 @@ namespace engine
 	// 정적 변수 초기화
 	Renderer* Renderer::instance = nullptr;
 
-	Renderer::Renderer(const Vector2& screenSize)
-		: screenSize(screenSize)
+	Renderer::Renderer(const Vector2& screenSize, int tileSize, int displayTileSize)
+		: screenSize(screenSize), tileSize(tileSize), displayTileSize(displayTileSize)
 	{
 		instance = this;
 
@@ -79,10 +80,14 @@ namespace engine
 		// 프레임 초기화
 		frame->Clear(screenSize);
 
-		// 픽셀 버퍼 초기화 (세로 해상도 2배)
+		// 화면 픽셀 버퍼 (half-block: 세로 2배)
 		pixelWidth = screenSize.x;
 		pixelHeight = screenSize.y * 2;
 		pixelBuffer = new PixelBuffer(pixelWidth * pixelHeight);
+
+		// 가상 해상도: 화면 픽셀 × (tileSize / displayTileSize)
+		virtualWidth = pixelWidth * tileSize / displayTileSize;
+		virtualHeight = pixelHeight * tileSize / displayTileSize;
 
 		// 이중 버퍼 객체 생성 및 초기화
 		screenBuffers[0] = new ScreenBuffer(screenSize);
@@ -213,10 +218,14 @@ namespace engine
 
 	void Renderer::SubmitPixel(int x, int y, Color color, int sortingOrder)
 	{
-		if (x < 0 || x >= pixelWidth || y < 0 || y >= pixelHeight)
+		// 가상 좌표 → 화면 픽셀 좌표 변환
+		const int sx = x * displayTileSize / tileSize;
+		const int sy = y * displayTileSize / tileSize;
+
+		if (sx < 0 || sx >= pixelWidth || sy < 0 || sy >= pixelHeight)
 			return;
 
-		const int index = y * pixelWidth + x;
+		const int index = sy * pixelWidth + sx;
 
 		if (pixelBuffer->sortingOrderArray[index] > sortingOrder)
 			return;
@@ -227,11 +236,48 @@ namespace engine
 
 	void Renderer::SubmitRect(int x, int y, int w, int h, Color color, int sortingOrder)
 	{
-		for (int py = y; py < y + h; ++py)
+		// 가상 사각형의 모서리를 화면 좌표로 변환
+		int sx1 = x * displayTileSize / tileSize;
+		int sy1 = y * displayTileSize / tileSize;
+		int sx2 = (x + w) * displayTileSize / tileSize;
+		int sy2 = (y + h) * displayTileSize / tileSize;
+
+		// 최소 1픽셀 보장
+		if (sx2 <= sx1) sx2 = sx1 + 1;
+		if (sy2 <= sy1) sy2 = sy1 + 1;
+
+		for (int py = sy1; py < sy2; ++py)
 		{
-			for (int px = x; px < x + w; ++px)
+			for (int px = sx1; px < sx2; ++px)
 			{
-				SubmitPixel(px, py, color, sortingOrder);
+				if (px < 0 || px >= pixelWidth || py < 0 || py >= pixelHeight)
+					continue;
+
+				const int index = py * pixelWidth + px;
+
+				if (pixelBuffer->sortingOrderArray[index] > sortingOrder)
+					continue;
+
+				pixelBuffer->colorArray[index] = color;
+				pixelBuffer->sortingOrderArray[index] = sortingOrder;
+			}
+		}
+	}
+
+	void Renderer::SubmitSprite(int x, int y, const SpriteAsset* sprite, int sortingOrder)
+	{
+		if (!sprite)
+			return;
+
+		for (int py = 0; py < sprite->height; ++py)
+		{
+			for (int px = 0; px < sprite->width; ++px)
+			{
+				const int idx = py * sprite->width + px;
+				if (!sprite->mask[idx])
+					continue;
+
+				SubmitPixel(x + px, y + py, sprite->pixels[idx], sortingOrder);
 			}
 		}
 	}

@@ -306,15 +306,16 @@ void GameLevel::LoadMap(const char* filename)
 	const int gameW = Engine::Get().GetGameWidth();
 	const int gameH = Engine::Get().GetGameHeight();
 
-	// 픽셀 좌표계에서 맵 중앙 정렬
+	// 가상 좌표계에서 맵 중앙 정렬
 	const int ts = Engine::Get().GetTileSize();
-	const int pixelGameW = gameW;
-	const int pixelGameH = gameH * 2;
+	const int dts = Engine::Get().GetDisplayTileSize();
+	const int virtualGameW = gameW * ts / dts;
+	const int virtualGameH = gameH * 2 * ts / dts;
 	const int mapPixelW = mapWidth * ts;
 	const int mapPixelH = mapHeight * ts;
 
-	mapOrigin = Vector2((pixelGameW - mapPixelW) / 2, (pixelGameH - mapPixelH) / 2);
-	screenCenter = Vector2(pixelGameW / 2, pixelGameH / 2);
+	mapOrigin = Vector2((virtualGameW - mapPixelW) / 2, (virtualGameH - mapPixelH) / 2);
+	screenCenter = Vector2(virtualGameW / 2, virtualGameH / 2);
 
 	/** �о�� ���ڿ� �м�(parsing) **/
 	int index = 0;

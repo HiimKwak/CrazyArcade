@@ -15,6 +15,7 @@
 namespace engine
 {
 	class Level;
+	struct SpriteAsset;
 
 	class ENGINE_API Actor : public RTTI
 	{
@@ -52,10 +53,13 @@ namespace engine
 			inline void SetImage(const wchar_t* src) { Util::DeepCopyString(image, src); }
 			inline Color GetColor() const { return color; }
 			inline void SetColor(Color newColor) { color = newColor; }
+			inline const SpriteAsset* GetPixelSprite() const { return pixelSprite; }
+			inline void SetPixelSprite(const SpriteAsset* asset) { pixelSprite = asset; }
 
 		private:
 			wchar_t* image = nullptr;
 			Color color = Color::White;
+			const SpriteAsset* pixelSprite = nullptr;
 		};
 
 		RTTI_DECLARATIONS(Actor, RTTI)
@@ -120,6 +124,8 @@ namespace engine
 		inline void SetSpriteImage(const wchar_t* src) { return sprite.SetImage(src); }
 		inline void SetSpriteColor(Color color) { return sprite.SetColor(color); }
 		inline Color GetSpriteColor() const { return sprite.GetColor(); }
+		inline void SetPixelSprite(const SpriteAsset* asset) { sprite.SetPixelSprite(asset); }
+		inline const SpriteAsset* GetPixelSprite() const { return sprite.GetPixelSprite(); }
 
 		inline bool HasBegunPlay() const { return hasBegunPlay; }
 		inline bool IsActive() const { return isActive && !destroyRequested; }

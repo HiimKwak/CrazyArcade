@@ -107,6 +107,7 @@ xcopy $(OutDir)\Engine.lib ..\Library\Engine\$(Platform)\$(Configuration)\ /e /y
     <ClCompile Include="Math\Vector2.cpp" />
     <ClCompile Include="Render\Renderer.cpp" />
     <ClCompile Include="Render\ScreenBuffer.cpp" />
+    <ClCompile Include="Render\SpriteLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor\Actor.h" />
@@ -122,6 +123,8 @@ xcopy $(OutDir)\Engine.lib ..\Library\Engine\$(Platform)\$(Configuration)\ /e /y
     <ClInclude Include="Math\Vector2.h" />
     <ClInclude Include="Math\Color.h" />
     <ClInclude Include="Render\ScreenBuffer.h" />
+    <ClInclude Include="Render\SpriteAsset.h" />
+    <ClInclude Include="Render\SpriteLoader.h" />
     <ClInclude Include="Util\Util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
