@@ -1,6 +1,7 @@
 #include "MovementComponent.h"
 #include "../Character.h"
 #include "Util/Util.h"
+#include "Engine/Engine.h"
 
 void MovementComponent::Tick(float deltaTime)
 {
@@ -51,7 +52,7 @@ bool MovementComponent::RequestMove(const Vector2& direction)
 	if (!delegate)
 		return false;
 
-	Vector2 targetPos = owner->GetPosition() + direction;
+	Vector2 targetPos = owner->GetPosition() + direction * Engine::Get().GetTileSize();
 
 	if (delegate->OnRequestMove(GetCharacter(), targetPos))
 	{

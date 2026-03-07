@@ -14,6 +14,7 @@ namespace engine
 		struct EngineSettings
 		{
 			float frameRate = 0.0f;
+			int tileSize = 3;
 
 			int gameScreenWidth = 0;
 			int gameScreenHeight = 0;
@@ -39,10 +40,12 @@ namespace engine
 		inline int GetGameWidth() const { return settings.gameScreenWidth; }
 		inline int GetGameHeight() const { return settings.gameScreenHeight; }
 		inline int GetHudHeight() const { return settings.hudHeight; }
+		inline int GetTileSize() const { return settings.tileSize; }
 
 	protected:
 		void Shutdown();
 		void LoadSettings();
+		void DetectConsoleSize();
 		void BeginPlay();
 		void Tick(float deltaTime);
 		void Draw();

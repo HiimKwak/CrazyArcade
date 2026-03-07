@@ -13,12 +13,11 @@
 using namespace engine;
 
 Enemy::Enemy(const Vector2& position)
-	: Character(L"●", position, Color::Red)
+	: Character(L"E", position, Color::Red)
 {
 	sortingOrder = 8;
 	CreateController<EnemyController>(this);
 
-	// Add components
 	auto stats = AddComponent<StatsComponent>();
 	stats->SetLives(1);
 	stats->SetMaxBubbleAmmo(2);

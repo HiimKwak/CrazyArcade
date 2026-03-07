@@ -6,7 +6,7 @@
 #include "Interface/IGameRuleManager.h"
 
 Bubble::Bubble(const Vector2& newPosition, int explosionRange)
-	: super(L"●", newPosition, Color::Blue),
+	: super(L"B", newPosition, Color::Blue),
 	range(explosionRange)
 {
 	sortingOrder = 5;

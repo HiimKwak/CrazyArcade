@@ -17,4 +17,11 @@ namespace engine
 		Yellow = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY,
 		Orange = FOREGROUND_RED | FOREGROUND_GREEN,
 	};
+
+	// Half-block(?) 렌더링용: 두 픽셀 색상을 CHAR_INFO.Attributes 하나로 합성
+	// topColor → foreground (bits 0-3), bottomColor → background (bits 4-7)
+	inline WORD MakeHalfBlockAttr(Color topColor, Color bottomColor)
+	{
+		return static_cast<WORD>(topColor) | (static_cast<WORD>(bottomColor) << 4);
+	}
 }

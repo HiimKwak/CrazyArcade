@@ -19,7 +19,6 @@ Player::Player(const Vector2& position)
 	auto playerCtrl = CreateController<PlayerController>(this);
 	playerCtrl->BindItemToKey('S', ItemType::Shield);
 
-	// Add components
 	auto stats = AddComponent<StatsComponent>();
 	stats->SetLives(2);
 	stats->SetMaxBubbleAmmo(2);

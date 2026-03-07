@@ -2,6 +2,7 @@
 #include "../Effects/BubbleExplosion.h"
 #include "../Effects/ExplosionTile.h"
 #include "Interface/IGameRuleManager.h"
+#include "Engine/Engine.h"
 
 BubbleExplosion::BubbleExplosion(const Vector2& origin, int explosionRange)
 	: super(L"", origin, Color::White),
@@ -47,7 +48,7 @@ void BubbleExplosion::PropagateInDirection(const Vector2& direction, int range)
 
 	for (int i = 1; i <= range; ++i)
 	{
-		Vector2 tilePos = origin + (i * direction);
+		Vector2 tilePos = origin + (i * Engine::Get().GetTileSize()) * direction;
 
 		if (owner)
 		{

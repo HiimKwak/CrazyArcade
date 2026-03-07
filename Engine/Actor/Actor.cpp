@@ -4,6 +4,7 @@
 #include "Util/Util.h"
 #include "Actor.h"
 #include "Render/Renderer.h"
+#include "Engine/Engine.h"
 
 namespace engine
 {
@@ -33,7 +34,11 @@ namespace engine
 	}
 	void Actor::Draw()
 	{
-		Renderer::Get().Submit(sprite.GetImage(), position, sprite.GetColor(), sortingOrder);
+		const int ts = Engine::Get().GetTileSize();
+		Renderer::Get().SubmitRect(
+			position.x, position.y,
+			ts, ts,
+			sprite.GetColor(), sortingOrder);
 	}
 
 	void Actor::Destroy(std::function<void()> onDestroy)

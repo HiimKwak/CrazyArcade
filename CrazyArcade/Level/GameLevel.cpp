@@ -27,7 +27,7 @@ using namespace engine;
 
 Vector2 GameLevel::WorldToScreen(const Vector2& worldPos) const
 {
-	return mapOrigin + worldPos;
+	return mapOrigin + worldPos * Engine::Get().GetTileSize();
 }
 
 bool GameLevel::IsInsideGameMap_Screen(const Vector2& screenPos) const
@@ -35,10 +35,11 @@ bool GameLevel::IsInsideGameMap_Screen(const Vector2& screenPos) const
 	if (mapWidth <= 0 || mapHeight <= 0)
 		return false;
 
+	const int ts = Engine::Get().GetTileSize();
 	const int left = mapOrigin.x;
 	const int top = mapOrigin.y;
-	const int right = mapOrigin.x + (mapWidth - 1);
-	const int bottom = mapOrigin.y + (mapHeight - 1);
+	const int right = mapOrigin.x + (mapWidth * ts - 1);
+	const int bottom = mapOrigin.y + (mapHeight * ts - 1);
 
 	return (screenPos.x >= left && screenPos.x <= right &&
 		screenPos.y >= top && screenPos.y <= bottom);
@@ -305,11 +306,15 @@ void GameLevel::LoadMap(const char* filename)
 	const int gameW = Engine::Get().GetGameWidth();
 	const int gameH = Engine::Get().GetGameHeight();
 
-	const Vector2 gameCenter((gameW - 1) / 2, (gameH - 1) / 2);
-	const Vector2 mapHalf(mapWidth / 2, mapHeight / 2);
+	// 픽셀 좌표계에서 맵 중앙 정렬
+	const int ts = Engine::Get().GetTileSize();
+	const int pixelGameW = gameW;
+	const int pixelGameH = gameH * 2;
+	const int mapPixelW = mapWidth * ts;
+	const int mapPixelH = mapHeight * ts;
 
-	mapOrigin = gameCenter - mapHalf;
-	screenCenter = gameCenter;
+	mapOrigin = Vector2((pixelGameW - mapPixelW) / 2, (pixelGameH - mapPixelH) / 2);
+	screenCenter = Vector2(pixelGameW / 2, pixelGameH / 2);
 
 	/** �о�� ���ڿ� �м�(parsing) **/
 	int index = 0;

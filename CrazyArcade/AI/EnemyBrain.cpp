@@ -3,6 +3,7 @@
 #include "Actor/Character/Character.h"
 #include "Util/Util.h"
 #include "Math/Vector2.h"
+#include "Engine/Engine.h"
 
 namespace
 {
@@ -81,6 +82,6 @@ bool EnemyBrain::IsDirectionValid(const Vector2& enemyPos, const Vector2& dir, C
 	if (dir == Vector2::Zero)
 		return false;
 
-	Vector2 next = enemyPos + dir;
+	Vector2 next = enemyPos + dir * Engine::Get().GetTileSize();
 	return character->QueryCanMove(enemyPos, next);
 }

@@ -10,7 +10,7 @@ namespace engine
 		memset(charInfoArray, 0, sizeof(CHAR_INFO) * bufferCount);
 
 		sortingOrderArray = new int[bufferCount];
-		memset(sortingOrderArray, 0, sizeof(int) * bufferCount); // 배열 동적할당 후엔 memset으로 제대로 초기화해주는게 좋음
+		memset(sortingOrderArray, 0, sizeof(int) * bufferCount); // '정적' 배열 동적할당 후엔 memset으로 제대로 초기화해주는게 좋음
 	}
 	Renderer::Frame::~Frame()
 	{
@@ -43,6 +43,28 @@ namespace engine
 	}
 	// ------------------ Frame ------------------- //
 
+	// ------------------ PixelBuffer -------------- //
+	Renderer::PixelBuffer::PixelBuffer(int pixelCount)
+	{
+		colorArray = new Color[pixelCount];
+		sortingOrderArray = new int[pixelCount];
+		Clear(pixelCount);
+	}
+	Renderer::PixelBuffer::~PixelBuffer()
+	{
+		SafeDeleteArray(colorArray);
+		SafeDeleteArray(sortingOrderArray);
+	}
+	void Renderer::PixelBuffer::Clear(int pixelCount)
+	{
+		for (int i = 0; i < pixelCount; ++i)
+		{
+			colorArray[i] = Color::Black;
+			sortingOrderArray[i] = -1;
+		}
+	}
+	// ------------------ PixelBuffer -------------- //
+
 	// 정적 변수 초기화
 	Renderer* Renderer::instance = nullptr;
 
@@ -56,6 +78,11 @@ namespace engine
 
 		// 프레임 초기화
 		frame->Clear(screenSize);
+
+		// 픽셀 버퍼 초기화 (세로 해상도 2배)
+		pixelWidth = screenSize.x;
+		pixelHeight = screenSize.y * 2;
+		pixelBuffer = new PixelBuffer(pixelWidth * pixelHeight);
 
 		// 이중 버퍼 객체 생성 및 초기화
 		screenBuffers[0] = new ScreenBuffer(screenSize);
@@ -71,6 +98,7 @@ namespace engine
 	Renderer::~Renderer()
 	{
 		SafeDelete(frame);
+		SafeDelete(pixelBuffer);
 		for (ScreenBuffer*& buffer : screenBuffers)
 		{
 			SafeDelete(buffer);
@@ -94,7 +122,10 @@ namespace engine
 		// 화면 지우기
 		Clear();
 
-		// 렌더큐 순회하면서 프레임 채우기
+		// 픽셀 버퍼 → CHAR_INFO 프레임 변환 (half-block)
+		ConvertPixelBufferToFrame();
+
+		// 렌더큐 순회하면서 프레임 채우기 (텍스트/HUD는 픽셀 위에 덮어쓰기)
 		// 전제조건: 레벨의 모든 액터가 렌더러에 렌더러에 Submit이 완료돼있어야 함
 		for (const RenderCommand& command : renderQueue)
 		{
@@ -153,6 +184,9 @@ namespace engine
 
 		// 렌더 큐 비우기
 		renderQueue.clear();
+
+		// 픽셀 버퍼 초기화 (다음 프레임을 위해)
+		pixelBuffer->Clear(pixelWidth * pixelHeight);
 	}
 
 	void Renderer::Clear()
@@ -168,13 +202,70 @@ namespace engine
 	void Renderer::Submit(const wchar_t* text, const Vector2& position, Color color, int sortingOrder)
 	{
 		// 렌더 데이터 생성 후 큐에 추가
-		RenderCommand command = {}; // 스택변수로 썼지만 크기가 더 커지면 힙 영역을 쓰도록 바꿔줘도 됨
-		command.text = text; // q. 직접 할당할 수밖에 없는 이유?
+		RenderCommand command = {};
+		command.text = text;
 		command.position = position;
 		command.color = color;
 		command.sortingOrder = sortingOrder;
 
 		renderQueue.emplace_back(command);
+	}
+
+	void Renderer::SubmitPixel(int x, int y, Color color, int sortingOrder)
+	{
+		if (x < 0 || x >= pixelWidth || y < 0 || y >= pixelHeight)
+			return;
+
+		const int index = y * pixelWidth + x;
+
+		if (pixelBuffer->sortingOrderArray[index] > sortingOrder)
+			return;
+
+		pixelBuffer->colorArray[index] = color;
+		pixelBuffer->sortingOrderArray[index] = sortingOrder;
+	}
+
+	void Renderer::SubmitRect(int x, int y, int w, int h, Color color, int sortingOrder)
+	{
+		for (int py = y; py < y + h; ++py)
+		{
+			for (int px = x; px < x + w; ++px)
+			{
+				SubmitPixel(px, py, color, sortingOrder);
+			}
+		}
+	}
+
+	void Renderer::ConvertPixelBufferToFrame()
+	{
+		for (int cy = 0; cy < screenSize.y; ++cy)
+		{
+			for (int x = 0; x < screenSize.x; ++x)
+			{
+				const int topIndex = (cy * 2) * pixelWidth + x;
+				const int bottomIndex = (cy * 2 + 1) * pixelWidth + x;
+
+				const int topOrder = pixelBuffer->sortingOrderArray[topIndex];
+				const int bottomOrder = pixelBuffer->sortingOrderArray[bottomIndex];
+
+				// 두 픽셀 모두 미설정이면 건너뛰기 (텍스트 렌더링에 맡김)
+				if (topOrder < 0 && bottomOrder < 0)
+					continue;
+
+				const int frameIndex = cy * screenSize.x + x;
+				const int pixelOrder = topOrder > bottomOrder ? topOrder : bottomOrder;
+
+				if (frame->sortingOrderArray[frameIndex] > pixelOrder)
+					continue;
+
+				Color topColor = topOrder >= 0 ? pixelBuffer->colorArray[topIndex] : Color::Black;
+				Color bottomColor = bottomOrder >= 0 ? pixelBuffer->colorArray[bottomIndex] : Color::Black;
+
+				frame->charInfoArray[frameIndex].Char.UnicodeChar = L'\u2580'; // ?
+				frame->charInfoArray[frameIndex].Attributes = MakeHalfBlockAttr(topColor, bottomColor);
+				frame->sortingOrderArray[frameIndex] = pixelOrder;
+			}
+		}
 	}
 
 	void Renderer::Present()
