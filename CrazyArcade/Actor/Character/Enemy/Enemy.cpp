@@ -16,7 +16,6 @@ Enemy::Enemy(const Vector2& position)
 	: Character(L"E", position, Color::Red)
 {
 	sortingOrder = 8;
-	CreateController<EnemyController>(this);
 
 	auto stats = AddComponent<StatsComponent>();
 	stats->SetLives(1);
@@ -28,6 +27,9 @@ Enemy::Enemy(const Vector2& position)
 	AddComponent<MovementComponent>();
 	AddComponent<StateComponent>();
 	AddComponent<BubbleComponent>();
+
+	// 컴포넌트 추가 후 생성 (컨트롤러 생성자에서 컴포넌트 접근)
+	CreateController<EnemyController>(this);
 }
 
 void Enemy::BeginPlay()

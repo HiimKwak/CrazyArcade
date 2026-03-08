@@ -200,6 +200,15 @@ void GameLevel::Draw()
 {
 	super::Draw();
 
+	// A* 경로 시각화 - 각 Enemy의 현재 계획 경로를 하늘색으로 표시
+	const int ts = Engine::Get().GetTileSize();
+	for (Actor* actor : actors)
+	{
+		if (!actor->IsTypeOf<Enemy>()) continue;
+		const auto& path = actor->As<Enemy>()->GetDebugPath();
+		for (int i = 1; i < static_cast<int>(path.size()); ++i)
+			Renderer::Get().SubmitRect(path[i].x, path[i].y, ts, ts, Color::Skyblue, 2);
+	}
 
 	Player* player = nullptr;
 	for (Actor* actor : actors)
@@ -641,4 +650,27 @@ bool GameLevel::OnQueryCanMove(const Vector2& from, const Vector2& to)
 Vector2 GameLevel::OnQueryPlayerPosition()
 {
 	return GetPlayerPosition();
+}
+
+bool GameLevel::OnQueryHasBubbleAt(const Vector2& position)
+{
+	return HasBubbleAt(position);
+}
+
+bool GameLevel::OnQueryHasBoxAt(const Vector2& position)
+{
+	return HasBoxAt(position);
+}
+
+bool GameLevel::OnQueryIsExplosionDangerAt(const Vector2& position)
+{
+	for (Actor* actor : actors)
+	{
+		if (!actor->IsTypeOf<Bubble>()) continue;
+		for (const Vector2& tile : actor->As<Bubble>()->GetPredictedDangerTiles())
+		{
+			if (tile == position) return true;
+		}
+	}
+	return false;
 }

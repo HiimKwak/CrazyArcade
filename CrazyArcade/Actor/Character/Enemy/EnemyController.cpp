@@ -3,62 +3,76 @@
 #include "../Component/State/StateComponent.h"
 #include "../Component/MovementComponent.h"
 #include "../Component/BubbleComponent.h"
-#include "AI/EnemyBrain.h"
+#include "../Component/StatsComponent.h"
+
+#include "AI/BTComposite.h"
+#include "AI/BTDecorator.h"
+#include "AI/BT/Conditions/IsMovingCondition.h"
+#include "AI/BT/Conditions/HasBubbleAmmoCondition.h"
+#include "AI/BT/Conditions/IsDangerNearbyCondition.h"
+#include "AI/BT/Conditions/IsPlayerAdjacentCondition.h"
+#include "AI/BT/Actions/FleeFromDangerAction.h"
+#include "AI/BT/Actions/AStarMoveAction.h"
+#include "AI/BT/Actions/PlaceBubbleAction.h"
+#include "AI/BT/Actions/PlaceBubbleNearBoxAction.h"
+
+using namespace engine;
 
 EnemyController::EnemyController(Enemy* owner)
-	: owner(owner), brain(nullptr)
+	: owner(owner)
 {
-	brain = new EnemyBrain();
-}
+	auto* movement = owner->GetComponent<MovementComponent>();
+	auto* stats    = owner->GetComponent<StatsComponent>();
+	auto* bubble   = owner->GetComponent<BubbleComponent>();
 
-EnemyController::~EnemyController()
-{
-	delete brain;
+	// movement tree
+	{
+		auto innerBoxSeq = std::make_unique<BTSequence>();
+		innerBoxSeq->AddChild(std::make_unique<HasBubbleAmmoCondition>(stats));
+		innerBoxSeq->AddChild(std::make_unique<PlaceBubbleNearBoxAction>(owner, movement, bubble));
+
+		auto innerSel = std::make_unique<BTSelector>();
+		innerSel->AddChild(std::make_unique<AStarMoveAction>(owner, movement));
+		innerSel->AddChild(std::move(innerBoxSeq));
+
+		auto cooldown = std::make_unique<BTCooldown>(0.5f);
+		cooldown->SetChild(std::move(innerSel));
+
+		auto dangerSeq = std::make_unique<BTSequence>();
+		dangerSeq->AddChild(std::make_unique<IsDangerNearbyCondition>(owner));
+		dangerSeq->AddChild(std::make_unique<FleeFromDangerAction>(owner, movement));
+
+		auto root = std::make_unique<BTSelector>();
+		root->AddChild(std::move(dangerSeq));
+		root->AddChild(std::make_unique<IsMovingCondition>(movement));
+		root->AddChild(std::move(cooldown));
+
+		movementTree = std::move(root);
+	}
+
+	// action tree
+	{
+		auto cooldown = std::make_unique<BTCooldown>(1.5f);
+		cooldown->SetChild(std::make_unique<PlaceBubbleAction>(bubble));
+
+		auto root = std::make_unique<BTSequence>();
+		root->AddChild(std::make_unique<IsPlayerAdjacentCondition>(owner));
+		root->AddChild(std::move(cooldown));
+
+		actionTree = std::move(root);
+	}
 }
 
 void EnemyController::Tick(float deltaTime)
 {
-	if (!owner)
-		return;
+	if (!owner) return;
 
 	auto stateComp = owner->GetComponent<StateComponent>();
-	if (!stateComp)
-		return;
+	if (!stateComp) return;
 
 	if (stateComp->CanMove())
-		HandleMovement(deltaTime);
+		movementTree->Execute(deltaTime);
 
 	if (stateComp->CanAct())
-		HandleAction(deltaTime);
-}
-
-void EnemyController::HandleMovement(float deltaTime)
-{
-	auto movementComp = owner->GetComponent<MovementComponent>();
-	if (!movementComp || movementComp->IsMoving())
-		return;
-
-	thinkTimer += deltaTime;
-	if (thinkTimer < 0.5f)
-		return;
-
-	thinkTimer = 0.0f;
-
-	Vector2 playerPos = owner->QueryPlayerPosition();
-	desiredDirection = brain ? brain->ChooseDirection(owner->GetPosition(), playerPos, owner) : Vector2::Zero;
-
-	if (desiredDirection != Vector2::Zero)
-		movementComp->RequestMove(desiredDirection);
-}
-
-void EnemyController::HandleAction(float deltaTime)
-{
-	shootTimer += deltaTime;
-	if (shootTimer < 3.0f)
-		return;
-
-	shootTimer = 0.0f;
-	auto bubbleComp = owner->GetComponent<BubbleComponent>();
-	if (bubbleComp)
-		bubbleComp->RequestGenerateBubble();
+		actionTree->Execute(deltaTime);
 }

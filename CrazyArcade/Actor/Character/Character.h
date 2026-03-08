@@ -28,6 +28,9 @@ public:
 
 	virtual bool OnQueryCanMove(const Vector2& from, const Vector2& to) = 0;
 	virtual Vector2 OnQueryPlayerPosition() = 0;
+	virtual bool OnQueryHasBubbleAt(const Vector2& position) = 0;
+	virtual bool OnQueryHasBoxAt(const Vector2& position) = 0;
+	virtual bool OnQueryIsExplosionDangerAt(const Vector2& position) = 0;
 };
 
 class Character : public Actor
@@ -50,6 +53,9 @@ public:
 
 	bool QueryCanMove(const Vector2& from, const Vector2& to) const;
 	Vector2 QueryPlayerPosition() const;
+	bool QueryHasBubbleAt(const Vector2& position) const;
+	bool QueryHasBoxAt(const Vector2& position) const;
+	bool QueryIsExplosionDangerAt(const Vector2& position) const;
 
 	void SetSpriteColor(Color color);
 	void ResetSpriteColor();

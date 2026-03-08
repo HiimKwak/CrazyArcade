@@ -50,6 +50,9 @@ private:
 	virtual bool OnRequestGenerateBubble(Character* character, const Vector2& position, int range) override;
 	virtual bool OnQueryCanMove(const Vector2& from, const Vector2& to) override;
 	virtual Vector2 OnQueryPlayerPosition() override;
+	virtual bool OnQueryHasBubbleAt(const Vector2& position) override;
+	virtual bool OnQueryHasBoxAt(const Vector2& position) override;
+	virtual bool OnQueryIsExplosionDangerAt(const Vector2& position) override;
 
 	bool CheckGameClear();
 	bool CheckGameOver();

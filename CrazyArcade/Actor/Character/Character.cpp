@@ -82,6 +82,33 @@ Vector2 Character::QueryPlayerPosition() const
 	return charDelegate->OnQueryPlayerPosition();
 }
 
+bool Character::QueryHasBubbleAt(const Vector2& position) const
+{
+	CharacterDelegate* charDelegate = GetDelegate();
+	if (!charDelegate)
+		return false;
+
+	return charDelegate->OnQueryHasBubbleAt(position);
+}
+
+bool Character::QueryHasBoxAt(const Vector2& position) const
+{
+	CharacterDelegate* charDelegate = GetDelegate();
+	if (!charDelegate)
+		return false;
+
+	return charDelegate->OnQueryHasBoxAt(position);
+}
+
+bool Character::QueryIsExplosionDangerAt(const Vector2& position) const
+{
+	CharacterDelegate* charDelegate = GetDelegate();
+	if (!charDelegate)
+		return false;
+
+	return charDelegate->OnQueryIsExplosionDangerAt(position);
+}
+
 void Character::SetSpriteColor(Color color)
 {
 	super::SetSpriteColor(color);

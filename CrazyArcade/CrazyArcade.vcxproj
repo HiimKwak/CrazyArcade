@@ -116,7 +116,6 @@
     <ClCompile Include="Actor\Environments\Item.cpp" />
     <ClCompile Include="Actor\Environments\Wall.cpp" />
     <ClCompile Include="Actor\Character\Component\Item\Shield\ShieldItem.cpp" />
-    <ClCompile Include="AI\EnemyBrain.cpp" />
     <ClCompile Include="Game\Game.cpp" />
     <ClCompile Include="Level\GameLevel.cpp" />
     <ClCompile Include="Level\MenuLevel.cpp" />
@@ -156,7 +155,17 @@
     <ClInclude Include="Actor\Character\Component\Item\Shield\ShieldItem.h" />
     <ClInclude Include="Actor\MoveSpeed.h" />
     <ClInclude Include="Actor\Environments\Wall.h" />
-    <ClInclude Include="AI\EnemyBrain.h" />
+    <ClInclude Include="AI\AStarPathfinder.h" />
+    <ClInclude Include="AI\BT\Actions\AStarMoveAction.h" />
+    <ClInclude Include="AI\BT\Actions\FleeFromDangerAction.h" />
+    <ClInclude Include="AI\BT\Actions\MoveRandomAction.h" />
+    <ClInclude Include="AI\BT\Actions\MoveToPlayerAction.h" />
+    <ClInclude Include="AI\BT\Actions\PlaceBubbleAction.h" />
+    <ClInclude Include="AI\BT\Actions\PlaceBubbleNearBoxAction.h" />
+    <ClInclude Include="AI\BT\Conditions\HasBubbleAmmoCondition.h" />
+    <ClInclude Include="AI\BT\Conditions\IsDangerNearbyCondition.h" />
+    <ClInclude Include="AI\BT\Conditions\IsMovingCondition.h" />
+    <ClInclude Include="AI\BT\Conditions\IsPlayerAdjacentCondition.h" />
     <ClInclude Include="Game\Game.h" />
     <ClInclude Include="Interface\IGameRuleManager.h" />
     <ClInclude Include="Level\GameLevel.h" />

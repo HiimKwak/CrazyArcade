@@ -2,6 +2,7 @@
 
 #include "Util/Timer.h"
 #include "Actor/Character/Character.h"
+#include <vector>
 
 using namespace engine;
 
@@ -12,6 +13,7 @@ class Bubble : public Actor
 public:
 	Bubble(const Vector2& newPosition, int explosionRange = 1);
 
+	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
 
 	bool IsExploded() const;
@@ -19,8 +21,11 @@ public:
 	inline Character* GetOwnerCharacter() const { return ownerCharacter; }
 	void SetOwnerCharacter(Character* actor) { ownerCharacter = actor; }
 
+	const std::vector<Vector2>& GetPredictedDangerTiles() const { return predictedDangerTiles; }
+
 private:
 	void Explode(float deltaTime);
+	void ComputeDangerTiles();
 
 	Character* ownerCharacter = nullptr;
 
@@ -28,5 +33,7 @@ private:
 	float countDown = 3.0f;
 	bool exploded = false;
 	int range;
+
+	std::vector<Vector2> predictedDangerTiles;
 };
 
