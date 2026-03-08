@@ -33,15 +33,24 @@ public:
 		};
 
 		std::vector<Vector2> path = AStarPathfinder::GetFullPath(start, target, canMove, ts);
-		enemy->SetDebugPath(path);
+
+		// 시각화: 박스를 무시한 A* 최단 경로를 표시
+		auto canMoveIgnoreBoxes = [this](const Vector2& from, const Vector2& to)
+		{
+			return enemy->QueryCanMove(from, to) || enemy->QueryHasBoxAt(to);
+		};
+		enemy->SetDebugPath(AStarPathfinder::GetFullPath(start, target, canMoveIgnoreBoxes, ts));
 
 		if (path.size() < 2)
 			return engine::BTStatus::Failure;
 
 		const Vector2& nextPos = path[1];
+		if (enemy->QueryIsExplosionDangerAt(nextPos))
+			return engine::BTStatus::Failure;
+
 		Vector2 dir(
-			(nextPos.x - start.x) / ts,
-			(nextPos.y - start.y) / ts
+			nextPos.x / ts - start.x / ts,
+			nextPos.y / ts - start.y / ts
 		);
 		movement->RequestMove(dir);
 		return engine::BTStatus::Success;

@@ -10,13 +10,7 @@
 
 using namespace engine;
 
-// 플레이어로 가는 경로를 막는 박스를 찾아 이동한 뒤 물풍선을 설치한다.
-//
-// 동작 순서 (매 틱):
-//   1. AStar(박스 투과)로 이상 경로를 탐색해 목표 배치 타일 계산
-//   2. 배치 타일에 도달했으면 → 물풍선 설치 시도 (내부 쿨다운 적용)
-//   3. 미도달 → AStar 경로로 한 칸 이동 후 Running 반환
-class PlaceBubbleNearBoxAction : public engine::BTNode
+class PlaceBubbleNearBoxAction : public BTNode
 {
 public:
 	PlaceBubbleNearBoxAction(Enemy* enemy, MovementComponent* movement, BubbleComponent* bubble)
@@ -24,12 +18,10 @@ public:
 	{
 	}
 
-	engine::BTStatus Execute(float deltaTime) override
+	BTStatus Execute(float) override
 	{
-		if (!enemy || !movement || !bubble) return engine::BTStatus::Failure;
-		if (movement->IsMoving()) return engine::BTStatus::Running;
-
-		cooldownElapsed += deltaTime;
+		if (!enemy || !movement || !bubble) return BTStatus::Failure;
+		if (movement->IsMoving()) return BTStatus::Running;
 
 		const Vector2 start  = enemy->GetPosition();
 		const Vector2 target = enemy->QueryPlayerPosition();
@@ -56,40 +48,34 @@ public:
 		);
 
 		if (placementTile == Vector2::Zero)
-			return engine::BTStatus::Failure;
+			return BTStatus::Failure;
 
 		// 배치 타일에 도달했으면 물풍선 설치
 		if (start == placementTile)
 		{
-			if (cooldownElapsed >= BUBBLE_COOLDOWN)
-			{
-				if (bubble->RequestGenerateBubble())
-				{
-					cooldownElapsed = 0.0f;
-					return engine::BTStatus::Success;
-				}
-			}
-			return engine::BTStatus::Running;
+			if (bubble->RequestGenerateBubble())
+				return BTStatus::Success;
+			return BTStatus::Running;
 		}
 
 		// 배치 타일까지 AStar로 한 칸 이동
 		Vector2 nextPos = AStarPathfinder::GetNextStep(start, placementTile, canMoveNormal, ts);
 		if (nextPos == Vector2::Zero)
-			return engine::BTStatus::Failure;
+			return BTStatus::Failure;
+
+		if (enemy->QueryIsExplosionDangerAt(nextPos))
+			return BTStatus::Failure;
 
 		Vector2 dir(
-			(nextPos.x - start.x) / ts,
-			(nextPos.y - start.y) / ts
+			nextPos.x / ts - start.x / ts,
+			nextPos.y / ts - start.y / ts
 		);
 		movement->RequestMove(dir);
-		return engine::BTStatus::Running;
+		return BTStatus::Running;
 	}
 
 private:
-	static constexpr float BUBBLE_COOLDOWN = 3.0f;
-
 	Enemy*            enemy;
 	MovementComponent* movement;
 	BubbleComponent*   bubble;
-	float cooldownElapsed = 0.0f;
 };

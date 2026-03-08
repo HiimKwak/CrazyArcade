@@ -1,6 +1,6 @@
 #include "Bubble.h"
 #include "Level/Level.h"
-#include "BubbleExplosion.h"
+#include "Actor/Effects/ExplosionTile.h"
 #include "Actor/Character/Player/Player.h"
 #include "Actor/Character/Component/BubbleComponent.h"
 #include "Interface/IGameRuleManager.h"
@@ -29,10 +29,9 @@ void Bubble::ComputeDangerTiles()
 	const int ts = Engine::Get().GetTileSize();
 	const Vector2 origin = GetPosition();
 
-	// 중심 타일은 항상 위험
+	predictedDangerTiles.clear();
 	predictedDangerTiles.push_back(origin);
 
-	// BubbleExplosion::PropagateInDirection 과 동일한 전파 로직
 	static const Vector2 dirs[4] = {
 		Vector2::Up, Vector2::Down, Vector2::Left, Vector2::Right
 	};
@@ -41,9 +40,9 @@ void Bubble::ComputeDangerTiles()
 		for (int i = 1; i <= range; ++i)
 		{
 			Vector2 tile = origin + dir * (i * ts);
-			if (!gm->CanExplosionPenetrate(tile)) break;  // 벽 → 타일 포함하지 않고 중단
+			if (!gm->CanExplosionPenetrate(tile)) break;
 			predictedDangerTiles.push_back(tile);
-			if (gm->HasBoxAt(tile)) break;                // 박스 → 타일 포함하고 중단
+			if (gm->HasBoxAt(tile)) break;
 		}
 	}
 }
@@ -70,10 +69,8 @@ void Bubble::Explode(float deltaTime)
 		int blink = 0;
 		if (remainingTime <= 1.0f)
 			blink = static_cast<int>(remainingTime * 10) % 2;
-
 		else if (remainingTime <= 2.0f)
 			blink = static_cast<int>(remainingTime * 5) % 2;
-
 		else if (remainingTime <= 3.0f)
 			blink = static_cast<int>(remainingTime * 3.33f) % 2;
 
@@ -84,7 +81,38 @@ void Bubble::Explode(float deltaTime)
 	exploded = true;
 
 	if (owner)
-		owner->AddNewActor(new BubbleExplosion(GetPosition(), range));
+	{
+		IGameRuleManager* gm = dynamic_cast<IGameRuleManager*>(owner);
+		const int ts = Engine::Get().GetTileSize();
+		const Vector2 origin = GetPosition();
+
+		// 중심 타일
+		ExplosionTile* center = new ExplosionTile(origin);
+		center->Activate();
+		owner->AddNewActor(center);
+
+		// 4방향 전파 (BubbleExplosion::PropagateInDirection과 동일한 차단 규칙)
+		static const Vector2 dirs[4] = {
+			Vector2::Up, Vector2::Right, Vector2::Down, Vector2::Left
+		};
+		for (const Vector2& dir : dirs)
+		{
+			for (int i = 1; i <= range; ++i)
+			{
+				Vector2 tilePos = origin + (i * ts) * dir;
+
+				if (gm && !gm->CanExplosionPenetrate(tilePos))
+					break;
+
+				ExplosionTile* tile = new ExplosionTile(tilePos);
+				tile->Activate();
+				owner->AddNewActor(tile);
+
+				if (gm && gm->HasBoxAt(tilePos))
+					break;
+			}
+		}
+	}
 
 	if (ownerCharacter)
 	{

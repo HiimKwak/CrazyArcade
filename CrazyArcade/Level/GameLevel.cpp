@@ -22,6 +22,7 @@
 #include <iostream>	
 #include <Windows.h>
 #include <string>
+#include <limits>
 
 using namespace engine;
 
@@ -72,6 +73,12 @@ GameLevel::~GameLevel()
 void GameLevel::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
+
+	const float blinkCycle = DEBUG_PATH_ON_TIME + DEBUG_PATH_OFF_TIME;
+	debugPathBlinkElapsed += deltaTime;
+	while (debugPathBlinkElapsed >= blinkCycle)
+		debugPathBlinkElapsed -= blinkCycle;
+	debugPathVisible = (debugPathBlinkElapsed < DEBUG_PATH_ON_TIME);
 
 	// ���� ���� ó��
 	if (CheckGameOver())
@@ -165,13 +172,15 @@ void GameLevel::ProcessCollision()
 		{
 			auto stateComp = player->GetComponent<StateComponent>();
 			if (stateComp && stateComp->GetCurrentState() == StateType::Normal)
-				player->OnDamaged();
+				stateComp->ChangeState(StateType::BubbleTrapped);
 		}
 
 		for (Enemy* enemy : enemies)
 		{
-			if (enemy->GetPosition() == explosionPos)
-				enemy->OnDamaged();
+			if (enemy->GetPosition() != explosionPos) continue;
+			auto stateComp = enemy->GetComponent<StateComponent>();
+			if (stateComp && stateComp->GetCurrentState() == StateType::Normal)
+				stateComp->ChangeState(StateType::BubbleTrapped);
 		}
 
 		for (Box* box : boxes)
@@ -183,16 +192,19 @@ void GameLevel::ProcessCollision()
 
 	for (Enemy* enemy : enemies)
 	{
-		if (player && enemy->GetPosition() == player->GetPosition())
-		{
-			auto playerState = player->GetComponent<StateComponent>();
-			auto enemyState = enemy->GetComponent<StateComponent>();
-			if (playerState && !playerState->IsDead() &&
-				enemyState && !enemyState->IsDead())
-			{
-				player->OnKilled();
-			}
-		}
+		if (!player || enemy->GetPosition() != player->GetPosition())
+			continue;
+
+		auto playerState = player->GetComponent<StateComponent>();
+		auto enemyState = enemy->GetComponent<StateComponent>();
+		if (!playerState || !enemyState || playerState->IsDead() || enemyState->IsDead())
+			continue;
+
+		// 상대가 BubbleTrapped 상태일 때 접촉하면 처치
+		if (playerState->IsBubbleTrapped())
+			player->OnKilled();
+		else if (enemyState->IsBubbleTrapped())
+			enemy->OnDamaged();
 	}
 }
 
@@ -200,14 +212,17 @@ void GameLevel::Draw()
 {
 	super::Draw();
 
-	// A* 경로 시각화 - 각 Enemy의 현재 계획 경로를 하늘색으로 표시
-	const int ts = Engine::Get().GetTileSize();
-	for (Actor* actor : actors)
+	// A* 경로 시각화 - 점멸 상태일 때만 흰색/낮은 우선순위로 표시
+	if (debugPathVisible)
 	{
-		if (!actor->IsTypeOf<Enemy>()) continue;
-		const auto& path = actor->As<Enemy>()->GetDebugPath();
-		for (int i = 1; i < static_cast<int>(path.size()); ++i)
-			Renderer::Get().SubmitRect(path[i].x, path[i].y, ts, ts, Color::Skyblue, 2);
+		const int ts = Engine::Get().GetTileSize();
+		for (Actor* actor : actors)
+		{
+			if (!actor->IsTypeOf<Enemy>()) continue;
+			const auto& path = actor->As<Enemy>()->GetDebugPath();
+			for (int i = 1; i < static_cast<int>(path.size()); ++i)
+				Renderer::Get().SubmitRect(path[i].x, path[i].y, ts, ts, Color::White, 4);
+		}
 	}
 
 	Player* player = nullptr;
@@ -257,7 +272,7 @@ void GameLevel::Draw()
 
 void GameLevel::LoadMap(const char* filename)
 {
-	/** ���� �ҷ����� **/
+	/** ���� �Ҷ����� **/
 	char path[2048] = {};
 	sprintf_s(path, 2048, "../Assets/%s", filename);
 
@@ -323,7 +338,10 @@ void GameLevel::LoadMap(const char* filename)
 	const int mapPixelW = mapWidth * ts;
 	const int mapPixelH = mapHeight * ts;
 
-	mapOrigin = Vector2((virtualGameW - mapPixelW) / 2, (virtualGameH - mapPixelH) / 2);
+	mapOrigin = Vector2(
+		((virtualGameW - mapPixelW) / 2 / ts) * ts,
+		((virtualGameH - mapPixelH) / 2 / ts) * ts
+	);
 	screenCenter = Vector2(virtualGameW / 2, virtualGameH / 2);
 
 	/** �о�� ���ڿ� �м�(parsing) **/
@@ -664,6 +682,9 @@ bool GameLevel::OnQueryHasBoxAt(const Vector2& position)
 
 bool GameLevel::OnQueryIsExplosionDangerAt(const Vector2& position)
 {
+	if (HasExplosionAt(position))
+		return true;
+
 	for (Actor* actor : actors)
 	{
 		if (!actor->IsTypeOf<Bubble>()) continue;
@@ -673,4 +694,27 @@ bool GameLevel::OnQueryIsExplosionDangerAt(const Vector2& position)
 		}
 	}
 	return false;
+}
+
+float GameLevel::OnQueryExplosionTimeAt(const Vector2& position)
+{
+	if (HasExplosionAt(position))
+		return 0.0f;
+
+	float minTime = std::numeric_limits<float>::infinity();
+	for (Actor* actor : actors)
+	{
+		if (!actor->IsTypeOf<Bubble>()) continue;
+		Bubble* bubble = actor->As<Bubble>();
+		for (const Vector2& tile : bubble->GetPredictedDangerTiles())
+		{
+			if (tile == position)
+			{
+				float t = bubble->GetRemainingTime();
+				if (t < minTime) minTime = t;
+				break;
+			}
+		}
+	}
+	return minTime;
 }

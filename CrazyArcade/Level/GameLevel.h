@@ -53,6 +53,7 @@ private:
 	virtual bool OnQueryHasBubbleAt(const Vector2& position) override;
 	virtual bool OnQueryHasBoxAt(const Vector2& position) override;
 	virtual bool OnQueryIsExplosionDangerAt(const Vector2& position) override;
+	virtual float OnQueryExplosionTimeAt(const Vector2& position) override;
 
 	bool CheckGameClear();
 	bool CheckGameOver();
@@ -70,5 +71,9 @@ private:
 	bool isClearWaiting = false;
 	Timer clearTimer;
 	float clearWaitTime = 10.0f;
+	float debugPathBlinkElapsed = 0.0f;
+	bool  debugPathVisible = false;
+	static constexpr float DEBUG_PATH_ON_TIME = 0.2f;
+	static constexpr float DEBUG_PATH_OFF_TIME = 1.2f;
 };
 

@@ -53,7 +53,15 @@ void Player::OnDamaged()
 {
 	auto stats = GetComponent<StatsComponent>();
 	if (stats)
+	{
 		stats->SetLives(stats->GetLives() - 1);
+		if (stats->GetLives() <= 0)
+		{
+			auto stateComp = GetComponent<StateComponent>();
+			if (stateComp)
+				stateComp->ChangeState(StateType::Dead);
+		}
+	}
 }
 
 void Player::OnKilled()

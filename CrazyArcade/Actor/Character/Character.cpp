@@ -1,4 +1,5 @@
 #include "Character.h"
+#include <limits>
 
 using namespace engine;
 
@@ -107,6 +108,15 @@ bool Character::QueryIsExplosionDangerAt(const Vector2& position) const
 		return false;
 
 	return charDelegate->OnQueryIsExplosionDangerAt(position);
+}
+
+float Character::QueryExplosionTimeAt(const Vector2& position) const
+{
+	CharacterDelegate* charDelegate = GetDelegate();
+	if (!charDelegate)
+		return std::numeric_limits<float>::infinity();
+
+	return charDelegate->OnQueryExplosionTimeAt(position);
 }
 
 void Character::SetSpriteColor(Color color)

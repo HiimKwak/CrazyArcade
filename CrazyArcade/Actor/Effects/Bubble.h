@@ -22,6 +22,7 @@ public:
 	void SetOwnerCharacter(Character* actor) { ownerCharacter = actor; }
 
 	const std::vector<Vector2>& GetPredictedDangerTiles() const { return predictedDangerTiles; }
+	float GetRemainingTime() const { return explodeTimer.GetRemainingTime(); }
 
 private:
 	void Explode(float deltaTime);
