@@ -54,12 +54,22 @@ bool GameLevel::IsInsideGameMap_World(const Vector2& worldPos) const
 
 GameLevel::GameLevel()
 {
+	worldQuery.BindActors(&actors);
+	collisionSystem.BindActors(&actors);
+	renderService.SetActors(&actors);
+	renderService.SetTileSize(Engine::Get().GetTileSize());
+	renderService.SetCurrentStage(1);
 	LoadMap("Stage1.txt");
 }
 
 GameLevel::GameLevel(int stage)
 {
+	worldQuery.BindActors(&actors);
+	collisionSystem.BindActors(&actors);
+	renderService.SetActors(&actors);
+	renderService.SetTileSize(Engine::Get().GetTileSize());
 	currentStage = stage;
+	renderService.SetCurrentStage(stage);
 
 	char filename[32];
 	sprintf_s(filename, 32, "Stage%d.txt", stage);
@@ -140,134 +150,19 @@ void GameLevel::Tick(float deltaTime)
 
 void GameLevel::ProcessCollision()
 {
-	std::vector<ExplosionTile*> activeExplosions;
-	Player* player = nullptr;
-	std::vector<Enemy*> enemies;
-	std::vector<Box*> boxes;
-
-	for (Actor* actor : actors)
-	{
-		if (actor->IsTypeOf<ExplosionTile>())
-		{
-			ExplosionTile* seg = actor->As<ExplosionTile>();
-			if (seg->IsActive())
-				activeExplosions.push_back(seg);
-		}
-
-		if (actor->IsTypeOf<Player>())
-			player = actor->As<Player>();
-
-		if (actor->IsTypeOf<Enemy>())
-			enemies.push_back(actor->As<Enemy>());
-
-		if (actor->IsTypeOf<Box>())
-			boxes.push_back(actor->As<Box>());
-	}
-
-	for (ExplosionTile* explosion : activeExplosions)
-	{
-		Vector2 explosionPos = explosion->GetPosition();
-
-		if (player && player->GetPosition() == explosionPos)
-		{
-			auto stateComp = player->GetComponent<StateComponent>();
-			if (stateComp && stateComp->GetCurrentState() == StateType::Normal)
-				stateComp->ChangeState(StateType::BubbleTrapped);
-		}
-
-		for (Enemy* enemy : enemies)
-		{
-			if (enemy->GetPosition() != explosionPos) continue;
-			auto stateComp = enemy->GetComponent<StateComponent>();
-			if (stateComp && stateComp->GetCurrentState() == StateType::Normal)
-				stateComp->ChangeState(StateType::BubbleTrapped);
-		}
-
-		for (Box* box : boxes)
-		{
-			if (box->GetPosition() == explosionPos)
-				box->OnDamaged();
-		}
-	}
-
-	for (Enemy* enemy : enemies)
-	{
-		if (!player || enemy->GetPosition() != player->GetPosition())
-			continue;
-
-		auto playerState = player->GetComponent<StateComponent>();
-		auto enemyState = enemy->GetComponent<StateComponent>();
-		if (!playerState || !enemyState || playerState->IsDead() || enemyState->IsDead())
-			continue;
-
-		// 상대가 BubbleTrapped 상태일 때 접촉하면 처치
-		if (playerState->IsBubbleTrapped())
-			player->OnKilled();
-		else if (enemyState->IsBubbleTrapped())
-			enemy->OnDamaged();
-	}
+	collisionSystem.ProcessCollisions();
 }
 
 void GameLevel::Draw()
 {
 	super::Draw();
 
-	// A* 경로 시각화 - 점멸 상태일 때만 흰색/낮은 우선순위로 표시
-	if (debugPathVisible)
-	{
-		const int ts = Engine::Get().GetTileSize();
-		for (Actor* actor : actors)
-		{
-			if (!actor->IsTypeOf<Enemy>()) continue;
-			const auto& path = actor->As<Enemy>()->GetDebugPath();
-			for (int i = 1; i < static_cast<int>(path.size()); ++i)
-				Renderer::Get().SubmitRect(path[i].x, path[i].y, ts, ts, Color::White, 4);
-		}
-	}
+	renderService.SetDebugPathVisible(debugPathVisible);
+	renderService.DrawDebugPathOverlay();
 
-	Player* player = nullptr;
-	for (Actor* actor : actors)
-	{
-		if (actor->IsTypeOf<Player>())
-		{
-			player = actor->As<Player>();
-			break;
-		}
-	}
-	const int gameH = Engine::Get().GetGameHeight();
-
-	wchar_t stageStr[32] = {};
-	swprintf_s(stageStr, 32, L"Stage: %d", currentStage);
-	Renderer::Get().Submit(stageStr, Vector2(0, 0), Color::White, 100);
-
-	Renderer::Get().Submit(L"---------------------------------------------", Vector2(0, gameH), Color::White, 100);
-	if (player)
-	{
-		wchar_t hpStr[128] = {};
-		auto statsComp = player->GetComponent<StatsComponent>();
-		swprintf_s(hpStr, 128, L"HP: %d", statsComp ? statsComp->GetLives() : 0);
-		Renderer::Get().Submit(hpStr, Vector2(0, gameH + 1), Color::Red, 100);
-
-		wchar_t bubbleStr[1024] = {};
-		auto statsComp2 = player->GetComponent<StatsComponent>();
-		swprintf_s(bubbleStr, 1024, L"Bubble: %d/%d  Range: %d",
-			statsComp2 ? statsComp2->GetBubbleAmmo() : 0,
-			statsComp2 ? statsComp2->GetMaxBubbleAmmo() : 0,
-			statsComp2 ? statsComp2->GetBubbleRange() : 0);
-		Renderer::Get().Submit(bubbleStr, Vector2(17, gameH + 1), Color::Yellow, 100);
-	}
-
-	Renderer::Get().Submit(L"ESC: Menu   Q: Quit", Vector2(0, gameH + 4), Color::Orange, 100);
-
-	if (CheckGameOver())
-	{
-		Renderer::Get().Submit(L"Game Over!", Vector2(0, gameH + 3), Color::Red, 100);
-	}
-
-	if (CheckGameClear())
-	{
-		Renderer::Get().Submit(L"Game Clear!", Vector2(0, gameH + 3), Color::White, 100);
-	}
+	Player* player = FindPlayer();
+	renderService.DrawHud(player);
+	renderService.DrawGameState(CheckGameOver(), CheckGameClear());
 }
 
 void GameLevel::LoadMap(const char* filename)
@@ -521,42 +416,22 @@ bool GameLevel::Push(const Vector2& pusherPos, const Vector2& targetPos)
 
 bool GameLevel::HasBubbleAt(const Vector2& position)
 {
-	for (Actor* actor : actors)
-	{
-		if (actor->IsTypeOf<Bubble>() && actor->GetPosition() == position)
-			return true;
-	}
-	return false;
+	return worldQuery.HasBubbleAt(position);
 }
 
 bool GameLevel::HasPlayerAt(const Vector2& position)
 {
-	for (Actor* actor : actors)
-	{
-		if (actor->IsTypeOf<Player>() && actor->GetPosition() == position)
-			return true;
-	}
-	return false;
+	return worldQuery.HasPlayerAt(position);
 }
 
 bool GameLevel::HasExplosionAt(const Vector2& position)
 {
-	for (Actor* actor : actors)
-	{
-		if (actor->IsTypeOf<ExplosionTile>() && actor->GetPosition() == position)
-			return true;
-	}
-	return false;
+	return worldQuery.HasExplosionAt(position);
 }
 
 bool GameLevel::HasBoxAt(const Vector2& position)
 {
-	for (Actor* actor : actors)
-	{
-		if (actor->IsTypeOf<Box>() && actor->GetPosition() == position)
-			return true;
-	}
-	return false;
+	return worldQuery.HasBoxAt(position);
 }
 
 void GameLevel::SendItemToPlayer(const Vector2& itemPos, ItemType itemType)
@@ -578,15 +453,7 @@ void GameLevel::SendItemToPlayer(const Vector2& itemPos, ItemType itemType)
 
 Vector2 GameLevel::GetPlayerPosition()
 {
-	for (Actor* actor : actors)
-	{
-		if (actor->IsTypeOf<Player>())
-		{
-			Player* player = actor->As<Player>();
-			return player->GetPosition();
-		}
-	}
-	return Vector2::Zero; // �÷��̾ ���� ���?
+	return worldQuery.GetPlayerPosition();
 }
 
 bool GameLevel::CanExplosionPenetrate(const Vector2& position)
@@ -682,39 +549,20 @@ bool GameLevel::OnQueryHasBoxAt(const Vector2& position)
 
 bool GameLevel::OnQueryIsExplosionDangerAt(const Vector2& position)
 {
-	if (HasExplosionAt(position))
-		return true;
-
-	for (Actor* actor : actors)
-	{
-		if (!actor->IsTypeOf<Bubble>()) continue;
-		for (const Vector2& tile : actor->As<Bubble>()->GetPredictedDangerTiles())
-		{
-			if (tile == position) return true;
-		}
-	}
-	return false;
+	return worldQuery.IsExplosionDangerAt(position);
 }
 
 float GameLevel::OnQueryExplosionTimeAt(const Vector2& position)
 {
-	if (HasExplosionAt(position))
-		return 0.0f;
+	return worldQuery.GetExplosionTimeAt(position);
+}
 
-	float minTime = std::numeric_limits<float>::infinity();
+Player* GameLevel::FindPlayer() const
+{
 	for (Actor* actor : actors)
 	{
-		if (!actor->IsTypeOf<Bubble>()) continue;
-		Bubble* bubble = actor->As<Bubble>();
-		for (const Vector2& tile : bubble->GetPredictedDangerTiles())
-		{
-			if (tile == position)
-			{
-				float t = bubble->GetRemainingTime();
-				if (t < minTime) minTime = t;
-				break;
-			}
-		}
+		if (actor->IsTypeOf<Player>())
+			return actor->As<Player>();
 	}
-	return minTime;
+	return nullptr;
 }

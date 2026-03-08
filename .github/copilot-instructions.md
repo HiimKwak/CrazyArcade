@@ -11,3 +11,4 @@
 ## Project-Specific Rules
 - Note that 'inline Vector2 GetCenterCoord(int)' is already declared in MenuLevel.h. Future explanations regarding MenuLevel will assume this declaration exists.
 - The CrazyArcade project is a C++ game project, refactored with the following folder structure: the Character folder contains subfolders State/, Component/, Controller/, and Playable/. Each folder includes an index.h file to implement the barrel export pattern.
+- Maintain a thin architecture for GameLevel, containing only map loader and Tick/Draw specifications, while separating detailed resource/state query logic into dedicated layers/services.

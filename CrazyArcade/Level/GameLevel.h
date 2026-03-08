@@ -4,6 +4,9 @@
 #include "Interface/IGameRuleManager.h"
 #include "Actor/Character/Character.h"
 #include "Util/Timer.h"
+#include "Level/Query/ActorWorldQueryService.h"
+#include "Level/Collision/ActorCollisionSystem.h"
+#include "Level/Render/GameRenderService.h"
 
 using namespace engine;
 
@@ -58,6 +61,12 @@ private:
 	bool CheckGameClear();
 	bool CheckGameOver();
 
+	void HandleCommonHotkeys();
+
+	Player* FindPlayer() const;
+
+	void CollectCollisionTargets();
+
 private:
 	Vector2 mapOrigin = Vector2::Zero;
 	Vector2 screenCenter;
@@ -75,5 +84,9 @@ private:
 	bool  debugPathVisible = false;
 	static constexpr float DEBUG_PATH_ON_TIME = 0.2f;
 	static constexpr float DEBUG_PATH_OFF_TIME = 1.2f;
+
+	ActorWorldQueryService worldQuery;
+	ActorCollisionSystem collisionSystem;
+	GameRenderService renderService;
 };
 
