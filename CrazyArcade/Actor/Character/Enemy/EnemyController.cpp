@@ -11,6 +11,7 @@
 #include "AI/BT/Conditions/IsDangerNearbyCondition.h"
 #include "AI/BT/Conditions/IsPlayerAdjacentCondition.h"
 #include "AI/BT/Actions/FleeFromDangerAction.h"
+#include "AI/BT/Actions/ExploitDangerAction.h"
 #include "AI/BT/Actions/AStarMoveAction.h"
 #include "AI/BT/Actions/PlaceBubbleAction.h"
 #include "AI/BT/Actions/PlaceBubbleNearBoxAction.h"
@@ -21,8 +22,8 @@ EnemyController::EnemyController(Enemy* owner)
 	: owner(owner)
 {
 	auto* movement = owner->GetComponent<MovementComponent>();
-	auto* stats    = owner->GetComponent<StatsComponent>();
-	auto* bubble   = owner->GetComponent<BubbleComponent>();
+	auto* stats = owner->GetComponent<StatsComponent>();
+	auto* bubble = owner->GetComponent<BubbleComponent>();
 
 	// movement tree
 	{
@@ -34,9 +35,13 @@ EnemyController::EnemyController(Enemy* owner)
 		innerSel->AddChild(std::make_unique<AStarMoveAction>(owner, movement));
 		innerSel->AddChild(std::move(innerBoxSeq));
 
+		auto dangerSel = std::make_unique<BTSelector>();
+		dangerSel->AddChild(std::make_unique<ExploitDangerAction>(owner, movement, bubble));
+		dangerSel->AddChild(std::make_unique<FleeFromDangerAction>(owner, movement));
+
 		auto dangerSeq = std::make_unique<BTSequence>();
 		dangerSeq->AddChild(std::make_unique<IsDangerNearbyCondition>(owner));
-		dangerSeq->AddChild(std::make_unique<FleeFromDangerAction>(owner, movement));
+		dangerSeq->AddChild(std::move(dangerSel));
 
 		auto root = std::make_unique<BTSelector>();
 		root->AddChild(std::move(dangerSeq));

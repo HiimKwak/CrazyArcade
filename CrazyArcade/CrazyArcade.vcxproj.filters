@@ -269,5 +269,11 @@
     <ClInclude Include="Level\Render\GameRenderService.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="AI\BT\Actions\ExploitDangerAction.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="AI\BT\Conditions\IsOnBubbleCondition.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

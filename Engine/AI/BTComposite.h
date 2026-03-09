@@ -18,7 +18,7 @@ namespace engine
 		std::vector<std::unique_ptr<BTNode>> children;
 	};
 
-	// 모든 자식이 Success여야 Success 반환
+	// every descendant needs to return success(&& condition)
 	class BTSequence : public BTComposite
 	{
 	public:
@@ -34,7 +34,7 @@ namespace engine
 		}
 	};
 
-	// 첫 번째 Success에서 즉시 반환
+	// success of a single child is sufficient(|| condition)
 	class BTSelector : public BTComposite
 	{
 	public:

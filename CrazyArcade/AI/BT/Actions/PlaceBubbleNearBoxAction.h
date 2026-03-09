@@ -23,34 +23,32 @@ public:
 		if (!enemy || !movement || !bubble) return BTStatus::Failure;
 		if (movement->IsMoving()) return BTStatus::Running;
 
-		const Vector2 start  = enemy->GetPosition();
+		const Vector2 start = enemy->GetPosition();
 		const Vector2 target = enemy->QueryPlayerPosition();
 		const int ts = Engine::Get().GetTileSize();
 
 		auto canMoveNormal = [this](const Vector2& f, const Vector2& t)
-		{
-			return enemy->QueryCanMove(f, t);
-		};
+			{
+				return enemy->QueryCanMove(f, t);
+			};
 		auto canMoveThroughBoxes = [this](const Vector2& f, const Vector2& t)
-		{
-			return enemy->QueryCanMove(f, t) || enemy->QueryHasBoxAt(t);
-		};
+			{
+				return enemy->QueryCanMove(f, t) || enemy->QueryHasBoxAt(t);
+			};
 		auto hasBox = [this](const Vector2& p)
-		{
-			return enemy->QueryHasBoxAt(p);
-		};
+			{
+				return enemy->QueryHasBoxAt(p);
+			};
 
-		// 배치 타일 계산 (이미 경로가 열려 있으면 Zero 반환)
 		Vector2 placementTile = AStarPathfinder::FindBoxPlacementTile(
 			start, target,
 			canMoveNormal, canMoveThroughBoxes, hasBox,
 			ts
 		);
 
-		if (placementTile == Vector2::Zero)
+		if (placementTile == Vector2::Zero) // no need to place bubbles
 			return BTStatus::Failure;
 
-		// 배치 타일에 도달했으면 물풍선 설치
 		if (start == placementTile)
 		{
 			if (bubble->RequestGenerateBubble())
@@ -58,7 +56,7 @@ public:
 			return BTStatus::Running;
 		}
 
-		// 배치 타일까지 AStar로 한 칸 이동
+		// move 1 tile step on the way to nearest box
 		Vector2 nextPos = AStarPathfinder::GetNextStep(start, placementTile, canMoveNormal, ts);
 		if (nextPos == Vector2::Zero)
 			return BTStatus::Failure;
@@ -75,7 +73,7 @@ public:
 	}
 
 private:
-	Enemy*            enemy;
+	Enemy* enemy;
 	MovementComponent* movement;
-	BubbleComponent*   bubble;
+	BubbleComponent* bubble;
 };

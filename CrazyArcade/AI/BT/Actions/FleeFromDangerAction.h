@@ -7,18 +7,12 @@
 #include "Actor/Character/Component/MovementComponent.h"
 #include "Actor/MoveSpeed.h"
 #include <queue>
-#include <map>
+#include <unordered_set>
 #include <utility>
 #include <limits>
 
 using namespace engine;
 
-// BFS로 예상 폭발 범위 바깥의 안전 지대까지 최단 경로를 계산해 한 칸 이동한다.
-//
-// 탈출 조건:
-//   - 이동할 타일이 폭발 범위 바깥이면 즉시 목적지로 확정
-//   - 이동할 타일이 폭발 범위 안이더라도 도착 예상 시간 < 폭발 잔여 시간이면 경유 허용
-//   - QueryCanMove가 물풍선 push를 포함하므로 push 경로도 자동 탐색
 class FleeFromDangerAction : public engine::BTNode
 {
 public:
@@ -45,70 +39,166 @@ public:
 
 private:
 	static constexpr int MAX_DEPTH = 8;
+	static constexpr float DANGER_TIME_MARGIN = 0.05f;
 
 	using TileKey = std::pair<int, int>;
+
+	struct TileKeyHash
+	{
+		size_t operator()(const TileKey& k) const noexcept
+		{
+			size_t h1 = std::hash<int>{}(k.first);
+			size_t h2 = std::hash<int>{}(k.second);
+			return h1 ^ (h2 << 1);
+		}
+	};
+
+	struct SearchNode
+	{
+		Vector2 pos;
+		Vector2 firstDir;
+		int depth;
+	};
 
 	TileKey Key(const Vector2& v, int ts) const
 	{
 		return { v.x / ts, v.y / ts };
 	}
 
-	// BFS: 가장 가까운 안전 타일(폭발 범위 바깥)로 가기 위한 첫 이동 방향 반환
-	// 위험 타일은 (도착 예상 시간 < 폭발 잔여 시간)일 때만 경유 허용
-	// 안전 지대가 없으면 Vector2::Zero 반환
-	Vector2 FindEscapeDir(const Vector2& start, int ts) const
+	int CountAdjacentBoxes(const Vector2& pos, int ts) const
 	{
 		static const Vector2 dirs[4] = {
 			Vector2::Up, Vector2::Down, Vector2::Left, Vector2::Right
 		};
 
-		std::queue<Vector2> q;
-		std::map<TileKey, Vector2> firstStep; // 각 타일까지의 start 기준 첫 방향
-		std::map<TileKey, int> depth;         // 해당 타일까지의 이동 횟수
+		int count = 0;
+		for (const Vector2& dir : dirs)
+		{
+			if (enemy->QueryHasBoxAt(pos + dir * ts))
+				++count;
+		}
+		return count;
+	}
 
-		firstStep[Key(start, ts)] = Vector2::Zero;
-		depth[Key(start, ts)] = 0;
-		q.push(start);
+	// returns the count of walkable and safe tiles
+	int CountSafeExits(const Vector2& pos, int ts) const
+	{
+		static const Vector2 dirs[4] = {
+			Vector2::Up, Vector2::Down, Vector2::Left, Vector2::Right
+		};
+
+		int count = 0;
+		for (const Vector2& dir : dirs)
+		{
+			Vector2 next = pos + dir * ts;
+			if (!enemy->QueryCanMove(pos, next))
+				continue;
+			if (!enemy->QueryIsExplosionDangerAt(next))
+				++count;
+		}
+		return count;
+	}
+
+	// evaluate if next tile is worthwhile to enter or not. returns false if no adjacent boxes and immediate exits
+	bool IsUsefulDangerTraversal(const Vector2& next, int ts) const
+	{
+		return CountAdjacentBoxes(next, ts) > 0 && CountSafeExits(next, ts) > 0;
+	}
+
+	// returns actual amount of worth enterting danger site
+	int EvaluateSafeTileValue(const Vector2& pos, int ts) const
+	{
+		return CountSafeExits(pos, ts) * 10 + CountAdjacentBoxes(pos, ts);
+	}
+
+	bool CanTraverseDangerTile(const Vector2& next, int nextDepth, int ts, bool forceEscapeFromPlacedBubble) const
+	{
+		if (!forceEscapeFromPlacedBubble && !IsUsefulDangerTraversal(next, ts))
+			return false;
+
+		float arrivalTime = nextDepth * MoveSpeed::NORMAL;
+		float explosionTime = enemy->QueryExplosionTimeAt(next);
+		return arrivalTime + DANGER_TIME_MARGIN < explosionTime;
+	}
+
+	// Search the nearest safe tile with BFS
+	Vector2 SearchEscapeDir(
+		const Vector2& start, int ts, bool allowTimedDangerTraversal, bool forceEscapeFromPlacedBubble
+	) const
+	{
+		static const Vector2 dirs[4] = {
+			Vector2::Up, Vector2::Down, Vector2::Left, Vector2::Right
+		};
+
+		std::queue<SearchNode> q;
+		std::unordered_set<TileKey, TileKeyHash> visited;
+
+		q.push({ start, Vector2::Zero, 0 });
+		visited.insert(Key(start, ts));
+
+		Vector2 bestDir = Vector2::Zero;
+		int bestDepth = (std::numeric_limits<int>::max)();
+		int bestValue = (std::numeric_limits<int>::min)();
 
 		while (!q.empty())
 		{
-			Vector2 cur = q.front();
+			SearchNode node = q.front();
 			q.pop();
 
-			int d = depth[Key(cur, ts)];
-			if (d >= MAX_DEPTH) continue;
+			if (node.depth >= MAX_DEPTH) continue;
+			if (node.depth > bestDepth) continue;
 
 			for (const Vector2& dir : dirs)
 			{
-				Vector2 next = cur + dir * ts;
-				TileKey nk   = Key(next, ts);
+				Vector2 next = node.pos + dir * ts;
+				TileKey nk = Key(next, ts);
 
-				if (firstStep.count(nk))           
-					continue; // 이미 방문
-				if (!enemy->QueryCanMove(cur, next)) 
+				if (visited.find(nk) != visited.end())
+					continue;
+				if (!enemy->QueryCanMove(node.pos, next))
 					continue;
 
-				// start에서 처음 취한 방향 기록
-				Vector2 fd = (Key(cur, ts) == Key(start, ts))
-					? dir
-					: firstStep[Key(cur, ts)];
+				visited.insert(nk);
 
-				firstStep[nk] = fd;
-				depth[nk]     = d + 1;
+				Vector2 fd = (node.firstDir == Vector2::Zero)
+					? dir
+					: node.firstDir;
+				int nextDepth = node.depth + 1;
 
 				if (!enemy->QueryIsExplosionDangerAt(next))
-					return fd;
-				
-				// 위험 타일: 도착 예상 시간 < 폭발 잔여 시간이면 경유 허용
-				// todo: 경유 허용 지역이어도 이득이 아니면 경유하지 않게 설정
-				float arrivalTime   = (d + 1) * MoveSpeed::NORMAL;
-				float explosionTime = enemy->QueryExplosionTimeAt(next);
-				if (arrivalTime < explosionTime)
-					q.push(next);
+				{
+					int candValue = EvaluateSafeTileValue(next, ts);
+					if (nextDepth < bestDepth || (nextDepth == bestDepth && candValue > bestValue))
+					{
+						bestDepth = nextDepth;
+						bestValue = candValue;
+						bestDir = fd;
+					}
+					continue;
+				}
+
+				// danger traverse guard(1. check whether allowed 2. judge whether it's worthwhile)
+				if (!allowTimedDangerTraversal)
+					continue;
+				if (!CanTraverseDangerTile(next, nextDepth, ts, forceEscapeFromPlacedBubble))
+					continue;
+
+				q.push({ next, fd, nextDepth });
 			}
 		}
 
-		return Vector2::Zero;
+		return bestDir;
+	}
+
+	Vector2 FindEscapeDir(const Vector2& start, int ts) const
+	{
+		const bool forceEscapeFromPlacedBubble = enemy->QueryHasBubbleAt(start);
+
+		Vector2 safeOnlyDir = SearchEscapeDir(start, ts, false, forceEscapeFromPlacedBubble);
+		if (safeOnlyDir != Vector2::Zero)
+			return safeOnlyDir;
+
+		return SearchEscapeDir(start, ts, true, forceEscapeFromPlacedBubble);
 	}
 
 	Enemy* enemy;

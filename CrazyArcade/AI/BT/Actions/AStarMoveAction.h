@@ -9,8 +9,6 @@
 
 using namespace engine;
 
-// A* 최단 경로로 플레이어를 향해 한 칸 이동하고, 경로를 Enemy에 저장해 시각화한다.
-// 경로가 존재하지 않으면(박스에 막힌 경우) Failure 반환.
 class AStarMoveAction : public engine::BTNode
 {
 public:
@@ -23,25 +21,24 @@ public:
 	{
 		if (!enemy || !movement) return engine::BTStatus::Failure;
 
-		const Vector2 start  = enemy->GetPosition();
+		const Vector2 start = enemy->GetPosition();
 		const Vector2 target = enemy->QueryPlayerPosition();
 		const int ts = Engine::Get().GetTileSize();
 
 		auto canMove = [this](const Vector2& from, const Vector2& to)
-		{
-			return enemy->QueryCanMove(from, to);
-		};
+			{
+				return enemy->QueryCanMove(from, to);
+			};
 
 		std::vector<Vector2> path = AStarPathfinder::GetFullPath(start, target, canMove, ts);
 
-		// 시각화: 박스를 무시한 A* 최단 경로를 표시
 		auto canMoveIgnoreBoxes = [this](const Vector2& from, const Vector2& to)
-		{
-			return enemy->QueryCanMove(from, to) || enemy->QueryHasBoxAt(to);
-		};
-		enemy->SetDebugPath(AStarPathfinder::GetFullPath(start, target, canMoveIgnoreBoxes, ts));
+			{
+				return enemy->QueryCanMove(from, to) || enemy->QueryHasBoxAt(to);
+			};
+		enemy->SetDebugPath(AStarPathfinder::GetFullPath(start, target, canMoveIgnoreBoxes, ts)); // show ideal shortest path
 
-		if (path.size() < 2)
+		if (path.size() < 2) // 1 element means nowhere to move except where it is
 			return engine::BTStatus::Failure;
 
 		const Vector2& nextPos = path[1];

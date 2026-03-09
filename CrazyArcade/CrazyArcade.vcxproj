@@ -157,6 +157,7 @@
     <ClInclude Include="Actor\Environments\Wall.h" />
     <ClInclude Include="AI\AStarPathfinder.h" />
     <ClInclude Include="AI\BT\Actions\AStarMoveAction.h" />
+    <ClInclude Include="AI\BT\Actions\ExploitDangerAction.h" />
     <ClInclude Include="AI\BT\Actions\FleeFromDangerAction.h" />
     <ClInclude Include="AI\BT\Actions\MoveRandomAction.h" />
     <ClInclude Include="AI\BT\Actions\MoveToPlayerAction.h" />
@@ -165,6 +166,7 @@
     <ClInclude Include="AI\BT\Conditions\HasBubbleAmmoCondition.h" />
     <ClInclude Include="AI\BT\Conditions\IsDangerNearbyCondition.h" />
     <ClInclude Include="AI\BT\Conditions\IsMovingCondition.h" />
+    <ClInclude Include="AI\BT\Conditions\IsOnBubbleCondition.h" />
     <ClInclude Include="AI\BT\Conditions\IsPlayerAdjacentCondition.h" />
     <ClInclude Include="Game\Game.h" />
     <ClInclude Include="Interface\IGameRuleManager.h" />

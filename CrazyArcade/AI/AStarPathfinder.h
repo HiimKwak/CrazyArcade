@@ -11,17 +11,13 @@
 
 using namespace engine;
 
-// A* 기반 경로 탐색 유틸리티
-// 모든 메서드는 정적(static)이며 상태를 갖지 않는다.
-// 휴리스틱: 맨해튼 거리 (4방향 격자 이동에 대해 admissible & consistent)
 class AStarPathfinder
 {
 public:
 	using CanMoveFn = std::function<bool(const Vector2& from, const Vector2& to)>;
-	using HasAtFn   = std::function<bool(const Vector2& pos)>;
+	using HasAtFn = std::function<bool(const Vector2& pos)>;
 
-	// 실제 이동 가능한 최단 경로의 다음 타일 위치를 반환한다.
-	// 경로가 없거나 start == target 이면 Vector2::Zero 반환.
+	// Get next tile from shortest Astar path
 	static Vector2 GetNextStep(
 		const Vector2& start,
 		const Vector2& target,
@@ -30,12 +26,11 @@ public:
 	{
 		if (start == target) return Vector2::Zero;
 
-		TileMap parent = RunAStar(start, target, canMove, tileSize);
-		return BacktrackNextStep(start, target, parent, tileSize);
+		TileMap parent = RunAStar(start, target, canMove, tileSize); // get astar path map
+		return BacktrackNextStep(start, target, parent, tileSize); // get next tile from astar path map
 	}
 
-	// start 부터 target 까지의 전체 경로(타일 위치 목록)를 반환한다.
-	// 경로가 없으면 빈 벡터를 반환한다.
+	// returns a shortest Astar path 2D vector list
 	static std::vector<Vector2> GetFullPath(
 		const Vector2& start,
 		const Vector2& target,
@@ -48,9 +43,6 @@ public:
 		return BuildPath(start, target, parent, tileSize);
 	}
 
-	// 박스를 투과하는 이상 경로(planning path) 상에서
-	// 첫 번째 박스 바로 앞(= 물풍선을 놓을 타일)을 반환한다.
-	// 이미 플레이어에게 도달 가능하거나 경로를 찾지 못하면 Vector2::Zero 반환.
 	static Vector2 FindBoxPlacementTile(
 		const Vector2& start,
 		const Vector2& target,
@@ -59,22 +51,22 @@ public:
 		const HasAtFn& hasBox,
 		int tileSize)
 	{
-		// 이미 실제 경로가 있으면 박스 제거 불필요
 		{
+			// exit the process if character can move towards target without destroying boxes
 			TileMap parent = RunAStar(start, target, canMoveNormal, tileSize);
 			if (parent.count(ToKey(target, tileSize)) > 0)
 				return Vector2::Zero;
 		}
 
-		// 박스 투과 A*로 이상 경로 탐색
+		// find shortest destructible path
 		TileMap parent = RunAStar(start, target, canMoveThroughBoxes, tileSize);
-		if (parent.count(ToKey(target, tileSize)) == 0)
+		if (parent.count(ToKey(target, tileSize)) == 0) // no destructible tiles around
 			return Vector2::Zero;
 
-		// 경로 재구성 (start → target 순서)
+		// set new path towards target
 		std::vector<Vector2> path = BuildPath(start, target, parent, tileSize);
 
-		// 경로상 첫 번째 박스 앞 타일 반환
+		// return the first box on the valid path
 		for (int i = 1; i < static_cast<int>(path.size()); ++i)
 		{
 			if (hasBox(path[i]))
@@ -90,7 +82,7 @@ private:
 
 	static TileKey ToKey(const Vector2& v, int ts)
 	{
-		return { v.x / ts, v.y / ts };
+		return { v.x / ts, v.y / ts }; // returns virtual world coords
 	}
 
 	static Vector2 FromKey(const TileKey& k, int ts)
@@ -108,7 +100,7 @@ private:
 
 	static int Heuristic(const TileKey& a, const TileKey& b)
 	{
-		return std::abs(a.first - b.first) + std::abs(a.second - b.second);
+		return std::abs(a.first - b.first) + std::abs(a.second - b.second); // manhattan distance
 	}
 
 	static TileMap RunAStar(
@@ -117,14 +109,14 @@ private:
 		const CanMoveFn& canMove,
 		int tileSize)
 	{
-		using Node = std::pair<int, TileKey>; // (f = g + h, key)
+		using Node = std::pair<int, TileKey>; // (cost(f = g + h), key)
 		std::priority_queue<Node, std::vector<Node>, std::greater<Node>> openSet;
 
 		TileMap parent;
 		std::map<TileKey, int> gScore;
 		std::set<TileKey> closed;
 
-		auto startKey  = ToKey(start, tileSize);
+		auto startKey = ToKey(start, tileSize);
 		auto targetKey = ToKey(target, tileSize);
 
 		gScore[startKey] = 0;
@@ -147,12 +139,14 @@ private:
 			for (int i = 0; i < 4; ++i)
 			{
 				Vector2 currentPos = FromKey(current, tileSize);
-				Vector2 nextPos    = currentPos + Dirs()[i] * tileSize;
-				auto    nextKey    = ToKey(nextPos, tileSize);
+				Vector2 nextPos = currentPos + Dirs()[i] * tileSize;
+				auto    nextKey = ToKey(nextPos, tileSize);
 
+				// filter visited or blocked tiles
 				if (closed.count(nextKey)) continue;
 				if (!canMove(currentPos, nextPos)) continue;
 
+				// set cheapest tile around character and put in openSet
 				int newG = gScore[current] + 1;
 				auto it = gScore.find(nextKey);
 				if (it == gScore.end() || newG < it->second)
@@ -178,7 +172,7 @@ private:
 			return Vector2::Zero;
 
 		auto startKey = ToKey(start, tileSize);
-		auto current  = targetKey;
+		auto current = targetKey;
 
 		while (true)
 		{
@@ -189,6 +183,7 @@ private:
 		}
 	}
 
+	// converts a tilemap to a 2D vector list
 	static std::vector<Vector2> BuildPath(
 		const Vector2& start,
 		const Vector2& target,
