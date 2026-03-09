@@ -215,37 +215,37 @@
     <ClInclude Include="Actor\Character\Component\index.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BT\Conditions\IsMovingCondition.h">
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\IsMovingCondition.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BT\Conditions\HasBubbleAmmoCondition.h">
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\HasBubbleAmmoCondition.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BT\Actions\MoveToPlayerAction.h">
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\MoveToPlayerAction.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BT\Actions\MoveRandomAction.h">
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\MoveRandomAction.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BT\Actions\PlaceBubbleAction.h">
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\PlaceBubbleAction.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BT\Conditions\IsDangerNearbyCondition.h">
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\IsDangerNearbyCondition.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BT\Conditions\IsPlayerAdjacentCondition.h">
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\IsPlayerAdjacentCondition.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BT\Actions\FleeFromDangerAction.h">
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\FleeFromDangerAction.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BT\Actions\PlaceBubbleNearBoxAction.h">
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\PlaceBubbleNearBoxAction.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AI\AStarPathfinder.h">
+    <ClInclude Include="Actor\Character\Enemy\AI\AStarPathfinder.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BT\Actions\AStarMoveAction.h">
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\AStarMoveAction.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Level\Query\WorldQueryService.h">
@@ -269,10 +269,7 @@
     <ClInclude Include="Level\Render\GameRenderService.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="AI\BT\Actions\ExploitDangerAction.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="AI\BT\Conditions\IsOnBubbleCondition.h">
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\ExploitDangerAction.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

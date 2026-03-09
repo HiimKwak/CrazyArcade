@@ -6,17 +6,19 @@
 #include "../Component/StatsComponent.h"
 
 #include "AI/BTComposite.h"
-#include "AI/BT/Conditions/IsMovingCondition.h"
-#include "AI/BT/Conditions/HasBubbleAmmoCondition.h"
-#include "AI/BT/Conditions/IsDangerNearbyCondition.h"
-#include "AI/BT/Conditions/IsPlayerAdjacentCondition.h"
-#include "AI/BT/Actions/FleeFromDangerAction.h"
-#include "AI/BT/Actions/ExploitDangerAction.h"
-#include "AI/BT/Actions/AStarMoveAction.h"
-#include "AI/BT/Actions/PlaceBubbleAction.h"
-#include "AI/BT/Actions/PlaceBubbleNearBoxAction.h"
+
+#include "./AI/BT/Conditions/IsMovingCondition.h"
+#include "./AI/BT/Conditions/HasBubbleAmmoCondition.h"
+#include "./AI/BT/Conditions/IsDangerNearbyCondition.h"
+#include "./AI/BT/Conditions/IsPlayerAdjacentCondition.h"
+#include "./AI/BT/Actions/FleeFromDangerAction.h"
+#include "./AI/BT/Actions/ExploitDangerAction.h"
+#include "./AI/BT/Actions/AStarMoveAction.h"
+#include "./AI/BT/Actions/PlaceBubbleAction.h"
+#include "./AI/BT/Actions/PlaceBubbleNearBoxAction.h"
 
 using namespace engine;
+using namespace enemy_ai;
 
 EnemyController::EnemyController(Enemy* owner)
 	: owner(owner)
