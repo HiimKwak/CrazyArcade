@@ -272,5 +272,8 @@
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\ExploitDangerAction.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\IsPlayerInAreaCondition.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

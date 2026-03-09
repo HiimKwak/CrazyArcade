@@ -119,6 +119,15 @@ float Character::QueryExplosionTimeAt(const Vector2& position) const
 	return charDelegate->OnQueryExplosionTimeAt(position);
 }
 
+bool Character::QueryIsPlayerBubbleTrapped() const
+{
+	CharacterDelegate* charDelegate = GetDelegate();
+	if (!charDelegate)
+		return false;
+
+	return charDelegate->OnQueryIsPlayerBubbleTrapped();
+}
+
 void Character::SetSpriteColor(Color color)
 {
 	super::SetSpriteColor(color);

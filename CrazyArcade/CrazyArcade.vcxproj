@@ -136,6 +136,7 @@
     <ClInclude Include="Actor\Character\Component\State\StateType.h" />
     <ClInclude Include="Actor\Character\Component\State\IState.h" />
     <ClInclude Include="Actor\Character\Component\State\Normal\NormalState.h" />
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\IsPlayerInAreaCondition.h" />
     <ClInclude Include="Actor\Environments\Box.h" />
     <ClInclude Include="Actor\Effects\Bubble.h" />
     <ClInclude Include="Actor\Effects\BubbleExplosion.h" />

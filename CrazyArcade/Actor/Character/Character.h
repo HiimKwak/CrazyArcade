@@ -32,6 +32,7 @@ public:
 	virtual bool OnQueryHasBoxAt(const Vector2& position) = 0;
 	virtual bool OnQueryIsExplosionDangerAt(const Vector2& position) = 0;
 	virtual float OnQueryExplosionTimeAt(const Vector2& position) = 0;
+	virtual bool OnQueryIsPlayerBubbleTrapped() = 0;
 };
 
 class Character : public Actor
@@ -58,6 +59,7 @@ public:
 	bool QueryHasBoxAt(const Vector2& position) const;
 	bool QueryIsExplosionDangerAt(const Vector2& position) const;
 	float QueryExplosionTimeAt(const Vector2& position) const;
+	bool QueryIsPlayerBubbleTrapped() const;
 
 	void SetSpriteColor(Color color);
 	void ResetSpriteColor();

@@ -557,6 +557,11 @@ float GameLevel::OnQueryExplosionTimeAt(const Vector2& position)
 	return worldQuery.GetExplosionTimeAt(position);
 }
 
+bool GameLevel::OnQueryIsPlayerBubbleTrapped()
+{
+	return worldQuery.IsPlayerBubbleTrapped();
+}
+
 Player* GameLevel::FindPlayer() const
 {
 	for (Actor* actor : actors)

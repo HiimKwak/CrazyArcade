@@ -7,6 +7,7 @@
 #include "Actor/Character/Player/Player.h"
 #include "Actor/Character/Enemy/Enemy.h"
 #include "Actor/Environments/Box.h"
+#include "Actor/Character/Component/State/StateComponent.h"
 
 #include <limits>
 
@@ -142,6 +143,20 @@ public:
 			}
 		}
 		return minTime;
+	}
+
+	bool IsPlayerBubbleTrapped() const
+	{
+		if (!actors) return false;
+		for (Actor* actor : *actors)
+		{
+			if (!actor->IsTypeOf<Player>())
+				continue;
+
+			auto* stateComp = actor->As<Player>()->GetComponent<StateComponent>();
+			return stateComp && stateComp->IsBubbleTrapped();
+		}
+		return false;
 	}
 
 private:

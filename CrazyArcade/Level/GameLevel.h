@@ -57,6 +57,7 @@ private:
 	virtual bool OnQueryHasBoxAt(const Vector2& position) override;
 	virtual bool OnQueryIsExplosionDangerAt(const Vector2& position) override;
 	virtual float OnQueryExplosionTimeAt(const Vector2& position) override;
+	virtual bool OnQueryIsPlayerBubbleTrapped() override;
 
 	bool CheckGameClear();
 	bool CheckGameOver();
