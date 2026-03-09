@@ -154,7 +154,7 @@
     <ClInclude Include="Actor\Character\Component\Item\ItemType.h" />
     <ClInclude Include="Actor\Character\Component\Item\IUsableItem.h" />
     <ClInclude Include="Actor\Character\Component\Item\Shield\ShieldItem.h" />
-    <ClInclude Include="Actor\MoveSpeed.h" />
+    <ClInclude Include="Actor\Character\MoveSpeed.h" />
     <ClInclude Include="Actor\Environments\Wall.h" />
     <ClInclude Include="Actor\Character\Enemy\AI\AStarPathfinder.h" />
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\AStarMoveAction.h" />
@@ -169,13 +169,14 @@
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\IsMovingCondition.h" />
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\IsPlayerAdjacentCondition.h" />
     <ClInclude Include="Game\Game.h" />
-    <ClInclude Include="Interface\IGameRuleManager.h" />
+    <ClInclude Include="Interface\ActorType.h" />
+    <ClInclude Include="Interface\IWorldQueryProvider.h" />
+    <ClInclude Include="Interface\IWorldQueryService.h" />
     <ClInclude Include="Level\Collision\ActorCollisionSystem.h" />
     <ClInclude Include="Level\GameLevel.h" />
     <ClInclude Include="Level\Loader\FileMapLoader.h" />
     <ClInclude Include="Level\Loader\MapLoader.h" />
     <ClInclude Include="Level\MenuLevel.h" />
-    <ClInclude Include="Level\Query\ActorWorldQueryService.h" />
     <ClInclude Include="Level\Query\WorldQueryService.h" />
     <ClInclude Include="Level\Render\GameRenderService.h" />
     <ClInclude Include="Level\Render\RenderService.h" />

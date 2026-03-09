@@ -25,6 +25,7 @@ public:
 
 private:
 	std::unique_ptr<IUsableItem> CreateUsableItem(ItemType type);
+	void ApplyPassiveItemEffect(ItemType type);
 
 	std::map<ItemType, std::unique_ptr<IUsableItem>> usableItems;
 	std::vector<std::unique_ptr<IEffect>> activeEffects;

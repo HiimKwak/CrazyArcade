@@ -3,7 +3,8 @@
 #include "../Effects/ExplosionTile.h"
 #include "Level/Level.h"
 #include "Util/Util.h"
-#include "Interface/IGameRuleManager.h"
+#include "Interface/IWorldQueryProvider.h"
+#include "Interface/IWorldQueryService.h"
 
 Item::Item(const Vector2& position)
 	: super(L"?", position, Color::White)
@@ -48,27 +49,28 @@ Item::Item(const Vector2& position, ItemType type)
 void Item::BeginPlay()
 {
 	super::BeginPlay();
-	gameRuleManager = dynamic_cast<IGameRuleManager*>(GetOwner());
+	IWorldQueryProvider* provider = dynamic_cast<IWorldQueryProvider*>(GetOwner());
+	worldQueryService = provider ? provider->GetWorldQueryService() : nullptr;
 }
 
 void Item::Tick(float deltaTime)
 {
 	super::Tick(deltaTime);
 
-	if (!owner)
+	if (!owner || !worldQueryService)
 		return;
 
 	Vector2 position = GetPosition();
 
-	if (gameRuleManager->HasExplosionAt(position))
+	if (worldQueryService->HasExplosionAt(position))
 	{
 		Destroy();
 		return;
 	}
 
-	if (gameRuleManager->HasPlayerAt(position))
+	if (worldQueryService->HasActorAt(position, ActorType::Character))
 	{
-		gameRuleManager->SendItemToPlayer(position, itemType);
+		worldQueryService->SendItemToCharacter(position, itemType);
 		Destroy();
 		return;
 	}

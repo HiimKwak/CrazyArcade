@@ -8,7 +8,7 @@
 #include "../Component/BubbleComponent.h"
 #include "../Component/Item/ItemComponent.h"
 #include "../Component/State/StateComponent.h"
-#include "Actor/MoveSpeed.h"
+#include "../MoveSpeed.h"
 
 using namespace engine;
 
@@ -24,6 +24,7 @@ Enemy::Enemy(const Vector2& position)
 	stats->SetBubbleRange(1);
 
 	AddComponent<InventoryComponent>();
+	AddComponent<ItemComponent>();
 	AddComponent<MovementComponent>();
 	AddComponent<StateComponent>();
 	AddComponent<BubbleComponent>();

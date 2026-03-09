@@ -8,7 +8,7 @@
 #include "../Component/BubbleComponent.h"
 #include "../Component/Item/ItemComponent.h"
 #include "../Component/State/StateComponent.h"
-#include "Actor/MoveSpeed.h"
+#include "../MoveSpeed.h"
 
 using namespace engine;
 

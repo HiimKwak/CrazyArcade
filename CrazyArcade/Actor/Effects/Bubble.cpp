@@ -3,7 +3,8 @@
 #include "Actor/Effects/ExplosionTile.h"
 #include "Actor/Character/Player/Player.h"
 #include "Actor/Character/Component/BubbleComponent.h"
-#include "Interface/IGameRuleManager.h"
+#include "Interface/IWorldQueryProvider.h"
+#include "Interface/IWorldQueryService.h"
 #include "Engine/Engine.h"
 
 Bubble::Bubble(const Vector2& newPosition, int explosionRange)
@@ -23,8 +24,9 @@ void Bubble::BeginPlay()
 
 void Bubble::ComputeDangerTiles()
 {
-	IGameRuleManager* gm = dynamic_cast<IGameRuleManager*>(owner);
-	if (!gm) return;
+	IWorldQueryProvider* provider = dynamic_cast<IWorldQueryProvider*>(owner);
+	IWorldQueryService* worldQuery = provider ? provider->GetWorldQueryService() : nullptr;
+	if (!worldQuery) return;
 
 	const int ts = Engine::Get().GetTileSize();
 	const Vector2 origin = GetPosition();
@@ -40,9 +42,9 @@ void Bubble::ComputeDangerTiles()
 		for (int i = 1; i <= range; ++i)
 		{
 			Vector2 tile = origin + dir * (i * ts);
-			if (!gm->CanExplosionPenetrate(tile)) break;
+			if (!worldQuery->CanExplosionPenetrate(tile)) break;
 			predictedDangerTiles.push_back(tile);
-			if (gm->HasBoxAt(tile)) break;
+			if (worldQuery->HasBoxAt(tile)) break;
 		}
 	}
 }
@@ -82,7 +84,8 @@ void Bubble::Explode(float deltaTime)
 
 	if (owner)
 	{
-		IGameRuleManager* gm = dynamic_cast<IGameRuleManager*>(owner);
+		IWorldQueryProvider* provider = dynamic_cast<IWorldQueryProvider*>(owner);
+		IWorldQueryService* worldQuery = provider ? provider->GetWorldQueryService() : nullptr;
 		const int ts = Engine::Get().GetTileSize();
 		const Vector2 origin = GetPosition();
 
@@ -101,14 +104,14 @@ void Bubble::Explode(float deltaTime)
 			{
 				Vector2 tilePos = origin + (i * ts) * dir;
 
-				if (gm && !gm->CanExplosionPenetrate(tilePos))
+				if (worldQuery && !worldQuery->CanExplosionPenetrate(tilePos))
 					break;
 
 				ExplosionTile* tile = new ExplosionTile(tilePos);
 				tile->Activate();
 				owner->AddNewActor(tile);
 
-				if (gm && gm->HasBoxAt(tilePos))
+				if (worldQuery && worldQuery->HasBoxAt(tilePos))
 					break;
 			}
 		}

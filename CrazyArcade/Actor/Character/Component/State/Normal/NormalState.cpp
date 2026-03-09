@@ -2,7 +2,7 @@
 #include "../StateComponent.h"
 #include "../../MovementComponent.h"
 #include "../../../Character.h"
-#include "Actor/MoveSpeed.h"
+#include "../../../MoveSpeed.h"
 
 void NormalState::OnEnter(StateComponent* stateComp)
 {

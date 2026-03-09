@@ -1,8 +1,9 @@
 #include "Level/Level.h"
 #include "../Effects/BubbleExplosion.h"
 #include "../Effects/ExplosionTile.h"
-#include "Interface/IGameRuleManager.h"
 #include "Engine/Engine.h"
+#include "Interface/IWorldQueryProvider.h"
+#include "Interface/IWorldQueryService.h"
 
 BubbleExplosion::BubbleExplosion(const Vector2& origin, int explosionRange)
 	: super(L"", origin, Color::White),
@@ -52,16 +53,17 @@ void BubbleExplosion::PropagateInDirection(const Vector2& direction, int range)
 
 		if (owner)
 		{
-			IGameRuleManager* gameRuleManager = dynamic_cast<IGameRuleManager*>(owner);
+			IWorldQueryProvider* provider = dynamic_cast<IWorldQueryProvider*>(owner);
+			IWorldQueryService* worldQuery = provider ? provider->GetWorldQueryService() : nullptr;
 
-			if (gameRuleManager && !gameRuleManager->CanExplosionPenetrate(tilePos))
+			if (worldQuery && !worldQuery->CanExplosionPenetrate(tilePos))
 				break;
 		
 			ExplosionTile* tile = new ExplosionTile(tilePos);
 			tile->Activate();
 			owner->AddNewActor(tile);
 
-			if (gameRuleManager && gameRuleManager->HasBoxAt(tilePos))
+			if (worldQuery && worldQuery->HasBoxAt(tilePos))
 				break;
 		}
 	}

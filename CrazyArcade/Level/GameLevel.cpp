@@ -276,6 +276,7 @@ void GameLevel::LoadMap(const char* filename)
 		{
 			Player* player = new Player(screenPos);
 			player->SetDelegate(this);
+			player->SetQueryDelegate(&worldQuery);
 			AddNewActor(player);
 			AddNewActor(new Ground(screenPos));
 			break;
@@ -284,6 +285,7 @@ void GameLevel::LoadMap(const char* filename)
 		{
 			Enemy* enemy = new Enemy(screenPos);
 			enemy->SetDelegate(this);
+			enemy->SetQueryDelegate(&worldQuery);
 			AddNewActor(enemy);
 			AddNewActor(new Ground(screenPos));
 			break;
@@ -414,58 +416,6 @@ bool GameLevel::Push(const Vector2& pusherPos, const Vector2& targetPos)
 	return true;
 }
 
-bool GameLevel::HasBubbleAt(const Vector2& position)
-{
-	return worldQuery.HasBubbleAt(position);
-}
-
-bool GameLevel::HasPlayerAt(const Vector2& position)
-{
-	return worldQuery.HasPlayerAt(position);
-}
-
-bool GameLevel::HasExplosionAt(const Vector2& position)
-{
-	return worldQuery.HasExplosionAt(position);
-}
-
-bool GameLevel::HasBoxAt(const Vector2& position)
-{
-	return worldQuery.HasBoxAt(position);
-}
-
-void GameLevel::SendItemToPlayer(const Vector2& itemPos, ItemType itemType)
-{
-	for (Actor* actor : actors)
-	{
-		if (actor->IsTypeOf<Player>() && actor->GetPosition() == itemPos)
-		{
-			Player* player = actor->As<Player>();
-			auto itemComp = player->GetComponent<ItemComponent>();
-			if (itemComp)
-			{
-				itemComp->OnItemAcquired(itemType);
-			}
-			break;
-		}
-	}
-}
-
-Vector2 GameLevel::GetPlayerPosition()
-{
-	return worldQuery.GetPlayerPosition();
-}
-
-bool GameLevel::CanExplosionPenetrate(const Vector2& position)
-{
-	for (Actor* actor : actors)
-	{
-		if (actor->GetPosition() == position && (actor->IsTypeOf<Wall>() || actor->IsTypeOf<Bubble>()))
-			return false;
-	}
-	return true;
-}
-
 bool GameLevel::CheckGameClear()
 {
 	std::vector<Actor*> aliveEnemies;
@@ -507,7 +457,7 @@ bool GameLevel::OnRequestMove(Character* character, const Vector2& targetPos)
 		return false;
 
 	auto stateComp = character->GetComponent<StateComponent>();
-	if (stateComp && stateComp->GetCurrentState() == StateType::Normal && HasBubbleAt(targetPos))
+	if (stateComp && stateComp->GetCurrentState() == StateType::Normal && worldQuery.HasActorAt(targetPos, ActorType::Bubble))
 	{
 		if (!Push(currentPos, targetPos))
 			return false;
@@ -518,7 +468,7 @@ bool GameLevel::OnRequestMove(Character* character, const Vector2& targetPos)
 
 bool GameLevel::OnRequestGenerateBubble(Character* character, const Vector2& position, int range)
 {
-	if (HasBubbleAt(position))
+	if (worldQuery.HasActorAt(position, ActorType::Bubble))
 		return false;
 
 	Bubble* bubble = new Bubble(position, range);
@@ -530,36 +480,6 @@ bool GameLevel::OnRequestGenerateBubble(Character* character, const Vector2& pos
 bool GameLevel::OnQueryCanMove(const Vector2& from, const Vector2& to)
 {
 	return CanMove(from, to);
-}
-
-Vector2 GameLevel::OnQueryPlayerPosition()
-{
-	return GetPlayerPosition();
-}
-
-bool GameLevel::OnQueryHasBubbleAt(const Vector2& position)
-{
-	return HasBubbleAt(position);
-}
-
-bool GameLevel::OnQueryHasBoxAt(const Vector2& position)
-{
-	return HasBoxAt(position);
-}
-
-bool GameLevel::OnQueryIsExplosionDangerAt(const Vector2& position)
-{
-	return worldQuery.IsExplosionDangerAt(position);
-}
-
-float GameLevel::OnQueryExplosionTimeAt(const Vector2& position)
-{
-	return worldQuery.GetExplosionTimeAt(position);
-}
-
-bool GameLevel::OnQueryIsPlayerBubbleTrapped()
-{
-	return worldQuery.IsPlayerBubbleTrapped();
 }
 
 Player* GameLevel::FindPlayer() const

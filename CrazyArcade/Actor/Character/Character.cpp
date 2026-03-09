@@ -67,65 +67,75 @@ void Character::NotifyBubbleExploded(const Vector2& position)
 
 bool Character::QueryCanMove(const Vector2& from, const Vector2& to) const
 {
-	CharacterDelegate* charDelegate = GetDelegate();
-	if (!charDelegate)
+	CharacterCommandDelegate* command = GetDelegate();
+	if (!command)
 		return false;
 
-	return charDelegate->OnQueryCanMove(from, to);
+	return command->OnQueryCanMove(from, to);
+}
+
+Vector2 Character::QueryActorPosition(ActorType type) const
+{
+	const CharacterQueryDelegate* query = GetQueryDelegate();
+	if (!query)
+		return Vector2::Zero;
+
+	return query->OnQueryActorPosition(type);
 }
 
 Vector2 Character::QueryPlayerPosition() const
 {
-	CharacterDelegate* charDelegate = GetDelegate();
-	if (!charDelegate)
-		return Vector2::Zero;
-
-	return charDelegate->OnQueryPlayerPosition();
+	return QueryActorPosition(ActorType::Player);
 }
 
 bool Character::QueryHasBubbleAt(const Vector2& position) const
 {
-	CharacterDelegate* charDelegate = GetDelegate();
-	if (!charDelegate)
+	const CharacterQueryDelegate* query = GetQueryDelegate();
+	if (!query)
 		return false;
 
-	return charDelegate->OnQueryHasBubbleAt(position);
+	return query->OnQueryHasBubbleAt(position);
 }
 
 bool Character::QueryHasBoxAt(const Vector2& position) const
 {
-	CharacterDelegate* charDelegate = GetDelegate();
-	if (!charDelegate)
+	const CharacterQueryDelegate* query = GetQueryDelegate();
+	if (!query)
 		return false;
 
-	return charDelegate->OnQueryHasBoxAt(position);
+	return query->OnQueryHasBoxAt(position);
 }
 
 bool Character::QueryIsExplosionDangerAt(const Vector2& position) const
 {
-	CharacterDelegate* charDelegate = GetDelegate();
-	if (!charDelegate)
+	const CharacterQueryDelegate* query = GetQueryDelegate();
+	if (!query)
 		return false;
 
-	return charDelegate->OnQueryIsExplosionDangerAt(position);
+	return query->OnQueryIsExplosionDangerAt(position);
 }
 
 float Character::QueryExplosionTimeAt(const Vector2& position) const
 {
-	CharacterDelegate* charDelegate = GetDelegate();
-	if (!charDelegate)
+	const CharacterQueryDelegate* query = GetQueryDelegate();
+	if (!query)
 		return std::numeric_limits<float>::infinity();
 
-	return charDelegate->OnQueryExplosionTimeAt(position);
+	return query->OnQueryExplosionTimeAt(position);
+}
+
+bool Character::QueryIsActorBubbleTrapped(ActorType type) const
+{
+	const CharacterQueryDelegate* query = GetQueryDelegate();
+	if (!query)
+		return false;
+
+	return query->OnQueryIsActorBubbleTrapped(type);
 }
 
 bool Character::QueryIsPlayerBubbleTrapped() const
 {
-	CharacterDelegate* charDelegate = GetDelegate();
-	if (!charDelegate)
-		return false;
-
-	return charDelegate->OnQueryIsPlayerBubbleTrapped();
+	return QueryIsActorBubbleTrapped(ActorType::Player);
 }
 
 void Character::SetSpriteColor(Color color)

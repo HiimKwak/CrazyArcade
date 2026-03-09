@@ -1,16 +1,16 @@
 #pragma once
 #include "Level/Level.h"
 #include "Common/Common.h"
-#include "Interface/IGameRuleManager.h"
+#include "Interface/IWorldQueryProvider.h"
 #include "Actor/Character/Character.h"
 #include "Util/Timer.h"
-#include "Level/Query/ActorWorldQueryService.h"
+#include "Level/Query/WorldQueryService.h"
 #include "Level/Collision/ActorCollisionSystem.h"
 #include "Level/Render/GameRenderService.h"
 
 using namespace engine;
 
-class GameLevel : public Level, public IGameRuleManager, public CharacterDelegate
+class GameLevel : public Level, public IWorldQueryProvider, public CharacterCommandDelegate
 {
 	RTTI_DECLARATIONS(GameLevel, Level)
 
@@ -26,6 +26,8 @@ public:
 	bool IsInsideGameMap_World(const Vector2& worldPos) const;
 	inline Vector2 GetMapOrigin() const { return mapOrigin; }
 
+	IWorldQueryService* GetWorldQueryService() override { return &worldQuery; }
+
 private:
 	virtual void Tick(float deltaTime) override;
 	void ProcessCollision();
@@ -33,31 +35,19 @@ private:
 	void LoadMap(const char* filename);
 	void LoadNextMap();
 
-	// IGameRuleManager (used by Item, BubbleExplosion, etc.)
-	virtual bool CanMove(const Vector2& currentPos, const Vector2& nextPos) override;
-	virtual bool CanExplosionPenetrate(const Vector2& position) override;
+	bool CanMove(const Vector2& currentPos, const Vector2& nextPos);
+	bool CanExplosionPenetrate(const Vector2& position);
 
-	virtual bool Push(const Vector2& pusherPos, const Vector2& targetPos) override;
+	bool Push(const Vector2& pusherPos, const Vector2& targetPos);
 
-	virtual bool HasBubbleAt(const Vector2& position) override;
-	virtual bool HasPlayerAt(const Vector2& position) override;
-	virtual bool HasExplosionAt(const Vector2& position) override;
-	virtual bool HasBoxAt(const Vector2& position) override;
+	void SendItemToPlayer(const Vector2& itemPos, ItemType itemType);
 
-	virtual void SendItemToPlayer(const Vector2& itemPos, ItemType itemType) override;
+	Vector2 GetActorPosition(ActorType type);
 
-	virtual Vector2 GetPlayerPosition() override;
-
-	// CharacterDelegate
+	// CharacterCommandDelegate
 	virtual bool OnRequestMove(Character* character, const Vector2& targetPos) override;
 	virtual bool OnRequestGenerateBubble(Character* character, const Vector2& position, int range) override;
 	virtual bool OnQueryCanMove(const Vector2& from, const Vector2& to) override;
-	virtual Vector2 OnQueryPlayerPosition() override;
-	virtual bool OnQueryHasBubbleAt(const Vector2& position) override;
-	virtual bool OnQueryHasBoxAt(const Vector2& position) override;
-	virtual bool OnQueryIsExplosionDangerAt(const Vector2& position) override;
-	virtual float OnQueryExplosionTimeAt(const Vector2& position) override;
-	virtual bool OnQueryIsPlayerBubbleTrapped() override;
 
 	bool CheckGameClear();
 	bool CheckGameOver();
@@ -86,7 +76,7 @@ private:
 	static constexpr float DEBUG_PATH_ON_TIME = 0.2f;
 	static constexpr float DEBUG_PATH_OFF_TIME = 1.2f;
 
-	ActorWorldQueryService worldQuery;
+	WorldQueryService worldQuery;
 	ActorCollisionSystem collisionSystem;
 	GameRenderService renderService;
 };

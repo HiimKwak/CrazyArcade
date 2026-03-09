@@ -5,7 +5,7 @@
 #include "Engine/Engine.h"
 #include "Actor/Character/Enemy/Enemy.h"
 #include "Actor/Character/Component/MovementComponent.h"
-#include "Actor/MoveSpeed.h"
+#include "Actor/Character/MoveSpeed.h"
 #include <queue>
 #include <unordered_set>
 #include <utility>

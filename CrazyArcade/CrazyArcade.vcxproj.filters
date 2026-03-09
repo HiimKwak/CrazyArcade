@@ -113,9 +113,6 @@
     <ClInclude Include="Level\GameLevel.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Interface\IGameRuleManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Actor\Environments\Wall.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -140,7 +137,7 @@
     <ClInclude Include="Actor\Environments\Box.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\MoveSpeed.h">
+    <ClInclude Include="Actor\Character\MoveSpeed.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Environments\Bush.h">
@@ -251,9 +248,6 @@
     <ClInclude Include="Level\Query\WorldQueryService.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Level\Query\ActorWorldQueryService.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Level\Loader\MapLoader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -273,6 +267,15 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\IsPlayerInAreaCondition.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\ActorType.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\IWorldQueryService.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\IWorldQueryProvider.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

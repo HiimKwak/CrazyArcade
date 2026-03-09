@@ -1,9 +1,12 @@
 #include "ItemComponent.h"
 #include "../InventoryComponent.h"
+#include "../StatsComponent.h"
+#include "../MovementComponent.h"
 #include "Actor/Actor.h"
 #include "IUsableItem.h"
 #include "IEffect.h"
 #include "Shield/ShieldItem.h"
+#include "Actor/Character/MoveSpeed.h"
 
 #include <algorithm>
 
@@ -35,8 +38,36 @@ std::unique_ptr<IUsableItem> ItemComponent::CreateUsableItem(ItemType type)
 	}
 }
 
+void ItemComponent::ApplyPassiveItemEffect(ItemType type)
+{
+	if (!owner)
+		return;
+
+	auto stats = owner->GetComponent<StatsComponent>();
+	auto movement = owner->GetComponent<MovementComponent>();
+
+	switch (type)
+	{
+	case ItemType::BubbleUpgrade:
+		if (stats)
+			stats->SetBubbleRange(stats->GetBubbleRange() + 1);
+		break;
+	case ItemType::Roller:
+		if (movement)
+			movement->SetMoveSpeed(MoveSpeed::FAST);
+		break;
+	default:
+		break;
+	}
+}
+
 void ItemComponent::OnItemAcquired(ItemType type)
 {
+	ApplyPassiveItemEffect(type);
+
+	if (type != ItemType::Shield)
+		return;
+
 	if (usableItems.find(type) == usableItems.end())
 	{
 		auto usable = CreateUsableItem(type);

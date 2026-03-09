@@ -3,7 +3,7 @@
 #include "../../MovementComponent.h"
 #include "../../StatsComponent.h"
 #include "../../../Character.h"
-#include "Actor/MoveSpeed.h"
+#include "../../../MoveSpeed.h"
 
 void BubbleTrappedState::OnEnter(StateComponent* stateComp)
 {

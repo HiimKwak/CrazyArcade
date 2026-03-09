@@ -1,14 +1,23 @@
 #pragma once
 
 #include <vector>
+#include <limits>
+
 #include "Math/Vector2.h"
+#include "Interface/ActorType.h"
+#include "Actor/Actor.h"
+#include "Actor/Effects/Bubble.h"
+#include "Actor/Effects/ExplosionTile.h"
+#include "Actor/Character/Character.h"
+#include "Actor/Character/Player/Player.h"
+#include "Actor/Character/Enemy/Enemy.h"
+#include "Actor/Environments/Box.h"
+#include "Actor/Character/Component/State/StateComponent.h"
+#include "Interface/IWorldQueryService.h"
+#include "Actor/Character/Component/Item/ItemComponent.h"
+#include "Actor/Environments/Wall.h"
 
 using namespace engine;
-
-class Player;
-class Enemy;
-class Box;
-class ExplosionTile;
 
 struct CollisionTargets
 {
@@ -18,20 +27,243 @@ struct CollisionTargets
 	std::vector<Box*> boxes;
 };
 
-class WorldQueryService
+class WorldQueryService : public CharacterQueryDelegate, public IWorldQueryService
 {
 public:
-	virtual ~WorldQueryService() = default;
+	void BindActors(const std::vector<Actor*>* inActors)
+	{
+		actors = inActors;
+	}
 
-	virtual CollisionTargets CollectCollisionTargets() const = 0;
+	CollisionTargets CollectCollisionTargets() const
+	{
+		CollisionTargets out;
+		if (!actors) return out;
 
-	virtual bool HasBubbleAt(const Vector2& position) const = 0;
-	virtual bool HasPlayerAt(const Vector2& position) const = 0;
-	virtual bool HasExplosionAt(const Vector2& position) const = 0;
-	virtual bool HasBoxAt(const Vector2& position) const = 0;
+		for (Actor* actor : *actors)
+		{
+			if (actor->IsTypeOf<ExplosionTile>())
+			{
+				ExplosionTile* seg = actor->As<ExplosionTile>();
+				if (seg->IsActive())
+					out.activeExplosions.push_back(seg);
+			}
 
-	virtual Vector2 GetPlayerPosition() const = 0;
+			if (actor->IsTypeOf<Player>())
+				out.player = actor->As<Player>();
 
-	virtual bool IsExplosionDangerAt(const Vector2& position) const = 0;
-	virtual float GetExplosionTimeAt(const Vector2& position) const = 0;
+			if (actor->IsTypeOf<Enemy>())
+				out.enemies.push_back(actor->As<Enemy>());
+
+			if (actor->IsTypeOf<Box>())
+				out.boxes.push_back(actor->As<Box>());
+		}
+
+		return out;
+	}
+
+	bool HasActorAt(const Vector2& position, ActorType type) const override
+	{
+		if (!actors) return false;
+
+		for (Actor* actor : *actors)
+		{
+			if (actor->GetPosition() != position)
+				continue;
+
+			if (IsMatchForType(actor, type))
+				return true;
+		}
+		return false;
+	}
+
+	bool HasBoxAt(const Vector2& position) const override
+	{
+		return HasActorAt(position, ActorType::Box);
+	}
+
+	bool HasExplosionAt(const Vector2& position) const override
+	{
+		return HasActorAt(position, ActorType::Explosion);
+	}
+
+	bool CanExplosionPenetrate(const Vector2& position) const override
+	{
+		if (!actors)
+			return true;
+
+		for (Actor* actor : *actors)
+		{
+			if (actor->GetPosition() == position && (actor->IsTypeOf<Wall>() || actor->IsTypeOf<Bubble>()))
+				return false;
+		}
+		return true;
+	}
+
+	Vector2 GetActorPosition(ActorType type) const
+	{
+		if (!actors) return Vector2::Zero;
+
+		for (Actor* actor : *actors)
+		{
+			if (type == ActorType::Player && actor->IsTypeOf<Player>())
+				return actor->As<Player>()->GetPosition();
+			if (type == ActorType::Enemy && actor->IsTypeOf<Enemy>())
+				return actor->As<Enemy>()->GetPosition();
+		}
+		return Vector2::Zero;
+	}
+
+	Vector2 GetPlayerPosition() const
+	{
+		return GetActorPosition(ActorType::Player);
+	}
+
+	bool IsExplosionDangerAt(const Vector2& position) const
+	{
+		if (HasActorAt(position, ActorType::Explosion))
+			return true;
+
+		if (!actors) return false;
+		for (Actor* actor : *actors)
+		{
+			if (!actor->IsTypeOf<Bubble>()) continue;
+			for (const Vector2& tile : actor->As<Bubble>()->GetPredictedDangerTiles())
+			{
+				if (tile == position) return true;
+			}
+		}
+		return false;
+	}
+
+	float GetExplosionTimeAt(const Vector2& position) const
+	{
+		if (HasActorAt(position, ActorType::Explosion))
+			return 0.0f;
+
+		float minTime = std::numeric_limits<float>::infinity();
+		if (!actors) return minTime;
+
+		for (Actor* actor : *actors)
+		{
+			if (!actor->IsTypeOf<Bubble>()) continue;
+			Bubble* bubble = actor->As<Bubble>();
+			for (const Vector2& tile : bubble->GetPredictedDangerTiles())
+			{
+				if (tile == position)
+				{
+					float t = bubble->GetRemainingTime();
+					if (t < minTime) minTime = t;
+					break;
+				}
+			}
+		}
+		return minTime;
+	}
+
+	bool IsActorBubbleTrapped(ActorType type) const
+	{
+		if (!actors) return false;
+
+		for (Actor* actor : *actors)
+		{
+			if (!actor->IsTypeOf<Character>())
+				continue;
+
+			if (type == ActorType::Player && !actor->IsTypeOf<Player>())
+				continue;
+			if (type == ActorType::Enemy && !actor->IsTypeOf<Enemy>())
+				continue;
+
+			auto* stateComp = actor->As<Character>()->GetComponent<StateComponent>();
+			if (!stateComp)
+				continue;
+
+			if (stateComp->GetCurrentState() == StateType::BubbleTrapped)
+				return true;
+
+			if (type == ActorType::Player || type == ActorType::Enemy)
+				return false;
+		}
+
+		return false;
+	}
+
+	Vector2 OnQueryActorPosition(ActorType type) const override
+	{
+		return GetActorPosition(type);
+	}
+
+	bool OnQueryHasBubbleAt(const Vector2& position) const override
+	{
+		return HasActorAt(position, ActorType::Bubble);
+	}
+
+	bool OnQueryHasBoxAt(const Vector2& position) const override
+	{
+		return HasActorAt(position, ActorType::Box);
+	}
+
+	bool OnQueryIsExplosionDangerAt(const Vector2& position) const override
+	{
+		return IsExplosionDangerAt(position);
+	}
+
+	float OnQueryExplosionTimeAt(const Vector2& position) const override
+	{
+		return GetExplosionTimeAt(position);
+	}
+
+	bool OnQueryIsActorBubbleTrapped(ActorType type) const override
+	{
+		return IsActorBubbleTrapped(type);
+	}
+
+	void SendItemToCharacter(const Vector2& itemPos, ItemType itemType) override
+	{
+		if (!actors)
+			return;
+
+		for (Actor* actor : *actors)
+		{
+			if (actor->GetPosition() != itemPos)
+				continue;
+
+			if (!actor->IsTypeOf<Character>())
+				continue;
+
+			Character* character = actor->As<Character>();
+			auto itemComp = character->GetComponent<ItemComponent>();
+			if (itemComp)
+			{
+				itemComp->OnItemAcquired(itemType);
+				break;
+			}
+		}
+	}
+
+private:
+	bool IsMatchForType(Actor* actor, ActorType type) const
+	{
+		switch (type)
+		{
+		case ActorType::Player:
+			return actor->IsTypeOf<Player>();
+		case ActorType::Enemy:
+			return actor->IsTypeOf<Enemy>();
+		case ActorType::Character:
+			return actor->IsTypeOf<Player>() || actor->IsTypeOf<Enemy>();
+		case ActorType::Bubble:
+			return actor->IsTypeOf<Bubble>();
+		case ActorType::Box:
+			return actor->IsTypeOf<Box>();
+		case ActorType::Explosion:
+			return actor->IsTypeOf<ExplosionTile>();
+		default:
+			return false;
+		}
+	}
+
+private:
+	const std::vector<Actor*>* actors = nullptr;
 };

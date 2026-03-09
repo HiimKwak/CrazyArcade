@@ -5,7 +5,7 @@
 
 using namespace engine;
 
-class IGameRuleManager;
+class IWorldQueryService;
 
 class Item : public Actor
 {
@@ -25,5 +25,5 @@ protected:
 private:
 	ItemType itemType;
 
-	IGameRuleManager* gameRuleManager = nullptr;
+	IWorldQueryService* worldQueryService = nullptr;
 };
