@@ -6,4 +6,4 @@
 #include "Item/ItemComponent.h"
 #include "MovementComponent.h"
 #include "State/StateComponent.h"
-#include "BubbleComponent.h"
+#include "WaterBalloonComponent.h"

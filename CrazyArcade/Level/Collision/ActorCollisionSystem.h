@@ -73,7 +73,7 @@ private:
 			{
 				auto stateComp = player->GetComponent<StateComponent>();
 				if (stateComp && stateComp->GetCurrentState() == StateType::Normal)
-					stateComp->ChangeState(StateType::BubbleTrapped);
+					stateComp->ChangeState(StateType::Bubbled);
 			}
 
 			for (Enemy* enemy : enemies)
@@ -81,7 +81,7 @@ private:
 				if (enemy->GetPosition() != explosionPos) continue;
 				auto stateComp = enemy->GetComponent<StateComponent>();
 				if (stateComp && stateComp->GetCurrentState() == StateType::Normal)
-					stateComp->ChangeState(StateType::BubbleTrapped);
+					stateComp->ChangeState(StateType::Bubbled);
 			}
 
 			for (Box* box : boxes)
@@ -106,9 +106,9 @@ private:
 			if (!playerState || !enemyState || playerState->IsDead() || enemyState->IsDead())
 				continue;
 
-			if (playerState->IsBubbleTrapped())
+			if (playerState->IsBubbled())
 				player->OnKilled();
-			else if (enemyState->IsBubbleTrapped())
+			else if (enemyState->IsBubbled())
 				enemy->OnDamaged();
 		}
 	}

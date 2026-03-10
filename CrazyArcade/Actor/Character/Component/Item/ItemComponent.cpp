@@ -50,7 +50,7 @@ void ItemComponent::ApplyPassiveItemEffect(ItemType type)
 	{
 	case ItemType::BubbleUpgrade:
 		if (stats)
-			stats->SetBubbleRange(stats->GetBubbleRange() + 1);
+			stats->SetExplosionRange(stats->GetExplosionRange() + 1);
 		break;
 	case ItemType::Roller:
 		if (movement)

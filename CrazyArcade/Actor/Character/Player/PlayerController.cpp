@@ -2,7 +2,7 @@
 #include "Player.h"
 #include "../Component/State/StateComponent.h"
 #include "../Component/MovementComponent.h"
-#include "../Component/BubbleComponent.h"
+#include "../Component/WaterBalloonComponent.h"
 #include "../Component/Item/ItemComponent.h"
 #include "Core/Input.h"
 
@@ -57,9 +57,9 @@ void PlayerController::HandleActionInput()
 	if (!Input::Get().GetKey(VK_SPACE))
 		return;
 
-	auto bubbleComp = owner->GetComponent<BubbleComponent>();
-	if (bubbleComp)
-		bubbleComp->RequestGenerateBubble();
+	auto waterBalloonComp = owner->GetComponent<WaterBalloonComponent>();
+	if (waterBalloonComp)
+		waterBalloonComp->RequestGenerateWaterBalloon();
 }
 
 void PlayerController::HandleItemInput()

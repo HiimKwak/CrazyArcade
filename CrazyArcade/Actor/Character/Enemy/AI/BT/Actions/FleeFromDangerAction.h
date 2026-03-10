@@ -113,9 +113,9 @@ namespace enemy_ai
 			return CountSafeExits(pos, ts) * 10 + CountAdjacentBoxes(pos, ts);
 		}
 
-		bool CanTraverseDangerTile(const Vector2& next, int nextDepth, int ts, bool forceEscapeFromPlacedBubble) const
+		bool CanTraverseDangerTile(const Vector2& next, int nextDepth, int ts, bool forceEscapeFromPlacedWB) const
 		{
-			if (!forceEscapeFromPlacedBubble && !IsUsefulDangerTraversal(next, ts))
+			if (!forceEscapeFromPlacedWB && !IsUsefulDangerTraversal(next, ts))
 				return false;
 
 			float arrivalTime = nextDepth * MoveSpeed::NORMAL;
@@ -125,7 +125,7 @@ namespace enemy_ai
 
 		// Search the nearest safe tile with BFS
 		Vector2 SearchEscapeDir(
-			const Vector2& start, int ts, bool allowTimedDangerTraversal, bool forceEscapeFromPlacedBubble
+			const Vector2& start, int ts, bool allowTimedDangerTraversal, bool forceEscapeFromPlacedWB
 		) const
 		{
 			static const Vector2 dirs[4] = {
@@ -182,7 +182,7 @@ namespace enemy_ai
 					// danger traverse guard(1. check whether allowed 2. judge whether it's worthwhile)
 					if (!allowTimedDangerTraversal)
 						continue;
-					if (!CanTraverseDangerTile(next, nextDepth, ts, forceEscapeFromPlacedBubble))
+					if (!CanTraverseDangerTile(next, nextDepth, ts, forceEscapeFromPlacedWB))
 						continue;
 
 					q.push({ next, fd, nextDepth });
@@ -194,13 +194,13 @@ namespace enemy_ai
 
 		Vector2 FindEscapeDir(const Vector2& start, int ts) const
 		{
-			const bool forceEscapeFromPlacedBubble = enemy->QueryHasBubbleAt(start);
+			const bool forceEscapeFromPlacedWB = enemy->QueryHasWaterBalloonAt(start);
 
-			Vector2 safeOnlyDir = SearchEscapeDir(start, ts, false, forceEscapeFromPlacedBubble);
+			Vector2 safeOnlyDir = SearchEscapeDir(start, ts, false, forceEscapeFromPlacedWB);
 			if (safeOnlyDir != Vector2::Zero)
 				return safeOnlyDir;
 
-			return SearchEscapeDir(start, ts, true, forceEscapeFromPlacedBubble);
+			return SearchEscapeDir(start, ts, true, forceEscapeFromPlacedWB);
 		}
 
 		Enemy* enemy;

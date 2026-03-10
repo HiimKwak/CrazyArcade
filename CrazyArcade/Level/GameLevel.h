@@ -39,7 +39,7 @@ private:
 
 	// CharacterCommandDelegate
 	virtual bool OnRequestMove(Character* character, const Vector2& targetPos) override;
-	virtual bool OnRequestGenerateBubble(Character* character, const Vector2& position, int range) override;
+	virtual bool OnRequestGenerateWaterBalloon(Character* character, const Vector2& position, int range) override;
 	virtual bool OnQueryCanMove(const Vector2& from, const Vector2& to) override;
 
 	bool CheckGameClear();

@@ -102,6 +102,18 @@
     <ClCompile Include="Actor\Character\Component\Item\Shield\ShieldItem.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Actor\Effects\WaterBalloon.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Actor\Effects\WaterBalloonExplosion.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Actor\Character\Component\WaterBalloonComponent.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Actor\Character\Component\State\Bubbled\BubbledState.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Util\Timer.h">
@@ -273,6 +285,30 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Level\Loader\GameMapLoader.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Effects\WaterBalloon.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Effects\WaterBalloonExplosion.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Character\Component\WaterBalloonComponent.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Character\Component\State\Bubbled\BubbledState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\PlaceWaterBalloonAction.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\PlaceWaterBalloonNearBoxAction.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\HasWaterBalloonAmmoCondition.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\IsPlayerBubbledCondition.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

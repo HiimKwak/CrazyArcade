@@ -69,12 +69,12 @@ public:
 			Renderer::Get().Submit(hpStr, Vector2(hudX, 5), Color::Yellow, 100);
 
 			swprintf_s(bubbleStr, _countof(bubbleStr), L"Bubble: %d/%d",
-				statsComp ? statsComp->GetBubbleAmmo() : 0,
-				statsComp ? statsComp->GetMaxBubbleAmmo() : 0);
+				statsComp ? statsComp->GetWaterBalloonAmmo() : 0,
+				statsComp ? statsComp->GetMaxWaterBalloonAmmo() : 0);
 			Renderer::Get().Submit(bubbleStr, Vector2(hudX, 7), Color::Yellow, 100);
 
 			swprintf_s(rangeStr, _countof(rangeStr), L"Range: %d",
-				statsComp ? statsComp->GetBubbleRange() : 0);
+				statsComp ? statsComp->GetExplosionRange() : 0);
 			Renderer::Get().Submit(rangeStr, Vector2(hudX, 9), Color::Yellow, 100);
 
 			// 획득한 아이템 표시

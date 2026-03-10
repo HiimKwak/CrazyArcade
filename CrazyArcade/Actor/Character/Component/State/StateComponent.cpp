@@ -1,13 +1,13 @@
 #include "StateComponent.h"
 #include "../../Character.h"
 #include "Normal/NormalState.h"
-#include "BubbleTrapped/BubbleTrappedState.h"
+#include "Bubbled/BubbledState.h"
 #include "Dead/DeadState.h"
 
 StateComponent::StateComponent()
 {
 	stateNormal = std::make_unique<NormalState>();
-	stateBubbleTrapped = std::make_unique<BubbleTrappedState>();
+	stateBubbled = std::make_unique<BubbledState>();
 	stateDead = std::make_unique<DeadState>();
 }
 
@@ -48,8 +48,8 @@ void StateComponent::ChangeState(StateType newState)
 		case StateType::Normal:
 			GetCharacter()->NotifyNormal();
 			break;
-		case StateType::BubbleTrapped:
-			GetCharacter()->NotifyBubbleTrapped();
+		case StateType::Bubbled:
+			GetCharacter()->NotifyBubbled();
 			break;
 		case StateType::Dead:
 			GetCharacter()->NotifyDied();
@@ -63,7 +63,7 @@ void StateComponent::ChangeState(StateType newState)
 
 bool StateComponent::CanMove() const
 {
-	return currentState == StateType::Normal || currentState == StateType::BubbleTrapped;
+	return currentState == StateType::Normal || currentState == StateType::Bubbled;
 }
 
 bool StateComponent::CanAct() const
@@ -77,8 +77,8 @@ IState* StateComponent::GetStateObject(StateType state)
 	{
 	case StateType::Normal:
 		return stateNormal.get();
-	case StateType::BubbleTrapped:
-		return stateBubbleTrapped.get();
+	case StateType::Bubbled:
+		return stateBubbled.get();
 	case StateType::Dead:
 		return stateDead.get();
 	}

@@ -1,15 +1,15 @@
-#include "BubbleComponent.h"
+#include "WaterBalloonComponent.h"
 #include "StatsComponent.h"
 #include "../Character.h"
 #include "Engine/Engine.h"
 
 using namespace engine;
 
-void BubbleComponent::Tick(float deltaTime)
+void WaterBalloonComponent::Tick(float deltaTime)
 {
 }
 
-bool BubbleComponent::RequestGenerateBubble()
+bool WaterBalloonComponent::RequestGenerateWaterBalloon()
 {
 	if (!owner)
 		return false;
@@ -22,7 +22,7 @@ bool BubbleComponent::RequestGenerateBubble()
 	if (!delegate)
 		return false;
 
-	// bubbles cannot overlap
+	// 타일 기준으로 위치를 스냅
 	const int ts = Engine::Get().GetTileSize();
 	Vector2 currentPos = owner->GetPosition();
 	Vector2 tilePos = Vector2(
@@ -38,7 +38,7 @@ bool BubbleComponent::RequestGenerateBubble()
 	return false;
 }
 
-void BubbleComponent::OnBubbleExploded()
+void WaterBalloonComponent::OnWaterBalloonExploded()
 {
 	if (!owner)
 		return;

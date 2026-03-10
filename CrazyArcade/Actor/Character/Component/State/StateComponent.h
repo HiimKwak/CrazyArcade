@@ -18,7 +18,7 @@ public:
 	StateType GetCurrentState() const { return currentState; }
 
 	bool IsNormal() const { return currentState == StateType::Normal; }
-	bool IsBubbleTrapped() const { return currentState == StateType::BubbleTrapped; }
+	bool IsBubbled() const { return currentState == StateType::Bubbled; }
 	bool IsDead() const { return currentState == StateType::Dead; }
 
 	bool CanMove() const;
@@ -31,6 +31,6 @@ private:
 	bool initialized = false;
 
 	std::unique_ptr<IState> stateNormal;
-	std::unique_ptr<IState> stateBubbleTrapped;
+	std::unique_ptr<IState> stateBubbled;
 	std::unique_ptr<IState> stateDead;
 };

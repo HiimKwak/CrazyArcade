@@ -5,7 +5,7 @@ enum class ActorType
 	Player,
 	Enemy,
 	Character,
-	Bubble,
+	WaterBalloon,
 	Box,
 	Explosion
 };

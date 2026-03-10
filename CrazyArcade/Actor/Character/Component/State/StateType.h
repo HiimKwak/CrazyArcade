@@ -3,6 +3,6 @@
 enum class StateType
 {
 	Normal,
-	BubbleTrapped,
+	Bubbled,
 	Dead
 };

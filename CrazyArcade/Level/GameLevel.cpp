@@ -2,7 +2,7 @@
 #include "GameLevel.h"
 #include "Core/Input.h"
 #include "Util/Util.h"
-#include "Actor/Effects/Bubble.h"
+#include "Actor/Effects/WaterBalloon.h"
 #include "Actor/Effects/ExplosionTile.h"
 #include "Actor/Character/Player/Player.h"
 #include "Actor/Character/Enemy/Enemy.h"
@@ -234,22 +234,32 @@ bool GameLevel::CanMove(const Vector2& currentPos, const Vector2& nextPos)
 	if (targetActor->IsTypeOf<Wall>() || targetActor->IsTypeOf<Box>())
 		return false;
 
-	if (targetActor->IsTypeOf<Bubble>())
+	// 물풍선이 있는 경우 - 푸시할 수 있는지 확인
+	if (targetActor->IsTypeOf<WaterBalloon>())
 	{
-		Vector2 direction = nextPos - currentPos;
-		Vector2 bubbleNextPos = nextPos + direction;
-
-		for (Actor* actor : actors)
+		// 같은 타일에 있던 경우(물풍선 위에서 나가는 경우)만 허용
+		const int ts = Engine::Get().GetTileSize();
+		Vector2 currentTile = Vector2((currentPos.x / ts) * ts, (currentPos.y / ts) * ts);
+		Vector2 balloonTile = Vector2((nextPos.x / ts) * ts, (nextPos.y / ts) * ts);
+		
+		// 현재 물풍선과 같은 타일에 있지 않으면 물풍선을 밀려고 시도
+		if (currentTile != balloonTile)
 		{
-			if (actor->GetPosition() == bubbleNextPos)
+			Vector2 direction = nextPos - currentPos;
+			Vector2 balloonNextPos = nextPos + direction;
+
+			for (Actor* actor : actors)
 			{
-				if (actor->IsTypeOf<Wall>() ||
-					actor->IsTypeOf<Box>() ||
-					actor->IsTypeOf<Bubble>() ||
-					actor->IsTypeOf<Player>() ||
-					actor->IsTypeOf<Enemy>())
+				if (actor->GetPosition() == balloonNextPos)
 				{
-					return false;
+					if (actor->IsTypeOf<Wall>() ||
+						actor->IsTypeOf<Box>() ||
+						actor->IsTypeOf<WaterBalloon>() ||
+						actor->IsTypeOf<Player>() ||
+						actor->IsTypeOf<Enemy>())
+					{
+						return false;
+					}
 				}
 			}
 		}
@@ -284,7 +294,7 @@ bool GameLevel::Push(const Vector2& pusherPos, const Vector2& targetPos)
 		{
 			if (actor->IsTypeOf<Wall>() ||
 				actor->IsTypeOf<Box>() ||
-				actor->IsTypeOf<Bubble>() ||
+				actor->IsTypeOf<WaterBalloon>() ||
 				actor->IsTypeOf<Player>() ||
 				actor->IsTypeOf<Enemy>())
 			{
@@ -340,7 +350,7 @@ bool GameLevel::OnRequestMove(Character* character, const Vector2& targetPos)
 		return false;
 
 	auto stateComp = character->GetComponent<StateComponent>();
-	if (stateComp && stateComp->GetCurrentState() == StateType::Normal && worldQuery.HasActorAt(targetPos, ActorType::Bubble))
+	if (stateComp && stateComp->GetCurrentState() == StateType::Normal && worldQuery.HasActorAt(targetPos, ActorType::WaterBalloon))
 	{
 		if (!Push(currentPos, targetPos))
 			return false;
@@ -349,14 +359,14 @@ bool GameLevel::OnRequestMove(Character* character, const Vector2& targetPos)
 	return true;
 }
 
-bool GameLevel::OnRequestGenerateBubble(Character* character, const Vector2& position, int range)
+bool GameLevel::OnRequestGenerateWaterBalloon(Character* character, const Vector2& position, int range)
 {
-	if (worldQuery.HasActorAt(position, ActorType::Bubble))
+	if (worldQuery.HasActorAt(position, ActorType::WaterBalloon))
 		return false;
 
-	Bubble* bubble = new Bubble(position, range);
-	bubble->SetOwnerCharacter(character);
-	AddNewActor(bubble);
+	WaterBalloon* waterBalloon = new WaterBalloon(position, range);
+	waterBalloon->SetOwnerCharacter(character);
+	AddNewActor(waterBalloon);
 	return true;
 }
 

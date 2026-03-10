@@ -2,22 +2,22 @@
 #include "Enemy.h"
 #include "../Component/State/StateComponent.h"
 #include "../Component/MovementComponent.h"
-#include "../Component/BubbleComponent.h"
+#include "../Component/WaterBalloonComponent.h"
 #include "../Component/StatsComponent.h"
 
 #include "AI/BTComposite.h"
 
 #include "./AI/BT/Conditions/IsMovingCondition.h"
-#include "./AI/BT/Conditions/HasBubbleAmmoCondition.h"
+#include "./AI/BT/Conditions/HasWaterBalloonAmmoCondition.h"
 #include "./AI/BT/Conditions/IsDangerNearbyCondition.h"
 #include "./AI/BT/Conditions/IsPlayerAdjacentCondition.h"
 #include "./AI/BT/Conditions/IsPlayerInAreaCondition.h"
-#include "./AI/BT/Conditions/IsPlayerBubbleTrappedCondition.h"
+#include "./AI/BT/Conditions/IsPlayerBubbledCondition.h"
 #include "./AI/BT/Actions/FleeFromDangerAction.h"
 #include "./AI/BT/Actions/ExploitDangerAction.h"
 #include "./AI/BT/Actions/AStarMoveAction.h"
-#include "./AI/BT/Actions/PlaceBubbleAction.h"
-#include "./AI/BT/Actions/PlaceBubbleNearBoxAction.h"
+#include "./AI/BT/Actions/PlaceWaterBalloonAction.h"
+#include "./AI/BT/Actions/PlaceWaterBalloonNearBoxAction.h"
 
 using namespace engine;
 using namespace enemy_ai;
@@ -27,7 +27,7 @@ EnemyController::EnemyController(Enemy* owner)
 {
 	auto* movement = owner->GetComponent<MovementComponent>();
 	auto* stats = owner->GetComponent<StatsComponent>();
-	auto* bubble = owner->GetComponent<BubbleComponent>();
+	auto* waterBalloon = owner->GetComponent<WaterBalloonComponent>();
 
 	constexpr int OFFENSIVE_AREA_TILES = 1;
 	constexpr int DEFENSIVE_AREA_TILES = 3;
@@ -36,16 +36,16 @@ EnemyController::EnemyController(Enemy* owner)
 	// movement tree
 	{
 		auto innerBoxSeq = std::make_unique<BTSequence>();
-		innerBoxSeq->AddChild(std::make_unique<HasBubbleAmmoCondition>(stats));
-		innerBoxSeq->AddChild(std::make_unique<PlaceBubbleNearBoxAction>(owner, movement, bubble));
+		innerBoxSeq->AddChild(std::make_unique<HasWaterBalloonAmmoCondition>(stats));
+		innerBoxSeq->AddChild(std::make_unique<PlaceWaterBalloonNearBoxAction>(owner, movement, waterBalloon));
 
 		auto offensiveApproachSeq = std::make_unique<BTSequence>();
-		offensiveApproachSeq->AddChild(std::make_unique<IsPlayerBubbleTrappedCondition>(owner, true));
+		offensiveApproachSeq->AddChild(std::make_unique<IsPlayerBubbledCondition>(owner, true));
 		offensiveApproachSeq->AddChild(std::make_unique<IsPlayerInAreaCondition>(owner, OFFENSIVE_AREA_TILES));
 		offensiveApproachSeq->AddChild(std::make_unique<AStarMoveAction>(owner, movement));
 
 		auto tracingApproachSeq = std::make_unique<BTSequence>();
-		tracingApproachSeq->AddChild(std::make_unique<IsPlayerBubbleTrappedCondition>(owner, false));
+		tracingApproachSeq->AddChild(std::make_unique<IsPlayerBubbledCondition>(owner, false));
 		tracingApproachSeq->AddChild(std::make_unique<IsPlayerInAreaCondition>(owner, TRACING_AREA_MIN_TILES));
 		tracingApproachSeq->AddChild(std::make_unique<AStarMoveAction>(owner, movement));
 
@@ -55,7 +55,7 @@ EnemyController::EnemyController(Enemy* owner)
 		innerSel->AddChild(std::move(innerBoxSeq));
 
 		auto dangerSel = std::make_unique<BTSelector>();
-		dangerSel->AddChild(std::make_unique<ExploitDangerAction>(owner, movement, bubble));
+		dangerSel->AddChild(std::make_unique<ExploitDangerAction>(owner, movement, waterBalloon));
 		dangerSel->AddChild(std::make_unique<FleeFromDangerAction>(owner, movement));
 
 		auto dangerSeq = std::make_unique<BTSequence>();
@@ -73,10 +73,10 @@ EnemyController::EnemyController(Enemy* owner)
 	// action tree
 	{
 		auto defensiveCombatSeq = std::make_unique<BTSequence>();
-		defensiveCombatSeq->AddChild(std::make_unique<IsPlayerBubbleTrappedCondition>(owner, false));
+		defensiveCombatSeq->AddChild(std::make_unique<IsPlayerBubbledCondition>(owner, false));
 		defensiveCombatSeq->AddChild(std::make_unique<IsPlayerInAreaCondition>(owner, OFFENSIVE_AREA_TILES + 1, DEFENSIVE_AREA_TILES));
-		defensiveCombatSeq->AddChild(std::make_unique<HasBubbleAmmoCondition>(stats));
-		defensiveCombatSeq->AddChild(std::make_unique<PlaceBubbleAction>(bubble));
+		defensiveCombatSeq->AddChild(std::make_unique<HasWaterBalloonAmmoCondition>(stats));
+		defensiveCombatSeq->AddChild(std::make_unique<PlaceWaterBalloonAction>(waterBalloon));
 
 		auto root = std::make_unique<BTSelector>();
 		root->AddChild(std::move(defensiveCombatSeq));

@@ -5,7 +5,7 @@
 #include "../Component/StatsComponent.h"
 #include "../Component/InventoryComponent.h"
 #include "../Component/MovementComponent.h"
-#include "../Component/BubbleComponent.h"
+#include "../Component/WaterBalloonComponent.h"
 #include "../Component/Item/ItemComponent.h"
 #include "../Component/State/StateComponent.h"
 #include "../MoveSpeed.h"
@@ -19,15 +19,15 @@ Enemy::Enemy(const Vector2& position)
 
 	auto stats = AddComponent<StatsComponent>();
 	stats->SetLives(1);
-	stats->SetMaxBubbleAmmo(2);
-	stats->SetBubbleAmmo(2);
-	stats->SetBubbleRange(1);
+	stats->SetMaxWaterBalloonAmmo(2);
+	stats->SetWaterBalloonAmmo(2);
+	stats->SetExplosionRange(1);
 
 	AddComponent<InventoryComponent>();
 	AddComponent<ItemComponent>();
 	AddComponent<MovementComponent>();
 	AddComponent<StateComponent>();
-	AddComponent<BubbleComponent>();
+	AddComponent<WaterBalloonComponent>();
 
 	// 컴포넌트 추가 후 생성 (컨트롤러 생성자에서 컴포넌트 접근)
 	CreateController<EnemyController>(this);

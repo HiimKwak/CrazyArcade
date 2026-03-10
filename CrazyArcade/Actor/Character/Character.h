@@ -14,9 +14,9 @@ public:
 	virtual ~CharacterObserver() = default;
 
 	virtual void OnCharacterDied(class Character* character) {}
-	virtual void OnCharacterBubbleTrapped(class Character* character) {}
+	virtual void OnCharacterBubbled(class Character* character) {}
 	virtual void OnCharacterNormal(class Character* character) {}
-	virtual void OnBubbleExploded(const Vector2& position) {}
+	virtual void OnWaterBalloonExploded(const Vector2& position) {}
 };
 
 class CharacterCommandDelegate : public IDelegate
@@ -25,7 +25,7 @@ public:
 	virtual ~CharacterCommandDelegate() = default;
 
 	virtual bool OnRequestMove(class Character* character, const Vector2& targetPos) = 0;
-	virtual bool OnRequestGenerateBubble(class Character* character, const Vector2& position, int range) = 0;
+	virtual bool OnRequestGenerateWaterBalloon(class Character* character, const Vector2& position, int range) = 0;
 	virtual bool OnQueryCanMove(const Vector2& from, const Vector2& to) = 0;
 };
 
@@ -35,11 +35,11 @@ public:
 	virtual ~CharacterQueryDelegate() = default;
 
 	virtual Vector2 OnQueryActorPosition(ActorType type) const = 0;
-	virtual bool OnQueryHasBubbleAt(const Vector2& position) const = 0;
+	virtual bool OnQueryHasWaterBalloonAt(const Vector2& position) const = 0;
 	virtual bool OnQueryHasBoxAt(const Vector2& position) const = 0;
 	virtual bool OnQueryIsExplosionDangerAt(const Vector2& position) const = 0;
 	virtual float OnQueryExplosionTimeAt(const Vector2& position) const = 0;
-	virtual bool OnQueryIsActorBubbleTrapped(ActorType type) const = 0;
+	virtual bool OnQueryIsActorBubbled(ActorType type) const = 0;
 };
 
 class Character : public Actor
@@ -59,19 +59,19 @@ public:
 	const CharacterQueryDelegate* GetQueryDelegate() const { return queryDelegate; }
 
 	void NotifyDied();
-	void NotifyBubbleTrapped();
+	void NotifyBubbled();
 	void NotifyNormal();
-	void NotifyBubbleExploded(const Vector2& position);
+	void NotifyWaterBalloonExploded(const Vector2& position);
 
 	bool QueryCanMove(const Vector2& from, const Vector2& to) const;
 	Vector2 QueryActorPosition(ActorType type) const;
 	Vector2 QueryPlayerPosition() const;
-	bool QueryHasBubbleAt(const Vector2& position) const;
+	bool QueryHasWaterBalloonAt(const Vector2& position) const;
 	bool QueryHasBoxAt(const Vector2& position) const;
 	bool QueryIsExplosionDangerAt(const Vector2& position) const;
 	float QueryExplosionTimeAt(const Vector2& position) const;
-	bool QueryIsActorBubbleTrapped(ActorType type) const;
-	bool QueryIsPlayerBubbleTrapped() const;
+	bool QueryIsActorBubbled(ActorType type) const;
+	bool QueryIsPlayerBubbled() const;
 
 	void SetSpriteColor(Color color);
 	void ResetSpriteColor();

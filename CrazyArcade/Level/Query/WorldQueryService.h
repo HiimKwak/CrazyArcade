@@ -6,7 +6,7 @@
 #include "Math/Vector2.h"
 #include "Interface/ActorType.h"
 #include "Actor/Actor.h"
-#include "Actor/Effects/Bubble.h"
+#include "Actor/Effects/WaterBalloon.h"
 #include "Actor/Effects/ExplosionTile.h"
 #include "Actor/Character/Character.h"
 #include "Actor/Character/Player/Player.h"
@@ -102,7 +102,7 @@ public:
 
 		for (Actor* actor : *actors)
 		{
-			if (actor->GetPosition() == position && (actor->IsTypeOf<Wall>() || actor->IsTypeOf<Bubble>()))
+			if (actor->GetPosition() == position && (actor->IsTypeOf<Wall>() || actor->IsTypeOf<WaterBalloon>()))
 				return false;
 		}
 		return true;
@@ -153,8 +153,8 @@ public:
 		if (!actors) return false;
 		for (Actor* actor : *actors)
 		{
-			if (!actor->IsTypeOf<Bubble>()) continue;
-			for (const Vector2& tile : actor->As<Bubble>()->GetPredictedDangerTiles())
+			if (!actor->IsTypeOf<WaterBalloon>()) continue;
+			for (const Vector2& tile : actor->As<WaterBalloon>()->GetPredictedDangerTiles())
 			{
 				if (tile == position) return true;
 			}
@@ -172,13 +172,13 @@ public:
 
 		for (Actor* actor : *actors)
 		{
-			if (!actor->IsTypeOf<Bubble>()) continue;
-			Bubble* bubble = actor->As<Bubble>();
-			for (const Vector2& tile : bubble->GetPredictedDangerTiles())
+			if (!actor->IsTypeOf<WaterBalloon>()) continue;
+			WaterBalloon* waterBalloon = actor->As<WaterBalloon>();
+			for (const Vector2& tile : waterBalloon->GetPredictedDangerTiles())
 			{
 				if (tile == position)
 				{
-					float t = bubble->GetRemainingTime();
+					float t = waterBalloon->GetRemainingTime();
 					if (t < minTime) minTime = t;
 					break;
 				}
@@ -187,7 +187,7 @@ public:
 		return minTime;
 	}
 
-	bool IsActorBubbleTrapped(ActorType type) const
+	bool IsActorBubbled(ActorType type) const
 	{
 		if (!actors) return false;
 
@@ -205,7 +205,7 @@ public:
 			if (!stateComp)
 				continue;
 
-			if (stateComp->GetCurrentState() == StateType::BubbleTrapped)
+			if (stateComp->GetCurrentState() == StateType::Bubbled)
 				return true;
 
 			if (type == ActorType::Player || type == ActorType::Enemy)
@@ -220,9 +220,9 @@ public:
 		return GetActorPosition(type);
 	}
 
-	bool OnQueryHasBubbleAt(const Vector2& position) const override
+	bool OnQueryHasWaterBalloonAt(const Vector2& position) const override
 	{
-		return HasActorAt(position, ActorType::Bubble);
+		return HasActorAt(position, ActorType::WaterBalloon);
 	}
 
 	bool OnQueryHasBoxAt(const Vector2& position) const override
@@ -240,9 +240,9 @@ public:
 		return GetExplosionTimeAt(position);
 	}
 
-	bool OnQueryIsActorBubbleTrapped(ActorType type) const override
+	bool OnQueryIsActorBubbled(ActorType type) const override
 	{
-		return IsActorBubbleTrapped(type);
+		return IsActorBubbled(type);
 	}
 
 	void SendItemToCharacter(const Vector2& itemPos, ItemType itemType) override
@@ -279,8 +279,8 @@ private:
 			return actor->IsTypeOf<Enemy>();
 		case ActorType::Character:
 			return actor->IsTypeOf<Player>() || actor->IsTypeOf<Enemy>();
-		case ActorType::Bubble:
-			return actor->IsTypeOf<Bubble>();
+		case ActorType::WaterBalloon:
+			return actor->IsTypeOf<WaterBalloon>();
 		case ActorType::Box:
 			return actor->IsTypeOf<Box>();
 		case ActorType::Explosion:

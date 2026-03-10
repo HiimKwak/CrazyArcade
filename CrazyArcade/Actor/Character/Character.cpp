@@ -41,11 +41,11 @@ void Character::NotifyDied()
 	}
 }
 
-void Character::NotifyBubbleTrapped()
+void Character::NotifyBubbled()
 {
 	for (auto observer : observers)
 	{
-		observer->OnCharacterBubbleTrapped(this);
+		observer->OnCharacterBubbled(this);
 	}
 }
 
@@ -57,11 +57,11 @@ void Character::NotifyNormal()
 	}
 }
 
-void Character::NotifyBubbleExploded(const Vector2& position)
+void Character::NotifyWaterBalloonExploded(const Vector2& position)
 {
 	for (auto observer : observers)
 	{
-		observer->OnBubbleExploded(position);
+		observer->OnWaterBalloonExploded(position);
 	}
 }
 
@@ -88,13 +88,13 @@ Vector2 Character::QueryPlayerPosition() const
 	return QueryActorPosition(ActorType::Player);
 }
 
-bool Character::QueryHasBubbleAt(const Vector2& position) const
+bool Character::QueryHasWaterBalloonAt(const Vector2& position) const
 {
 	const CharacterQueryDelegate* query = GetQueryDelegate();
 	if (!query)
 		return false;
 
-	return query->OnQueryHasBubbleAt(position);
+	return query->OnQueryHasWaterBalloonAt(position);
 }
 
 bool Character::QueryHasBoxAt(const Vector2& position) const
@@ -124,18 +124,18 @@ float Character::QueryExplosionTimeAt(const Vector2& position) const
 	return query->OnQueryExplosionTimeAt(position);
 }
 
-bool Character::QueryIsActorBubbleTrapped(ActorType type) const
+bool Character::QueryIsActorBubbled(ActorType type) const
 {
 	const CharacterQueryDelegate* query = GetQueryDelegate();
 	if (!query)
 		return false;
 
-	return query->OnQueryIsActorBubbleTrapped(type);
+	return query->OnQueryIsActorBubbled(type);
 }
 
-bool Character::QueryIsPlayerBubbleTrapped() const
+bool Character::QueryIsPlayerBubbled() const
 {
-	return QueryIsActorBubbleTrapped(ActorType::Player);
+	return QueryIsActorBubbled(ActorType::Player);
 }
 
 void Character::SetSpriteColor(Color color)

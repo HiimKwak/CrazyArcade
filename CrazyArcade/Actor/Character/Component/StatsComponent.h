@@ -10,19 +10,19 @@ public:
 	int GetLives() const { return lives; }
 	void SetLives(int newLives) { lives = newLives; }
 
-	int GetMaxBubbleAmmo() const { return maxBubbleAmmo; }
-	int GetBubbleAmmo() const { return bubbleAmmo; }
-	void SetMaxBubbleAmmo(int ammo) { maxBubbleAmmo = ammo; }
-	void SetBubbleAmmo(int ammo) { bubbleAmmo = ammo; }
+	int GetMaxWaterBalloonAmmo() const { return maxWaterBalloonAmmo; }
+	int GetWaterBalloonAmmo() const { return waterBalloonAmmo; }
+	void SetMaxWaterBalloonAmmo(int ammo) { maxWaterBalloonAmmo = ammo; }
+	void SetWaterBalloonAmmo(int ammo) { waterBalloonAmmo = ammo; }
 
-	int GetBubbleRange() const { return bubbleRange; }
-	void SetBubbleRange(int range) { bubbleRange = range; }
+	int GetExplosionRange() const { return explosionRange; }
+	void SetExplosionRange(int range) { explosionRange = range; }
 
-	void RestoreBubbleAmmo();
+	void RestoreWaterBalloonAmmo();
 
 protected:
 	int lives = 1;
-	int maxBubbleAmmo = 1;
-	int bubbleAmmo = 1;
-	int bubbleRange = 1;
+	int maxWaterBalloonAmmo = 1;
+	int waterBalloonAmmo = 1;
+	int explosionRange = 1;
 };

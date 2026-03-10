@@ -4,8 +4,8 @@ void StatsComponent::Tick(float deltaTime)
 {
 }
 
-void StatsComponent::RestoreBubbleAmmo()
+void StatsComponent::RestoreWaterBalloonAmmo()
 {
-	if (bubbleAmmo < maxBubbleAmmo)
-		bubbleAmmo++;
+	if (waterBalloonAmmo < maxWaterBalloonAmmo)
+		waterBalloonAmmo++;
 }
