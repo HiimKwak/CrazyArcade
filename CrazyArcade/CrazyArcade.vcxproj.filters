@@ -33,16 +33,10 @@
     <ClCompile Include="Actor\Environments\Ground.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Actor\Effects\Bubble.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Level\MenuLevel.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Actor\Effects\ExplosionTile.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Actor\Effects\BubbleExplosion.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Actor\Environments\Item.cpp">
@@ -69,9 +63,6 @@
     <ClCompile Include="Actor\Character\Component\State\StateComponent.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Actor\Character\Component\BubbleComponent.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Actor\Character\Component\Item\ItemComponent.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -85,9 +76,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Actor\Character\Player\PlayerController.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Actor\Character\Component\State\BubbleTrapped\BubbleTrappedState.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Actor\Character\Component\State\Dead\DeadState.cpp">
@@ -131,16 +119,10 @@
     <ClInclude Include="Actor\Environments\Ground.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Effects\Bubble.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Level\MenuLevel.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Effects\ExplosionTile.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Actor\Effects\BubbleExplosion.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Environments\Item.h">
@@ -173,9 +155,6 @@
     <ClInclude Include="Actor\Character\Component\State\StateComponent.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Character\Component\BubbleComponent.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Actor\Character\Component\Item\ItemComponent.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -189,9 +168,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Character\Player\PlayerController.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Actor\Character\Component\State\BubbleTrapped\BubbleTrappedState.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Character\Component\State\Dead\DeadState.h">
@@ -227,16 +203,10 @@
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\IsMovingCondition.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\HasBubbleAmmoCondition.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\MoveToPlayerAction.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\MoveRandomAction.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\PlaceBubbleAction.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\IsDangerNearbyCondition.h">
@@ -246,9 +216,6 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\FleeFromDangerAction.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\PlaceBubbleNearBoxAction.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Actor\Character\Enemy\AI\AStarPathfinder.h">

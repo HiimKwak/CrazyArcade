@@ -141,7 +141,7 @@ void GameLevel::Draw()
 
 	Player* player = FindPlayer();
 	renderService.DrawHud(player);
-	
+
 	int remainingStages = MAX_STAGE - currentStage;
 	float remainingTime = isClearWaiting ? clearTimer.GetRemainingTime() : 0.0f;
 	renderService.DrawGameState(CheckGameOver(), CheckGameClear(), remainingStages, remainingTime);
@@ -151,7 +151,7 @@ void GameLevel::LoadMap(const char* filename)
 {
 	auto SpawnActorFn = [this](int character, const Vector2& position) {
 		SpawnActor(character, position);
-	};
+		};
 
 	MapData mapData = mapLoader.LoadMap(filename, SpawnActorFn);
 
@@ -241,7 +241,7 @@ bool GameLevel::CanMove(const Vector2& currentPos, const Vector2& nextPos)
 		const int ts = Engine::Get().GetTileSize();
 		Vector2 currentTile = Vector2((currentPos.x / ts) * ts, (currentPos.y / ts) * ts);
 		Vector2 balloonTile = Vector2((nextPos.x / ts) * ts, (nextPos.y / ts) * ts);
-		
+
 		// 현재 물풍선과 같은 타일에 있지 않으면 물풍선을 밀려고 시도
 		if (currentTile != balloonTile)
 		{
@@ -311,6 +311,15 @@ bool GameLevel::Push(const Vector2& pusherPos, const Vector2& targetPos)
 
 bool GameLevel::CheckGameClear()
 {
+	// prioritize 'game over' over 'game clear' 
+	Player* player = FindPlayer();
+	if (player)
+	{
+		auto playerState = player->GetComponent<StateComponent>();
+		if (playerState && playerState->IsDead())
+			return false;
+	}
+
 	std::vector<Actor*> aliveEnemies;
 
 	for (Actor* const actor : actors)
