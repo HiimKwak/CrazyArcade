@@ -1,23 +1,10 @@
 #pragma once
 
-#include <vector>
-
 #include "Actor/Actor.h"
 #include "Math/Vector2.h"
 #include "Interface/ActorType.h"
 
 using namespace engine;
-
-class CharacterObserver
-{
-public:
-	virtual ~CharacterObserver() = default;
-
-	virtual void OnCharacterDied(class Character* character) {}
-	virtual void OnCharacterBubbled(class Character* character) {}
-	virtual void OnCharacterNormal(class Character* character) {}
-	virtual void OnWaterBalloonExploded(const Vector2& position) {}
-};
 
 class CharacterCommandDelegate : public IDelegate
 {
@@ -50,18 +37,11 @@ public:
 	Character(const wchar_t* image, const Vector2& position, Color color);
 	virtual ~Character();
 
-	void Subscribe(CharacterObserver* observer);
-	void Unsubscribe(CharacterObserver* observer);
 	void SetDelegate(CharacterCommandDelegate* newDelegate) { Actor::SetDelegate(newDelegate); }
 	CharacterCommandDelegate* GetDelegate() const { return static_cast<CharacterCommandDelegate*>(Actor::GetDelegate()); }
 
 	void SetQueryDelegate(const CharacterQueryDelegate* newDelegate) { queryDelegate = newDelegate; }
 	const CharacterQueryDelegate* GetQueryDelegate() const { return queryDelegate; }
-
-	void NotifyDied();
-	void NotifyBubbled();
-	void NotifyNormal();
-	void NotifyWaterBalloonExploded(const Vector2& position);
 
 	bool QueryCanMove(const Vector2& from, const Vector2& to) const;
 	Vector2 QueryActorPosition(ActorType type) const;
@@ -80,6 +60,5 @@ protected:
 	Color originalColor;
 
 private:
-	std::vector<CharacterObserver*> observers;
 	const CharacterQueryDelegate* queryDelegate = nullptr;
 };

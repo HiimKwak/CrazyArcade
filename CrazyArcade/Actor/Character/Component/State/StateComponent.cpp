@@ -40,23 +40,6 @@ void StateComponent::ChangeState(StateType newState)
 	currentState = newState;
 
 	IState* newStatePtr = GetStateObject(newState);
-
-	if (GetCharacter())
-	{
-		switch (newState)
-		{
-		case StateType::Normal:
-			GetCharacter()->NotifyNormal();
-			break;
-		case StateType::Bubbled:
-			GetCharacter()->NotifyBubbled();
-			break;
-		case StateType::Dead:
-			GetCharacter()->NotifyDied();
-			break;
-		}
-	}
-
 	if (newStatePtr)
 		newStatePtr->OnEnter(this);
 }

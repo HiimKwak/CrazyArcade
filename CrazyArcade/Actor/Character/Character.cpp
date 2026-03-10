@@ -10,59 +10,6 @@ Character::Character(const wchar_t* image, const Vector2& position, Color color)
 
 Character::~Character()
 {
-	for (auto observer : observers)
-	{
-		observer = nullptr;
-	}
-	observers.clear();
-}
-
-void Character::Subscribe(CharacterObserver* observer)
-{
-	if (observer)
-	{
-		observers.push_back(observer);
-	}
-}
-
-void Character::Unsubscribe(CharacterObserver* observer)
-{
-	observers.erase(
-		std::remove(observers.begin(), observers.end(), observer),
-		observers.end()
-	);
-}
-
-void Character::NotifyDied()
-{
-	for (auto observer : observers)
-	{
-		observer->OnCharacterDied(this);
-	}
-}
-
-void Character::NotifyBubbled()
-{
-	for (auto observer : observers)
-	{
-		observer->OnCharacterBubbled(this);
-	}
-}
-
-void Character::NotifyNormal()
-{
-	for (auto observer : observers)
-	{
-		observer->OnCharacterNormal(this);
-	}
-}
-
-void Character::NotifyWaterBalloonExploded(const Vector2& position)
-{
-	for (auto observer : observers)
-	{
-		observer->OnWaterBalloonExploded(position);
-	}
 }
 
 bool Character::QueryCanMove(const Vector2& from, const Vector2& to) const
