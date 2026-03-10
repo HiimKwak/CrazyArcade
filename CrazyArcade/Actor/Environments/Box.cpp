@@ -35,7 +35,8 @@ void Box::OnDamaged()
 
 void Box::SpawnItem()
 {
-	spawnItem = Util::Random(0, 1);
+	constexpr int itemSpawnDenominator = 4; // 25%
+	spawnItem = (Util::Random(0, itemSpawnDenominator - 1) == 0);
 	if (owner && spawnItem)
 		owner->AddNewActor(new Item(GetPosition()));
 

@@ -104,11 +104,15 @@ public:
 				}
 				else
 				{
+					itemLineBuffers.clear();
+					itemLineBuffers.reserve(items.size());
 					for (const auto& [itemType, count] : items)
 					{
 						const wchar_t* itemName = GetItemName(itemType);
-						swprintf_s(itemStr, _countof(itemStr), L"%s x%d", itemName, count);
-						Renderer::Get().Submit(itemStr, Vector2(hudX, itemY++), Color::Green, 100);
+						wchar_t itemLine[80] = {};
+						swprintf_s(itemLine, _countof(itemLine), L"%s x%d", itemName, count);
+						itemLineBuffers.emplace_back(itemLine);
+						Renderer::Get().Submit(itemLineBuffers.back().c_str(), Vector2(hudX, itemY++), Color::Green, 100);
 					}
 				}
 			}
@@ -277,5 +281,5 @@ private:
 	wchar_t bubbleStr[32] = {};
 	wchar_t rangeStr[32] = {};
 	wchar_t speedStr[32] = {};
-	wchar_t itemStr[80] = {};
+	std::vector<std::wstring> itemLineBuffers;
 };

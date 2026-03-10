@@ -7,13 +7,18 @@
 void BubbledState::OnEnter(StateComponent* stateComp)
 {
 	trapTimer = TRAP_DURATION;
+	hasStoredMoveSpeed = false;
 
 	if (!stateComp) return;
 	if (auto* character = stateComp->GetCharacter())
 	{
 		character->SetSpriteColor(Color::Skyblue);
 		if (auto* movement = character->GetComponent<MovementComponent>())
+		{
+			previousMoveSpeed = movement->GetMoveSpeed();
+			hasStoredMoveSpeed = true;
 			movement->SetMoveSpeed(MovementComponent::SPEED_SLOW);
+		}
 	}
 }
 
@@ -26,8 +31,12 @@ void BubbledState::OnExit(StateComponent* stateComp)
 	{
 		character->ResetSpriteColor();
 		if (auto* movement = character->GetComponent<MovementComponent>())
-			movement->SetMoveSpeed(MovementComponent::SPEED_NORMAL);
+		{
+			movement->SetMoveSpeed(hasStoredMoveSpeed ? previousMoveSpeed : MovementComponent::SPEED_NORMAL);
+		}
 	}
+
+	hasStoredMoveSpeed = false;
 }
 
 void BubbledState::Tick(StateComponent* stateComp, float deltaTime)

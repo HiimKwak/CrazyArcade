@@ -1,5 +1,6 @@
 #include "WaterBalloonComponent.h"
 #include "StatsComponent.h"
+#include "State/StateComponent.h"
 #include "../Character.h"
 #include "Engine/Engine.h"
 
@@ -12,6 +13,10 @@ void WaterBalloonComponent::Tick(float deltaTime)
 bool WaterBalloonComponent::RequestGenerateWaterBalloon()
 {
 	if (!owner)
+		return false;
+
+	auto state = owner->GetComponent<StateComponent>();
+	if (state && !state->CanAct())
 		return false;
 
 	auto stats = owner->GetComponent<StatsComponent>();

@@ -259,6 +259,10 @@ public:
 				continue;
 
 			Character* character = actor->As<Character>();
+			auto stateComp = character->GetComponent<StateComponent>();
+			if (stateComp && !stateComp->CanAct())
+				continue;
+
 			auto itemComp = character->GetComponent<ItemComponent>();
 			if (itemComp)
 			{

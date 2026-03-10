@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../IState.h"
+#include "Actor/Character/Component/MovementComponent.h"
 
 class BubbledState : public IState
 {
@@ -11,5 +12,7 @@ public:
 
 private:
 	float trapTimer = 0.0f;
+	float previousMoveSpeed = MovementComponent::SPEED_NORMAL;
+	bool hasStoredMoveSpeed = false;
 	static constexpr float TRAP_DURATION = 3.0f;
 };
