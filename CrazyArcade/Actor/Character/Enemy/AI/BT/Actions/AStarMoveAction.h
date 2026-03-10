@@ -51,6 +51,8 @@ namespace enemy_ai
 				nextPos.x / ts - start.x / ts,
 				nextPos.y / ts - start.y / ts
 			);
+			
+			enemy->ClearEscapePath();
 			movement->RequestMove(dir);
 			return engine::BTStatus::Success;
 		}

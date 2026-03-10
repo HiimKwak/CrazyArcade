@@ -53,6 +53,7 @@ namespace enemy_ai
 			const Vector2 next = from + dir * ts;
 			if (enemy->QueryCanMove(from, next))
 			{
+				enemy->ClearEscapePath();
 				movement->RequestMove(dir);
 				return true;
 			}

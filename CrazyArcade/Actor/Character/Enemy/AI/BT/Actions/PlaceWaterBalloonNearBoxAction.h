@@ -7,6 +7,7 @@
 #include "Actor/Character/Enemy/Enemy.h"
 #include "Actor/Character/Component/MovementComponent.h"
 #include "Actor/Character/Component/WaterBalloonComponent.h"
+#include "Actor/Character/Enemy/AI/BT/Actions/EscapeHelper.h"
 
 using namespace engine;
 
@@ -48,17 +49,19 @@ namespace enemy_ai
 				ts
 			);
 
-			if (placementTile == Vector2::Zero) // no need to place water balloons
+			if (placementTile == Vector2::Zero)
 				return BTStatus::Failure;
 
 			if (start == placementTile)
 			{
 				if (waterBalloon->RequestGenerateWaterBalloon())
+				{
+					EvaluateAndPrepareEscape(start, ts);
 					return BTStatus::Success;
+				}
 				return BTStatus::Running;
 			}
 
-			// move 1 tile step on the way to nearest box
 			Vector2 nextPos = AStarPathfinder::GetNextStep(start, placementTile, canMoveNormal, ts);
 			if (nextPos == Vector2::Zero)
 				return BTStatus::Failure;
@@ -70,11 +73,19 @@ namespace enemy_ai
 				nextPos.x / ts - start.x / ts,
 				nextPos.y / ts - start.y / ts
 			);
+			
+			enemy->ClearEscapePath();
 			movement->RequestMove(dir);
 			return BTStatus::Running;
 		}
 
 	private:
+		void EvaluateAndPrepareEscape(const Vector2& placementPos, int ts)
+		{
+			if (!EscapeHelper::ShouldKeepEscapePath(enemy, placementPos, ts))
+				enemy->ClearEscapePath();
+		}
+
 		Enemy* enemy;
 		MovementComponent* movement;
 		WaterBalloonComponent* waterBalloon;

@@ -7,8 +7,10 @@
 #include "Actor/Character/Component/MovementComponent.h"
 #include <queue>
 #include <unordered_set>
+#include <unordered_map>
 #include <utility>
 #include <limits>
+#include <algorithm>
 
 using namespace engine;
 
@@ -30,17 +32,65 @@ namespace enemy_ai
 			const Vector2 pos = enemy->GetPosition();
 			const int ts = Engine::Get().GetTileSize();
 
-			Vector2 dir = FindEscapeDir(pos, ts);
-			if (dir == Vector2::Zero)
+			const auto& escapePath = enemy->GetEscapePath();
+			if (!escapePath.empty())
+			{
+				if (escapePath.front() == pos)
+				{
+					auto updatedPath = escapePath;
+					updatedPath.erase(updatedPath.begin());
+					enemy->SetEscapePath(std::move(updatedPath));
+				}
+
+				const auto& currentPath = enemy->GetEscapePath();
+				if (!currentPath.empty())
+				{
+					Vector2 nextPos = currentPath.front();
+					Vector2 dir(
+						(nextPos.x - pos.x) / ts,
+						(nextPos.y - pos.y) / ts
+					);
+
+					if (enemy->QueryIsExplosionDangerAt(nextPos))
+					{
+						float explosionTime = enemy->QueryExplosionTimeAt(nextPos);
+						float currentSpeed = movement->GetMoveSpeed();
+						if (currentSpeed + DANGER_TIME_MARGIN >= explosionTime)
+						{
+							enemy->ClearEscapePath();
+						}
+						else
+						{
+							movement->RequestMove(dir);
+							return engine::BTStatus::Running;
+						}
+					}
+					else
+					{
+						movement->RequestMove(dir);
+						return engine::BTStatus::Running;
+					}
+				}
+			}
+
+			std::vector<Vector2> newPath = FindEscapePath(pos, ts);
+			if (newPath.empty())
 				return engine::BTStatus::Failure;
 
+			enemy->SetEscapePath(newPath);
+
+			Vector2 nextPos = newPath.front();
+			Vector2 dir(
+				(nextPos.x - pos.x) / ts,
+				(nextPos.y - pos.y) / ts
+			);
 			movement->RequestMove(dir);
 			return engine::BTStatus::Success;
 		}
 
 	private:
-		static constexpr int MAX_DEPTH = 8;
-		static constexpr float DANGER_TIME_MARGIN = 0.05f;
+		static constexpr int MAX_DEPTH = 15;
+		static constexpr float DANGER_TIME_MARGIN = 0.1f;
 
 		using TileKey = std::pair<int, int>;
 
@@ -57,8 +107,8 @@ namespace enemy_ai
 		struct SearchNode
 		{
 			Vector2 pos;
-			Vector2 firstDir;
 			int depth;
+			float arrivalTime;
 		};
 
 		TileKey Key(const Vector2& v, int ts) const
@@ -112,18 +162,37 @@ namespace enemy_ai
 			return CountSafeExits(pos, ts) * 10 + CountAdjacentBoxes(pos, ts);
 		}
 
-		bool CanTraverseDangerTile(const Vector2& next, int nextDepth, int ts, bool forceEscapeFromPlacedWB) const
+		bool CanTraverseDangerTile(const Vector2& next, float arrivalTime, int ts, bool forceEscape) const
 		{
-			if (!forceEscapeFromPlacedWB && !IsUsefulDangerTraversal(next, ts))
+			if (!forceEscape && !IsUsefulDangerTraversal(next, ts))
 				return false;
 
-			float arrivalTime = nextDepth * MovementComponent::SPEED_NORMAL;
 			float explosionTime = enemy->QueryExplosionTimeAt(next);
 			return arrivalTime + DANGER_TIME_MARGIN < explosionTime;
 		}
 
-		// Search the nearest safe tile with BFS
-		Vector2 SearchEscapeDir(
+		std::vector<Vector2> ReconstructPath(
+			const std::unordered_map<TileKey, TileKey, TileKeyHash>& cameFrom,
+			TileKey start, TileKey goal, int ts
+		) const
+		{
+			std::vector<Vector2> path;
+			TileKey current = goal;
+
+			while (current != start)
+			{
+				path.push_back(Vector2(current.first * ts, current.second * ts));
+				auto it = cameFrom.find(current);
+				if (it == cameFrom.end())
+					break;
+				current = it->second;
+			}
+
+			std::reverse(path.begin(), path.end());
+			return path;
+		}
+
+		std::vector<Vector2> SearchEscapePath(
 			const Vector2& start, int ts, bool allowTimedDangerTraversal, bool forceEscapeFromPlacedWB
 		) const
 		{
@@ -131,13 +200,17 @@ namespace enemy_ai
 				Vector2::Up, Vector2::Down, Vector2::Left, Vector2::Right
 			};
 
+			float currentSpeed = movement ? movement->GetMoveSpeed() : MovementComponent::SPEED_NORMAL;
+
 			std::queue<SearchNode> q;
 			std::unordered_set<TileKey, TileKeyHash> visited;
+			std::unordered_map<TileKey, TileKey, TileKeyHash> cameFrom;
 
-			q.push({ start, Vector2::Zero, 0 });
-			visited.insert(Key(start, ts));
+			TileKey startKey = Key(start, ts);
+			q.push({ start, 0, 0.0f });
+			visited.insert(startKey);
 
-			Vector2 bestDir = Vector2::Zero;
+			Vector2 bestSafePos = Vector2::Zero;
 			int bestDepth = (std::numeric_limits<int>::max)();
 			int bestValue = (std::numeric_limits<int>::min)();
 
@@ -149,22 +222,23 @@ namespace enemy_ai
 				if (node.depth >= MAX_DEPTH) continue;
 				if (node.depth > bestDepth) continue;
 
+				TileKey nodeKey = Key(node.pos, ts);
+
 				for (const Vector2& dir : dirs)
 				{
 					Vector2 next = node.pos + dir * ts;
-					TileKey nk = Key(next, ts);
+					TileKey nextKey = Key(next, ts);
 
-					if (visited.find(nk) != visited.end())
+					if (visited.find(nextKey) != visited.end())
 						continue;
 					if (!enemy->QueryCanMove(node.pos, next))
 						continue;
 
-					visited.insert(nk);
+					visited.insert(nextKey);
+					cameFrom[nextKey] = nodeKey;
 
-					Vector2 fd = (node.firstDir == Vector2::Zero)
-						? dir
-						: node.firstDir;
 					int nextDepth = node.depth + 1;
+					float nextArrivalTime = node.arrivalTime + currentSpeed;
 
 					if (!enemy->QueryIsExplosionDangerAt(next))
 					{
@@ -173,33 +247,35 @@ namespace enemy_ai
 						{
 							bestDepth = nextDepth;
 							bestValue = candValue;
-							bestDir = fd;
+							bestSafePos = next;
 						}
 						continue;
 					}
 
-					// danger traverse guard(1. check whether allowed 2. judge whether it's worthwhile)
 					if (!allowTimedDangerTraversal)
 						continue;
-					if (!CanTraverseDangerTile(next, nextDepth, ts, forceEscapeFromPlacedWB))
+					if (!CanTraverseDangerTile(next, nextArrivalTime, ts, forceEscapeFromPlacedWB))
 						continue;
 
-					q.push({ next, fd, nextDepth });
+					q.push({ next, nextDepth, nextArrivalTime });
 				}
 			}
 
-			return bestDir;
+			if (bestSafePos == Vector2::Zero)
+				return std::vector<Vector2>();
+
+			return ReconstructPath(cameFrom, startKey, Key(bestSafePos, ts), ts);
 		}
 
-		Vector2 FindEscapeDir(const Vector2& start, int ts) const
+		std::vector<Vector2> FindEscapePath(const Vector2& start, int ts) const
 		{
 			const bool forceEscapeFromPlacedWB = enemy->QueryHasWaterBalloonAt(start);
 
-			Vector2 safeOnlyDir = SearchEscapeDir(start, ts, false, forceEscapeFromPlacedWB);
-			if (safeOnlyDir != Vector2::Zero)
-				return safeOnlyDir;
+			auto safeOnlyPath = SearchEscapePath(start, ts, false, forceEscapeFromPlacedWB);
+			if (!safeOnlyPath.empty())
+				return safeOnlyPath;
 
-			return SearchEscapeDir(start, ts, true, forceEscapeFromPlacedWB);
+			return SearchEscapePath(start, ts, true, forceEscapeFromPlacedWB);
 		}
 
 		Enemy* enemy;

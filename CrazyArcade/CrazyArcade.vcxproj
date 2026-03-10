@@ -136,6 +136,8 @@
     <ClInclude Include="Actor\Character\Component\State\IState.h" />
     <ClInclude Include="Actor\Character\Component\State\Normal\NormalState.h" />
     <ClInclude Include="Actor\Character\Component\WaterBalloonComponent.h" />
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\EscapeHelper.h" />
+    <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\ExploitDangerAction_new.h" />
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\PlaceWaterBalloonAction.h" />
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\PlaceWaterBalloonNearBoxAction.h" />
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Conditions\HasWaterBalloonAmmoCondition.h" />

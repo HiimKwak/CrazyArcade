@@ -21,6 +21,11 @@ public:
 	const std::vector<Vector2>& GetDebugPath() const { return debugPath; }
 	void SetDebugPath(std::vector<Vector2> path) { debugPath = std::move(path); }
 
+	const std::vector<Vector2>& GetEscapePath() const { return escapePath; }
+	void SetEscapePath(std::vector<Vector2> path) { escapePath = std::move(path); }
+	void ClearEscapePath() { escapePath.clear(); }
+
 private:
 	std::vector<Vector2> debugPath;
+	std::vector<Vector2> escapePath;
 };
