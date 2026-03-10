@@ -16,6 +16,7 @@
 #include "Interface/IWorldQueryService.h"
 #include "Actor/Character/Component/Item/ItemComponent.h"
 #include "Actor/Environments/Wall.h"
+#include "Engine/Engine.h"
 
 using namespace engine;
 
@@ -33,6 +34,13 @@ public:
 	void BindActors(const std::vector<Actor*>* inActors)
 	{
 		actors = inActors;
+	}
+
+	void BindMapBounds(const Vector2* inMapOrigin, const int* inMapWidth, const int* inMapHeight)
+	{
+		mapOrigin = inMapOrigin;
+		mapWidth = inMapWidth;
+		mapHeight = inMapHeight;
 	}
 
 	CollisionTargets CollectCollisionTargets() const
@@ -98,6 +106,24 @@ public:
 				return false;
 		}
 		return true;
+	}
+
+	bool IsInsideGameMap(const Vector2& position) const override
+	{
+		if (!mapOrigin || !mapWidth || !mapHeight)
+			return true;
+
+		if (*mapWidth <= 0 || *mapHeight <= 0)
+			return false;
+
+		const int ts = engine::Engine::Get().GetTileSize();
+		const int left = mapOrigin->x;
+		const int top = mapOrigin->y;
+		const int right = mapOrigin->x + (*mapWidth * ts - 1);
+		const int bottom = mapOrigin->y + (*mapHeight * ts - 1);
+
+		return (position.x >= left && position.x <= right &&
+			position.y >= top && position.y <= bottom);
 	}
 
 	Vector2 GetActorPosition(ActorType type) const
@@ -266,4 +292,7 @@ private:
 
 private:
 	const std::vector<Actor*>* actors = nullptr;
+	const Vector2* mapOrigin = nullptr;
+	const int* mapWidth = nullptr;
+	const int* mapHeight = nullptr;
 };

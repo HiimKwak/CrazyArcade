@@ -56,8 +56,14 @@ void BubbleExplosion::PropagateInDirection(const Vector2& direction, int range)
 			IWorldQueryProvider* provider = dynamic_cast<IWorldQueryProvider*>(owner);
 			IWorldQueryService* worldQuery = provider ? provider->GetWorldQueryService() : nullptr;
 
-			if (worldQuery && !worldQuery->CanExplosionPenetrate(tilePos))
-				break;
+			if (worldQuery)
+			{
+				if (!worldQuery->IsInsideGameMap(tilePos))
+					break;
+
+				if (!worldQuery->CanExplosionPenetrate(tilePos))
+					break;
+			}
 		
 			ExplosionTile* tile = new ExplosionTile(tilePos);
 			tile->Activate();

@@ -11,10 +11,7 @@ ExplosionTile::ExplosionTile(const Vector2& tilePos)
 
 void ExplosionTile::Draw()
 {
-	GameLevel* gameLevel = owner ? dynamic_cast<GameLevel*>(owner) : nullptr;
-
-	if (gameLevel && gameLevel->IsInsideGameMap_Screen(GetPosition()))
-		super::Draw();
+	super::Draw();
 }
 
 void ExplosionTile::Tick(float deltaTime)

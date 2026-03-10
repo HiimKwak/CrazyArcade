@@ -23,6 +23,8 @@ public:
 	void OnItemAcquired(ItemType type);
 	bool RequestUseItem(ItemType type);
 
+	const std::map<ItemType, std::unique_ptr<IUsableItem>>& GetUsableItems() const { return usableItems; }
+
 private:
 	std::unique_ptr<IUsableItem> CreateUsableItem(ItemType type);
 	void ApplyPassiveItemEffect(ItemType type);

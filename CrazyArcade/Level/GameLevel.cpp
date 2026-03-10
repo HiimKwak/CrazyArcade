@@ -20,56 +20,38 @@
 #include "Render/Renderer.h"
 
 #include <iostream>	
-#include <Windows.h>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <limits>
 
 using namespace engine;
 
-Vector2 GameLevel::WorldToScreen(const Vector2& worldPos) const
-{
-	return mapOrigin + worldPos * Engine::Get().GetTileSize();
-}
-
-bool GameLevel::IsInsideGameMap_Screen(const Vector2& screenPos) const
-{
-	if (mapWidth <= 0 || mapHeight <= 0)
-		return false;
-
-	const int ts = Engine::Get().GetTileSize();
-	const int left = mapOrigin.x;
-	const int top = mapOrigin.y;
-	const int right = mapOrigin.x + (mapWidth * ts - 1);
-	const int bottom = mapOrigin.y + (mapHeight * ts - 1);
-
-	return (screenPos.x >= left && screenPos.x <= right &&
-		screenPos.y >= top && screenPos.y <= bottom);
-}
-
-bool GameLevel::IsInsideGameMap_World(const Vector2& worldPos) const
-{
-	return IsInsideGameMap_Screen(WorldToScreen(worldPos));
-}
-
-
 GameLevel::GameLevel()
 {
 	worldQuery.BindActors(&actors);
+	worldQuery.BindMapBounds(&mapOrigin, &mapWidth, &mapHeight);
 	collisionSystem.BindActors(&actors);
 	renderService.SetActors(&actors);
 	renderService.SetTileSize(Engine::Get().GetTileSize());
 	renderService.SetCurrentStage(1);
+
+	mapLoader.SetHudWidth(RenderService::GetHudWidth());
+
 	LoadMap("Stage1.txt");
 }
 
 GameLevel::GameLevel(int stage)
 {
 	worldQuery.BindActors(&actors);
+	worldQuery.BindMapBounds(&mapOrigin, &mapWidth, &mapHeight);
 	collisionSystem.BindActors(&actors);
 	renderService.SetActors(&actors);
 	renderService.SetTileSize(Engine::Get().GetTileSize());
 	currentStage = stage;
 	renderService.SetCurrentStage(stage);
+
+	mapLoader.SetHudWidth(RenderService::GetHudWidth());
 
 	char filename[32];
 	sprintf_s(filename, 32, "Stage%d.txt", stage);
@@ -90,7 +72,6 @@ void GameLevel::Tick(float deltaTime)
 		debugPathBlinkElapsed -= blinkCycle;
 	debugPathVisible = (debugPathBlinkElapsed < DEBUG_PATH_ON_TIME);
 
-	// ���� ���� ó��
 	if (CheckGameOver())
 	{
 		if (Input::Get().GetKeyDown(VK_ESCAPE))
@@ -104,7 +85,6 @@ void GameLevel::Tick(float deltaTime)
 		return;
 	}
 
-	// ���� Ŭ���� ó��
 	if (CheckGameClear())
 	{
 		if (!isClearWaiting)
@@ -116,7 +96,6 @@ void GameLevel::Tick(float deltaTime)
 
 		clearTimer.Tick(deltaTime);
 
-		// NŰ�� �����ų� 10�ʰ� ������ ���� ����������
 		if (Input::Get().GetKeyDown('N') || clearTimer.IsTimeout())
 		{
 			LoadNextMap();
@@ -162,161 +141,65 @@ void GameLevel::Draw()
 
 	Player* player = FindPlayer();
 	renderService.DrawHud(player);
-	renderService.DrawGameState(CheckGameOver(), CheckGameClear());
+	
+	int remainingStages = MAX_STAGE - currentStage;
+	float remainingTime = isClearWaiting ? clearTimer.GetRemainingTime() : 0.0f;
+	renderService.DrawGameState(CheckGameOver(), CheckGameClear(), remainingStages, remainingTime);
 }
 
 void GameLevel::LoadMap(const char* filename)
 {
-	/** ���� �Ҷ����� **/
-	char path[2048] = {};
-	sprintf_s(path, 2048, "../Assets/%s", filename);
+	auto SpawnActorFn = [this](int character, const Vector2& position) {
+		SpawnActor(character, position);
+	};
 
-	FILE* file = nullptr;
-	fopen_s(&file, path, "rb");
+	MapData mapData = mapLoader.LoadMap(filename, SpawnActorFn);
 
-	if (!file)
+	mapWidth = mapData.width;
+	mapHeight = mapData.height;
+	mapOrigin = mapData.origin;
+
+	mapLoader.SpawnBoundaryWalls(mapData, SpawnActorFn);
+}
+
+void GameLevel::SpawnActor(int character, const Vector2& position)
+{
+	switch (character)
 	{
-		std::cerr << "Failed to open map file.\n";
-		__debugbreak();
+	case '0':
+		AddNewActor(new Ground(position));
+		break;
+	case '1':
+		AddNewActor(new Wall(position));
+		break;
+	case '2':
+		AddNewActor(new Box(position));
+		AddNewActor(new Ground(position));
+		break;
+	case '3':
+	{
+		Player* player = new Player(position);
+		player->SetDelegate(this);
+		player->SetQueryDelegate(&worldQuery);
+		AddNewActor(player);
+		AddNewActor(new Ground(position));
+		break;
 	}
-
-	/** ���ۿ� ��� **/
-	fseek(file, 0, SEEK_END);
-	size_t fileSize = ftell(file);
-	rewind(file);
-
-	char* data = new char[fileSize + 1];
-	size_t readSize = fread(data, sizeof(char), fileSize, file);
-	data[fileSize] = '\0';
-
-	// 1) �� ũ�� ����(mapWidth/mapHeight)
-	int computedMapWidth = 0;
-	int computedMapHeight = 0;
-	int currentLineWidth = 0;
-	bool hasContent = false;
-
-	for (size_t i = 0; i < fileSize; ++i)
+	case '4':
 	{
-		if (data[i] == '\r')
-			continue;
-
-		if (data[i] == '\n')
-		{
-			if (currentLineWidth > 0)
-			{
-				if (currentLineWidth > computedMapWidth) computedMapWidth = currentLineWidth;
-				computedMapHeight++;
-				currentLineWidth = 0;
-			}
-			continue;
-		}
-		++currentLineWidth;
-		hasContent = true;
+		Enemy* enemy = new Enemy(position);
+		enemy->SetDelegate(this);
+		enemy->SetQueryDelegate(&worldQuery);
+		AddNewActor(enemy);
+		AddNewActor(new Ground(position));
+		break;
 	}
-	if (currentLineWidth > 0)
-	{
-		if (currentLineWidth > computedMapWidth) computedMapWidth = currentLineWidth;
-		computedMapHeight++;
-	}
-
-	mapWidth = computedMapWidth;
-	mapHeight = computedMapHeight;
-
-	const int gameW = Engine::Get().GetGameWidth();
-	const int gameH = Engine::Get().GetGameHeight();
-
-	// 가상 좌표계에서 맵 중앙 정렬
-	const int ts = Engine::Get().GetTileSize();
-	const int dts = Engine::Get().GetDisplayTileSize();
-	const int virtualGameW = gameW * ts / dts;
-	const int virtualGameH = gameH * 2 * ts / dts;
-	const int mapPixelW = mapWidth * ts;
-	const int mapPixelH = mapHeight * ts;
-
-	mapOrigin = Vector2(
-		((virtualGameW - mapPixelW) / 2 / ts) * ts,
-		((virtualGameH - mapPixelH) / 2 / ts) * ts
-	);
-	screenCenter = Vector2(virtualGameW / 2, virtualGameH / 2);
-
-	/** �о�� ���ڿ� �м�(parsing) **/
-	int index = 0;
-	Vector2 worldPos = Vector2::Zero;
-
-	while (index < (int)fileSize)
-	{
-		char mapCharacter = data[index];
-		++index;
-
-		if (mapCharacter == '\r')
-			continue;
-
-		if (mapCharacter == '\n')
-		{
-			++worldPos.y;
-			worldPos.x = 0;
-			continue;
-		}
-
-		Vector2 screenPos = WorldToScreen(worldPos);
-
-		switch (mapCharacter)
-		{
-		case '0':
-			AddNewActor(new Ground(screenPos));
-			break;
-		case '1':
-			AddNewActor(new Wall(screenPos));
-			break;
-		case '2':
-			AddNewActor(new Box(screenPos));
-			AddNewActor(new Ground(screenPos));
-			break;
-		case '3':
-		{
-			Player* player = new Player(screenPos);
-			player->SetDelegate(this);
-			player->SetQueryDelegate(&worldQuery);
-			AddNewActor(player);
-			AddNewActor(new Ground(screenPos));
-			break;
-		}
-		case '4':
-		{
-			Enemy* enemy = new Enemy(screenPos);
-			enemy->SetDelegate(this);
-			enemy->SetQueryDelegate(&worldQuery);
-			AddNewActor(enemy);
-			AddNewActor(new Ground(screenPos));
-			break;
-		}
-		case '5':
-			AddNewActor(new Bush(screenPos));
-			break;
-		}
-
-		++worldPos.x;
-	}
-
-	delete[] data;
-	fclose(file);
-
-	// �� �׵θ� ����
-	for (int x = -1; x <= mapWidth; ++x)
-	{
-		Vector2 fenceUp = WorldToScreen(Vector2(x, -1));
-		AddNewActor(new Wall(fenceUp, false));
-		Vector2 fenceDown = WorldToScreen(Vector2(x, mapHeight));
-		AddNewActor(new Wall(fenceDown, false));
-	}
-
-
-	for (int y = 0; y < mapHeight; ++y)
-	{
-		Vector2 fenceLeft = WorldToScreen(Vector2(-1, y));
-		AddNewActor(new Wall(fenceLeft, false));
-		Vector2 fenceRight = WorldToScreen(Vector2(mapWidth, y));
-		AddNewActor(new Wall(fenceRight, false));
+	case '5':
+		AddNewActor(new Bush(position));
+		break;
+	case 'W': // Boundary wall
+		AddNewActor(new Wall(position, false));
+		break;
 	}
 }
 

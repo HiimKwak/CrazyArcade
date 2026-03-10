@@ -1,6 +1,16 @@
 #pragma once
 
+#include "Engine/Engine.h"
+#include "Render/Renderer.h"
 #include "Math/Vector2.h"
+#include "Actor/Character/Player/Player.h"
+#include "Actor/Character/Enemy/Enemy.h"
+#include "Actor/Character/Component/StatsComponent.h"
+
+#include <vector>
+#include <string>
+#include <cwchar>
+#include <stdlib.h>
 
 using namespace engine;
 
@@ -11,10 +21,242 @@ class RenderService
 public:
 	virtual ~RenderService() = default;
 
-	virtual void SetCurrentStage(int stage) = 0;
-	virtual void SetDebugPathVisible(bool visible) = 0;
+	void SetCurrentStage(int stage)
+	{
+		currentStage = stage;
+	}
 
-	virtual void DrawHud(Player* player) = 0;
-	virtual void DrawDebugPathOverlay() = 0;
-	virtual void DrawGameState(bool isGameOver, bool isGameClear) = 0;
+	void SetDebugPathVisible(bool visible)
+	{
+		debugPathVisible = visible;
+	}
+
+	void SetActors(const std::vector<Actor*>* inActors)
+	{
+		actors = inActors;
+	}
+
+	void SetTileSize(int ts)
+	{
+		tileSize = ts;
+	}
+
+	static int GetHudWidth()
+	{
+		return HUD_WIDTH;
+	}
+
+	void DrawHud(Player* player)
+	{
+		const int viewportW = engine::Engine::Get().GetWidth();
+		const int viewportH = engine::Engine::Get().GetHeight();
+		const int hudX = viewportW - HUD_WIDTH + 1;
+
+		for (int y = 0; y < viewportH; ++y)
+		{
+			Renderer::Get().Submit(L"|", Vector2(hudX - 1, y), Color::White, 100);
+		}
+
+		swprintf_s(stageStr, _countof(stageStr), L"Stage: %d", currentStage);
+		Renderer::Get().Submit(stageStr, Vector2(hudX, 1), Color::White, 100);
+
+		if (player)
+		{
+			auto statsComp = player->GetComponent<StatsComponent>();
+
+			swprintf_s(hpStr, _countof(hpStr), L"HP: %d",
+				statsComp ? statsComp->GetLives() : 0);
+			Renderer::Get().Submit(hpStr, Vector2(hudX, 5), Color::Yellow, 100);
+
+			swprintf_s(bubbleStr, _countof(bubbleStr), L"Bubble: %d/%d",
+				statsComp ? statsComp->GetBubbleAmmo() : 0,
+				statsComp ? statsComp->GetMaxBubbleAmmo() : 0);
+			Renderer::Get().Submit(bubbleStr, Vector2(hudX, 7), Color::Yellow, 100);
+
+			swprintf_s(rangeStr, _countof(rangeStr), L"Range: %d",
+				statsComp ? statsComp->GetBubbleRange() : 0);
+			Renderer::Get().Submit(rangeStr, Vector2(hudX, 9), Color::Yellow, 100);
+
+			// 획득한 아이템 표시
+			Renderer::Get().Submit(L"Items:", Vector2(hudX, 12), Color::Skyblue, 100);
+
+			auto itemComp = player->GetComponent<ItemComponent>();
+			if (itemComp)
+			{
+				const auto& items = itemComp->GetUsableItems();
+				int itemY = 13;
+
+				if (items.empty())
+				{
+					Renderer::Get().Submit(L"  None", Vector2(hudX, itemY), Color::White, 100);
+				}
+				else
+				{
+					for (const auto& [itemType, item] : items)
+					{
+						const wchar_t* itemName = GetItemName(itemType);
+						Renderer::Get().Submit(itemName, Vector2(hudX, itemY++), Color::Green, 100);
+					}
+				}
+			}
+		}
+
+		Renderer::Get().Submit(L"Menu: Esc", Vector2(hudX, viewportH - 3), Color::Orange, 100);
+		Renderer::Get().Submit(L"Quit: q", Vector2(hudX, viewportH - 2), Color::Orange, 100);
+	}
+
+	void DrawDebugPathOverlay()
+	{
+		if (!debugPathVisible || !actors)
+			return;
+
+		for (Actor* actor : *actors)
+		{
+			if (!actor->IsTypeOf<Enemy>()) continue;
+			const auto& path = actor->As<Enemy>()->GetDebugPath();
+			for (int i = 1; i < static_cast<int>(path.size()); ++i)
+				Renderer::Get().SubmitRect(path[i].x, path[i].y, tileSize, tileSize, Color::White, 4);
+		}
+	}
+
+	void DrawGameState(bool isGameOver, bool isGameClear, int remainingStages, float remainingTime)
+	{
+		const int viewportW = engine::Engine::Get().GetWidth();
+		const int viewportH = engine::Engine::Get().GetHeight();
+		const int centerX = (viewportW - HUD_WIDTH) / 2;
+		const int centerY = viewportH / 2;
+
+		const int boxWidth = 40;
+		const int boxHeight = 16;
+
+		if (isGameOver)
+		{
+			for (int y = centerY - boxHeight; y <= centerY + boxHeight; ++y)
+			{
+				for (int x = centerX - boxWidth; x <= centerX + boxWidth; ++x)
+				{
+					Renderer::Get().Submit(L" ", Vector2(x, y), Color::Black, 99);
+				}
+			}
+
+			for (int x = centerX - boxWidth; x <= centerX + boxWidth; ++x)
+			{
+				Renderer::Get().Submit(L"═", Vector2(x, centerY - boxHeight), Color::Red, 100);
+				Renderer::Get().Submit(L"═", Vector2(x, centerY + boxHeight), Color::Red, 100);
+			}
+			for (int y = centerY - boxHeight; y <= centerY + boxHeight; ++y)
+			{
+				Renderer::Get().Submit(L"║", Vector2(centerX - boxWidth, y), Color::Red, 100);
+				Renderer::Get().Submit(L"║", Vector2(centerX + boxWidth, y), Color::Red, 100);
+			}
+			Renderer::Get().Submit(L"╔", Vector2(centerX - boxWidth, centerY - boxHeight), Color::Red, 100);
+			Renderer::Get().Submit(L"╗", Vector2(centerX + boxWidth, centerY - boxHeight), Color::Red, 100);
+			Renderer::Get().Submit(L"╚", Vector2(centerX - boxWidth, centerY + boxHeight), Color::Red, 100);
+			Renderer::Get().Submit(L"╝", Vector2(centerX + boxWidth, centerY + boxHeight), Color::Red, 100);
+
+			const wchar_t* title1 = L"█▀▀ ▄▀█ █▀▄▀█ █▀▀   █▀█ █░█ █▀▀ █▀█";
+			const wchar_t* title2 = L"█▄█ █▀█ █░▀░█ ██▄   █▄█ ▀▄▀ ██▄ █▀▄";
+			int title1Len = static_cast<int>(wcslen(title1));
+			int title2Len = static_cast<int>(wcslen(title2));
+			Renderer::Get().Submit(title1, Vector2(centerX - title1Len / 2, centerY - 4), Color::Red, 100);
+			Renderer::Get().Submit(title2, Vector2(centerX - title2Len / 2, centerY - 3), Color::Red, 100);
+
+			const wchar_t* msg1 = L"Press ESC to return to Main Menu";
+			int msg1Len = static_cast<int>(wcslen(msg1));
+			Renderer::Get().Submit(msg1, Vector2(centerX - msg1Len / 2, centerY + 2), Color::White, 100);
+		}
+
+		if (isGameClear)
+		{
+			for (int y = centerY - boxHeight; y <= centerY + boxHeight; ++y)
+			{
+				for (int x = centerX - boxWidth; x <= centerX + boxWidth; ++x)
+				{
+					Renderer::Get().Submit(L" ", Vector2(x, y), Color::Black, 99);
+				}
+			}
+
+			for (int x = centerX - boxWidth; x <= centerX + boxWidth; ++x)
+			{
+				Renderer::Get().Submit(L"═", Vector2(x, centerY - boxHeight), Color::Yellow, 100);
+				Renderer::Get().Submit(L"═", Vector2(x, centerY + boxHeight), Color::Yellow, 100);
+			}
+			for (int y = centerY - boxHeight; y <= centerY + boxHeight; ++y)
+			{
+				Renderer::Get().Submit(L"║", Vector2(centerX - boxWidth, y), Color::Yellow, 100);
+				Renderer::Get().Submit(L"║", Vector2(centerX + boxWidth, y), Color::Yellow, 100);
+			}
+			Renderer::Get().Submit(L"╔", Vector2(centerX - boxWidth, centerY - boxHeight), Color::Yellow, 100);
+			Renderer::Get().Submit(L"╗", Vector2(centerX + boxWidth, centerY - boxHeight), Color::Yellow, 100);
+			Renderer::Get().Submit(L"╚", Vector2(centerX - boxWidth, centerY + boxHeight), Color::Yellow, 100);
+			Renderer::Get().Submit(L"╝", Vector2(centerX + boxWidth, centerY + boxHeight), Color::Yellow, 100);
+
+			const wchar_t* title1 = L"█▀ ▀█▀ ▄▀█ █▀▀ █▀▀   █▀▀ █░░ █▀▀ ▄▀█ █▀█";
+			const wchar_t* title2 = L"▄█ ░█░ █▀█ █▄█ ██▄   █▄▄ █▄▄ ██▄ █▀█ █▀▄";
+			int title1Len = static_cast<int>(wcslen(title1));
+			int title2Len = static_cast<int>(wcslen(title2));
+			Renderer::Get().Submit(title1, Vector2(centerX - title1Len / 2, centerY - 6), Color::Yellow, 100);
+			Renderer::Get().Submit(title2, Vector2(centerX - title2Len / 2, centerY - 5), Color::Yellow, 100);
+
+			wchar_t countdownStr[64];
+			swprintf_s(countdownStr, _countof(countdownStr), L"Next stage in:  %d seconds", static_cast<int>(remainingTime) + 1);
+			int countdownLen = static_cast<int>(wcslen(countdownStr));
+			Renderer::Get().Submit(countdownStr, Vector2(centerX - countdownLen / 2, centerY - 1), Color::Skyblue, 100);
+
+			if (remainingStages > 0)
+			{
+				const wchar_t* msg1 = L"Press N to skip to next stage";
+				const wchar_t* msg2 = L"Press ESC to return to Main Menu";
+				int msg1Len = static_cast<int>(wcslen(msg1));
+				int msg2Len = static_cast<int>(wcslen(msg2));
+				Renderer::Get().Submit(msg1, Vector2(centerX - msg1Len / 2, centerY + 3), Color::Green, 100);
+				Renderer::Get().Submit(msg2, Vector2(centerX - msg2Len / 2, centerY + 5), Color::Orange, 100);
+			}
+			else
+			{
+				const wchar_t* msg1 = L"★ ALL STAGES CLEARED! ★";
+				const wchar_t* msg2 = L"Press ESC to return to Main Menu";
+				int msg1Len = static_cast<int>(wcslen(msg1));
+				int msg2Len = static_cast<int>(wcslen(msg2));
+				Renderer::Get().Submit(msg1, Vector2(centerX - msg1Len / 2, centerY + 3), Color::Yellow, 100);
+				Renderer::Get().Submit(msg2, Vector2(centerX - msg2Len / 2, centerY + 5), Color::Orange, 100);
+			}
+		}
+	}
+
+private:
+	int GetCenteredX(const wchar_t* text) const
+	{
+		const int viewportW = engine::Engine::Get().GetWidth();
+		const int textLen = static_cast<int>(wcslen(text));
+		return (viewportW - textLen) / 2;
+	}
+
+	const wchar_t* GetItemName(ItemType type) const
+	{
+		switch (type)
+		{
+		case ItemType::BubbleUpgrade:
+			return L"  ◆ Bubble+";
+		case ItemType::Roller:
+			return L"  ◇ Roller";
+		case ItemType::Shield:
+			return L"  ◈ Shield";
+		default:
+			return L"  ? Unknown";
+		}
+	}
+
+private:
+	static constexpr int HUD_WIDTH = 20;
+
+	int currentStage = 1;
+	bool debugPathVisible = false;
+	int tileSize = 32;
+	const std::vector<Actor*>* actors = nullptr;
+
+	wchar_t stageStr[64] = {};
+	wchar_t hpStr[32] = {};
+	wchar_t bubbleStr[32] = {};
+	wchar_t rangeStr[32] = {};
 };

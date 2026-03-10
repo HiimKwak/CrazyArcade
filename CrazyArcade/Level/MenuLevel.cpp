@@ -60,10 +60,41 @@ void MenuLevel::Tick(float deltaTime)
 
 void MenuLevel::Draw()
 {
-	const wchar_t* title = L"Crazy Arcade";
-	size_t title_length = wcslen(title) + 1;
-	Vector2 title_pos = GetCenterCoord(title_length) - Vector2(0, 5);
-	Renderer::Get().Submit(L"Crazy Arcade", title_pos);
+	const wchar_t* title1 = L"   ⣠⣤⣤⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⡏⠙⣷⠀⠀     ";
+	const wchar_t* title2 = L"⠀⣰⠟⠉⠀⠀⣈⣿⣤⠶⠶⣦⣀⣴⠶⠶⠶⣤⣀⡶⠶⠶⠶⠶⠶⡶⠶⣆⣠⡶⠶⣄⠀⠀⢠⡞⠋⠁⠉⠉⠛⣦⣀⡴⠶⠶⣆⣠⡴⠶⠶⣆⣠⡴⠶⠶⢶⣤⡀⢀⡤⠶⠶⢿⠃⠀⣿⣠⡴⠶⠶⢶⣄⠀";
+	const wchar_t* title3 = L"⢸⡏⠀⣠⡞⠛⢻⡟⠁⢀⣠⣿⠏⠀⢀⣀⡀⠈⢻⣧⣤⡄⠀⠀⣰⠀⠀⣿⣿⠀⠀⣿⠀⠀⣿⠀⢀⡾⠻⣦⠀⢸⡏⠀⢀⣠⣿⠋⠀⣀⣤⣿⠋⠀⣀⣀⠀⠈⢿⡟⠁⢀⣠⣼⠀⠀⣿⠋⠀⣀⠀⠀⢸⡷";
+	const wchar_t* title4 = L"⢿⡅⠀⣿⡀⠀⢸⡇⠀⢸⡇⣿⠀⠀⣿⣉⣿⠀⠈⣿⠟⠀⢀⣼⣿⠀⠀⣿⣿⠀⠀⣿⠀⠀⣿⠀⢸⡿⠟⠃⠀⢸⡇⠀⣿⠉⣿⠀⠰⣏⣉⣿⠀⠸⣏⣙⡇⠀⢸⡃⠀⢿⣉⣿⠃⠀⣇⠀⠸⡅⢀⣴⡟⠁";
+	const wchar_t* title5 = L"⠸⣧⠀⠘⠷⢦⣼⡇⠀⢸⡇⠹⣦⡀⠈⠉⣿⠀⠐⠃⠀⠀⠉⠉⢻⣧⠀⠈⠁⠀⠀⣿⠀⠀⣿⠀⢸⣧⣤⣤⠀⢸⡇⠀⣿⠀⠻⣆⠀⠈⠉⣿⣄⠀⠈⠙⣇⠀⢸⣧⡀⠀⠉⠁⢀⣴⢿⣄⠀⠉⠉⠉⣿⠀";
+	const wchar_t* title6 = L"⠀⠙⠷⣤⣀⣀⣈⡿⠶⠛⠀⠀⠈⠛⠶⠶⠛⠶⠾⠶⠶⠶⠶⠶⠟⠉⢻⡶⠖⠀⢀⡿⠀⠀⣿⡀⢸⡏⠈⣿⠀⢸⡷⠶⠋⠀⠀⠉⠛⠶⠾⠋⠉⠛⠶⠾⠛⠶⠞⠉⠙⠳⠶⠾⠛⠁⠀⠙⠛⠶⠶⠶⠋⠀";
+	const wchar_t* title7 = L"⠀⠀⠀⠈⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣄⣀⣤⡾⠁⠀⠀⠈⠛⠋⠁⠀⠈⠛⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀";
+	const wchar_t* title8 = L"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀";
+
+	size_t title1_length = wcslen(title1);
+	size_t title2_length = wcslen(title2);
+	size_t title3_length = wcslen(title3);
+	size_t title4_length = wcslen(title4);
+	size_t title5_length = wcslen(title5);
+	size_t title6_length = wcslen(title6);
+	size_t title7_length = wcslen(title7);
+	size_t title8_length = wcslen(title8);
+
+	Vector2 title1_pos = GetCenterCoord(title1_length + 1) - Vector2(0, 10);
+	Vector2 title2_pos = GetCenterCoord(title2_length + 1) - Vector2(0, 9);
+	Vector2 title3_pos = GetCenterCoord(title3_length + 1) - Vector2(0, 8);
+	Vector2 title4_pos = GetCenterCoord(title4_length + 1) - Vector2(0, 7);
+	Vector2 title5_pos = GetCenterCoord(title5_length + 1) - Vector2(0, 6);
+	Vector2 title6_pos = GetCenterCoord(title6_length + 1) - Vector2(0, 5);
+	Vector2 title7_pos = GetCenterCoord(title7_length + 1) - Vector2(0, 4);
+	Vector2 title8_pos = GetCenterCoord(title8_length + 1) - Vector2(0, 3);
+
+	Renderer::Get().Submit(title1, title1_pos, Color::Skyblue);
+	Renderer::Get().Submit(title2, title2_pos, Color::Skyblue);
+	Renderer::Get().Submit(title3, title3_pos, Color::Skyblue);
+	Renderer::Get().Submit(title4, title4_pos, Color::Skyblue);
+	Renderer::Get().Submit(title5, title5_pos, Color::Skyblue);
+	Renderer::Get().Submit(title6, title6_pos, Color::Skyblue);
+	Renderer::Get().Submit(title7, title7_pos, Color::Skyblue);
+	Renderer::Get().Submit(title8, title8_pos, Color::Skyblue);
 
 	for (int ix = 0; ix < static_cast<int>(menuList.size()); ++ix)
 	{
@@ -71,7 +102,7 @@ void MenuLevel::Draw()
 		Color textColor =
 			(ix == currentIndex) ? selectedColor : unselectedColor;
 		size_t textLength = wcslen(text) + 1;
-		Vector2 text_pos = GetCenterCoord(textLength) - Vector2(0, (3 - ix));
+		Vector2 text_pos = GetCenterCoord(textLength) - Vector2(0, (-3 - ix));
 
 		Renderer::Get().Submit(text, text_pos, textColor);
 	}

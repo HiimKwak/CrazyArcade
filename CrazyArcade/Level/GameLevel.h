@@ -6,13 +6,14 @@
 #include "Util/Timer.h"
 #include "Level/Query/WorldQueryService.h"
 #include "Level/Collision/ActorCollisionSystem.h"
-#include "Level/Render/GameRenderService.h"
+#include "Level/Render/RenderService.h"
+#include "Level/Loader/GameMapLoader.h"
 
 using namespace engine;
 
-class GameLevel : public Level, public IWorldQueryProvider, public CharacterCommandDelegate
+class GameLevel : public engine::Level, public IWorldQueryProvider, public CharacterCommandDelegate
 {
-	RTTI_DECLARATIONS(GameLevel, Level)
+	RTTI_DECLARATIONS(GameLevel, engine::Level)
 
 public:
 	GameLevel();
@@ -21,9 +22,6 @@ public:
 
 	virtual void Draw() override;
 
-	Vector2 WorldToScreen(const Vector2& worldPos) const;
-	bool IsInsideGameMap_Screen(const Vector2& worldPos) const;
-	bool IsInsideGameMap_World(const Vector2& worldPos) const;
 	inline Vector2 GetMapOrigin() const { return mapOrigin; }
 
 	IWorldQueryService* GetWorldQueryService() override { return &worldQuery; }
@@ -34,15 +32,10 @@ private:
 
 	void LoadMap(const char* filename);
 	void LoadNextMap();
+	void SpawnActor(int character, const Vector2& position);
 
 	bool CanMove(const Vector2& currentPos, const Vector2& nextPos);
-	bool CanExplosionPenetrate(const Vector2& position);
-
 	bool Push(const Vector2& pusherPos, const Vector2& targetPos);
-
-	void SendItemToPlayer(const Vector2& itemPos, ItemType itemType);
-
-	Vector2 GetActorPosition(ActorType type);
 
 	// CharacterCommandDelegate
 	virtual bool OnRequestMove(Character* character, const Vector2& targetPos) override;
@@ -52,25 +45,19 @@ private:
 	bool CheckGameClear();
 	bool CheckGameOver();
 
-	void HandleCommonHotkeys();
-
 	Player* FindPlayer() const;
-
-	void CollectCollisionTargets();
 
 private:
 	Vector2 mapOrigin = Vector2::Zero;
-	Vector2 screenCenter;
 
 	int mapWidth = 0;
 	int mapHeight = 0;
 
-	int targetScore = 0;
-
 	int currentStage = 1;
+	static constexpr int MAX_STAGE = 3;
 	bool isClearWaiting = false;
 	Timer clearTimer;
-	float clearWaitTime = 10.0f;
+	float clearWaitTime = 5.0f;
 	float debugPathBlinkElapsed = 0.0f;
 	bool  debugPathVisible = false;
 	static constexpr float DEBUG_PATH_ON_TIME = 0.2f;
@@ -78,6 +65,7 @@ private:
 
 	WorldQueryService worldQuery;
 	ActorCollisionSystem collisionSystem;
-	GameRenderService renderService;
+	RenderService renderService;
+	GameMapLoader mapLoader;
 };
 

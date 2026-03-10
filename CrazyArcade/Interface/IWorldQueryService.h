@@ -15,5 +15,6 @@ public:
 	virtual bool HasBoxAt(const Vector2& position) const = 0;
 	virtual bool HasExplosionAt(const Vector2& position) const = 0;
 	virtual bool CanExplosionPenetrate(const Vector2& position) const = 0;
+	virtual bool IsInsideGameMap(const Vector2& position) const = 0;
 	virtual void SendItemToCharacter(const Vector2& itemPos, ItemType itemType) = 0;
 };
