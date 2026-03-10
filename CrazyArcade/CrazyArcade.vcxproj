@@ -158,7 +158,6 @@
     <ClInclude Include="Actor\Character\Component\Item\ItemType.h" />
     <ClInclude Include="Actor\Character\Component\Item\IUsableItem.h" />
     <ClInclude Include="Actor\Character\Component\Item\Shield\ShieldItem.h" />
-    <ClInclude Include="Actor\Character\MoveSpeed.h" />
     <ClInclude Include="Actor\Environments\Wall.h" />
     <ClInclude Include="Actor\Character\Enemy\AI\AStarPathfinder.h" />
     <ClInclude Include="Actor\Character\Enemy\AI\BT\Actions\AStarMoveAction.h" />

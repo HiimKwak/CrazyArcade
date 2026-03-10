@@ -8,6 +8,10 @@ using namespace engine;
 class MovementComponent : public ICharacterComponent
 {
 public:
+	static constexpr float SPEED_FAST = 0.0625f;
+	static constexpr float SPEED_NORMAL = 0.125f;
+	static constexpr float SPEED_SLOW = 0.5f;
+
 	virtual void Tick(float deltaTime) override;
 
 	void StartMove(const Vector2& targetPosition);

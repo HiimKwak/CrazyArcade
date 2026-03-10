@@ -2,7 +2,6 @@
 #include "../StateComponent.h"
 #include "../../MovementComponent.h"
 #include "../../../Character.h"
-#include "../../../MoveSpeed.h"
 
 void NormalState::OnEnter(StateComponent* stateComp)
 {
@@ -11,7 +10,7 @@ void NormalState::OnEnter(StateComponent* stateComp)
 	{
 		character->ResetSpriteColor();
 		if (auto* movement = character->GetComponent<MovementComponent>())
-			movement->SetMoveSpeed(MoveSpeed::NORMAL);
+			movement->SetMoveSpeed(MovementComponent::SPEED_NORMAL);
 	}
 }
 

@@ -6,6 +6,8 @@
 #include "Actor/Character/Player/Player.h"
 #include "Actor/Character/Enemy/Enemy.h"
 #include "Actor/Character/Component/StatsComponent.h"
+#include "Actor/Character/Component/MovementComponent.h"
+#include "Actor/Character/Component/Item/ItemComponent.h"
 
 #include <vector>
 #include <string>
@@ -63,6 +65,7 @@ public:
 		if (player)
 		{
 			auto statsComp = player->GetComponent<StatsComponent>();
+			auto movementComp = player->GetComponent<MovementComponent>();
 
 			swprintf_s(hpStr, _countof(hpStr), L"HP: %d",
 				statsComp ? statsComp->GetLives() : 0);
@@ -77,14 +80,23 @@ public:
 				statsComp ? statsComp->GetExplosionRange() : 0);
 			Renderer::Get().Submit(rangeStr, Vector2(hudX, 9), Color::Yellow, 100);
 
-			// 획득한 아이템 표시
-			Renderer::Get().Submit(L"Items:", Vector2(hudX, 12), Color::Skyblue, 100);
+			float displaySpeed = 1.0f;
+			if (movementComp)
+			{
+				float currentSpeed = movementComp->GetMoveSpeed();
+				if (currentSpeed > 0.0f)
+					displaySpeed = MovementComponent::SPEED_NORMAL / currentSpeed;
+			}
+			swprintf_s(speedStr, _countof(speedStr), L"Speed: %.2fx", displaySpeed);
+			Renderer::Get().Submit(speedStr, Vector2(hudX, 11), Color::Yellow, 100);
+
+			Renderer::Get().Submit(L"Items:", Vector2(hudX, 14), Color::Skyblue, 100);
 
 			auto itemComp = player->GetComponent<ItemComponent>();
 			if (itemComp)
 			{
-				const auto& items = itemComp->GetUsableItems();
-				int itemY = 13;
+				const auto& items = itemComp->GetAcquiredItems();
+				int itemY = 15;
 
 				if (items.empty())
 				{
@@ -92,10 +104,11 @@ public:
 				}
 				else
 				{
-					for (const auto& [itemType, item] : items)
+					for (const auto& [itemType, count] : items)
 					{
 						const wchar_t* itemName = GetItemName(itemType);
-						Renderer::Get().Submit(itemName, Vector2(hudX, itemY++), Color::Green, 100);
+						swprintf_s(itemStr, _countof(itemStr), L"%s x%d", itemName, count);
+						Renderer::Get().Submit(itemStr, Vector2(hudX, itemY++), Color::Green, 100);
 					}
 				}
 			}
@@ -115,7 +128,11 @@ public:
 			if (!actor->IsTypeOf<Enemy>()) continue;
 			const auto& path = actor->As<Enemy>()->GetDebugPath();
 			for (int i = 1; i < static_cast<int>(path.size()); ++i)
-				Renderer::Get().SubmitRect(path[i].x, path[i].y, tileSize, tileSize, Color::White, 4);
+			{
+				int centerX = path[i].x + tileSize / 2;
+				int centerY = path[i].y + tileSize / 2;
+				Renderer::Get().SubmitPixel(centerX, centerY, Color::White, 4);
+			}
 		}
 	}
 
@@ -259,4 +276,6 @@ private:
 	wchar_t hpStr[32] = {};
 	wchar_t bubbleStr[32] = {};
 	wchar_t rangeStr[32] = {};
+	wchar_t speedStr[32] = {};
+	wchar_t itemStr[80] = {};
 };

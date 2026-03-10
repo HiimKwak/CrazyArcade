@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "MenuLevel.h"
+#include "GameLevel.h"
 #include "Game/Game.h"
 #include "Core/Input.h"
 #include "Util/Util.h"
@@ -9,9 +10,9 @@
 MenuLevel::MenuLevel()
 {
 	menuList.emplace_back(new MenuItem(
-		L"Resume Game",
+		L"New Game",
 		[]() {
-			Game::Get().ToggleMenu();
+			Engine::Get().SetNewLevel(new GameLevel());
 		}
 	));
 	menuList.emplace_back(new MenuItem(
@@ -52,8 +53,7 @@ void MenuLevel::Tick(float deltaTime)
 	}
 	if (Input::Get().GetKeyDown(VK_ESCAPE))
 	{
-		Game::Get().ToggleMenu();
-
+		Engine::Get().SetNewLevel(new GameLevel());
 		currentIndex = 0;
 	}
 }
@@ -65,7 +65,7 @@ void MenuLevel::Draw()
 	const wchar_t* title3 = L"⢸⡏⠀⣠⡞⠛⢻⡟⠁⢀⣠⣿⠏⠀⢀⣀⡀⠈⢻⣧⣤⡄⠀⠀⣰⠀⠀⣿⣿⠀⠀⣿⠀⠀⣿⠀⢀⡾⠻⣦⠀⢸⡏⠀⢀⣠⣿⠋⠀⣀⣤⣿⠋⠀⣀⣀⠀⠈⢿⡟⠁⢀⣠⣼⠀⠀⣿⠋⠀⣀⠀⠀⢸⡷";
 	const wchar_t* title4 = L"⢿⡅⠀⣿⡀⠀⢸⡇⠀⢸⡇⣿⠀⠀⣿⣉⣿⠀⠈⣿⠟⠀⢀⣼⣿⠀⠀⣿⣿⠀⠀⣿⠀⠀⣿⠀⢸⡿⠟⠃⠀⢸⡇⠀⣿⠉⣿⠀⠰⣏⣉⣿⠀⠸⣏⣙⡇⠀⢸⡃⠀⢿⣉⣿⠃⠀⣇⠀⠸⡅⢀⣴⡟⠁";
 	const wchar_t* title5 = L"⠸⣧⠀⠘⠷⢦⣼⡇⠀⢸⡇⠹⣦⡀⠈⠉⣿⠀⠐⠃⠀⠀⠉⠉⢻⣧⠀⠈⠁⠀⠀⣿⠀⠀⣿⠀⢸⣧⣤⣤⠀⢸⡇⠀⣿⠀⠻⣆⠀⠈⠉⣿⣄⠀⠈⠙⣇⠀⢸⣧⡀⠀⠉⠁⢀⣴⢿⣄⠀⠉⠉⠉⣿⠀";
-	const wchar_t* title6 = L"⠀⠙⠷⣤⣀⣀⣈⡿⠶⠛⠀⠀⠈⠛⠶⠶⠛⠶⠾⠶⠶⠶⠶⠶⠟⠉⢻⡶⠖⠀⢀⡿⠀⠀⣿⡀⢸⡏⠈⣿⠀⢸⡷⠶⠋⠀⠀⠉⠛⠶⠾⠋⠉⠛⠶⠾⠛⠶⠞⠉⠙⠳⠶⠾⠛⠁⠀⠙⠛⠶⠶⠶⠋⠀";
+	const wchar_t* title6 = L"⠀⠙⠷⣤⣀⣀⣈⡿⠶⠛⠀⠀⠈⠛⠶⠶⠛⠶⠾⠶⠶⠶⠶⠶⠶⠟⠉⢻⡶⠖⠀⢀⡿⠀⠀⠈⠛⠋⠁⠀⠈⠛⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀";
 	const wchar_t* title7 = L"⠀⠀⠀⠈⠉⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣄⣀⣤⡾⠁⠀⠀⠈⠛⠋⠁⠀⠈⠛⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀";
 	const wchar_t* title8 = L"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀";
 

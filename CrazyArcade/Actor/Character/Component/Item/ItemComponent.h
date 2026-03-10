@@ -24,6 +24,7 @@ public:
 	bool RequestUseItem(ItemType type);
 
 	const std::map<ItemType, std::unique_ptr<IUsableItem>>& GetUsableItems() const { return usableItems; }
+	const std::map<ItemType, int>& GetAcquiredItems() const { return acquiredItems; }
 
 private:
 	std::unique_ptr<IUsableItem> CreateUsableItem(ItemType type);
@@ -31,4 +32,5 @@ private:
 
 	std::map<ItemType, std::unique_ptr<IUsableItem>> usableItems;
 	std::vector<std::unique_ptr<IEffect>> activeEffects;
+	std::map<ItemType, int> acquiredItems;
 };

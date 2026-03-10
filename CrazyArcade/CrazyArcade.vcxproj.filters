@@ -131,9 +131,6 @@
     <ClInclude Include="Actor\Environments\Box.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Actor\Character\MoveSpeed.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Actor\Environments\Bush.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>

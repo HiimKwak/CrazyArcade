@@ -8,7 +8,6 @@
 #include "../Component/WaterBalloonComponent.h"
 #include "../Component/Item/ItemComponent.h"
 #include "../Component/State/StateComponent.h"
-#include "../MoveSpeed.h"
 
 using namespace engine;
 
@@ -37,7 +36,7 @@ void Player::BeginPlay()
 	super::BeginPlay();
 	auto movementComp = GetComponent<MovementComponent>();
 	if (movementComp)
-		movementComp->SetMoveSpeed(MoveSpeed::NORMAL);
+		movementComp->SetMoveSpeed(MovementComponent::SPEED_NORMAL);
 }
 
 void Player::Tick(float deltaTime)

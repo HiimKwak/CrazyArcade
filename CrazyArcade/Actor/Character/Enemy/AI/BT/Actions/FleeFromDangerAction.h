@@ -5,7 +5,6 @@
 #include "Engine/Engine.h"
 #include "Actor/Character/Enemy/Enemy.h"
 #include "Actor/Character/Component/MovementComponent.h"
-#include "Actor/Character/MoveSpeed.h"
 #include <queue>
 #include <unordered_set>
 #include <utility>
@@ -118,7 +117,7 @@ namespace enemy_ai
 			if (!forceEscapeFromPlacedWB && !IsUsefulDangerTraversal(next, ts))
 				return false;
 
-			float arrivalTime = nextDepth * MoveSpeed::NORMAL;
+			float arrivalTime = nextDepth * MovementComponent::SPEED_NORMAL;
 			float explosionTime = enemy->QueryExplosionTimeAt(next);
 			return arrivalTime + DANGER_TIME_MARGIN < explosionTime;
 		}

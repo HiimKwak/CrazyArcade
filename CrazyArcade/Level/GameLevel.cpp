@@ -1,29 +1,18 @@
 #include "Game/Game.h"
 #include "GameLevel.h"
+#include "MenuLevel.h"
 #include "Core/Input.h"
-#include "Util/Util.h"
 #include "Actor/Effects/WaterBalloon.h"
-#include "Actor/Effects/ExplosionTile.h"
 #include "Actor/Character/Player/Player.h"
 #include "Actor/Character/Enemy/Enemy.h"
 #include "Actor/Character/Component/State/StateComponent.h"
-#include "Actor/Character/Component/Item/ItemComponent.h"
-#include "Actor/Character/Component/StatsComponent.h"
 #include "Actor/Environments/Ground.h"
 #include "Actor/Environments/Wall.h"
 #include "Actor/Environments/Bush.h"
 #include "Actor/Environments/Box.h"
-#include "Actor/Environments/Item.h"
 
 #include "Engine/Engine.h"
 #include "Math/Vector2.h"
-#include "Render/Renderer.h"
-
-#include <iostream>	
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <limits>
 
 using namespace engine;
 
@@ -72,19 +61,6 @@ void GameLevel::Tick(float deltaTime)
 		debugPathBlinkElapsed -= blinkCycle;
 	debugPathVisible = (debugPathBlinkElapsed < DEBUG_PATH_ON_TIME);
 
-	if (CheckGameOver())
-	{
-		if (Input::Get().GetKeyDown(VK_ESCAPE))
-		{
-			Game::Get().ToggleMenu();
-		}
-		if (Input::Get().GetKeyDown('Q'))
-		{
-			Game::Get().Quit();
-		}
-		return;
-	}
-
 	if (CheckGameClear())
 	{
 		if (!isClearWaiting)
@@ -104,7 +80,20 @@ void GameLevel::Tick(float deltaTime)
 
 		if (Input::Get().GetKeyDown(VK_ESCAPE))
 		{
-			Game::Get().ToggleMenu();
+			Engine::Get().SetNewLevel(new MenuLevel());
+		}
+		if (Input::Get().GetKeyDown('Q'))
+		{
+			Game::Get().Quit();
+		}
+		return;
+	}
+
+	if (CheckGameOver())
+	{
+		if (Input::Get().GetKeyDown(VK_ESCAPE))
+		{
+			Engine::Get().SetNewLevel(new MenuLevel());
 		}
 		if (Input::Get().GetKeyDown('Q'))
 		{
@@ -117,7 +106,7 @@ void GameLevel::Tick(float deltaTime)
 
 	if (Input::Get().GetKeyDown(VK_ESCAPE))
 	{
-		Game::Get().ToggleMenu();
+		Engine::Get().SetNewLevel(new MenuLevel());
 		return;
 	}
 
@@ -234,15 +223,12 @@ bool GameLevel::CanMove(const Vector2& currentPos, const Vector2& nextPos)
 	if (targetActor->IsTypeOf<Wall>() || targetActor->IsTypeOf<Box>())
 		return false;
 
-	// 물풍선이 있는 경우 - 푸시할 수 있는지 확인
 	if (targetActor->IsTypeOf<WaterBalloon>())
 	{
-		// 같은 타일에 있던 경우(물풍선 위에서 나가는 경우)만 허용
 		const int ts = Engine::Get().GetTileSize();
 		Vector2 currentTile = Vector2((currentPos.x / ts) * ts, (currentPos.y / ts) * ts);
 		Vector2 balloonTile = Vector2((nextPos.x / ts) * ts, (nextPos.y / ts) * ts);
 
-		// 현재 물풍선과 같은 타일에 있지 않으면 물풍선을 밀려고 시도
 		if (currentTile != balloonTile)
 		{
 			Vector2 direction = nextPos - currentPos;
@@ -342,7 +328,7 @@ bool GameLevel::CheckGameOver()
 	{
 		if (actor->IsTypeOf<Player>())
 		{
-			Player* player = actor->As<Player>();
+		 Player* player = actor->As<Player>();
 			auto stateComp = player->GetComponent<StateComponent>();
 			if (stateComp && !stateComp->IsDead())
 				return false;

@@ -3,7 +3,6 @@
 #include "../../MovementComponent.h"
 #include "../../StatsComponent.h"
 #include "../../../Character.h"
-#include "../../../MoveSpeed.h"
 
 void BubbledState::OnEnter(StateComponent* stateComp)
 {
@@ -14,7 +13,7 @@ void BubbledState::OnEnter(StateComponent* stateComp)
 	{
 		character->SetSpriteColor(Color::Skyblue);
 		if (auto* movement = character->GetComponent<MovementComponent>())
-			movement->SetMoveSpeed(MoveSpeed::SLOW);
+			movement->SetMoveSpeed(MovementComponent::SPEED_SLOW);
 	}
 }
 
@@ -27,7 +26,7 @@ void BubbledState::OnExit(StateComponent* stateComp)
 	{
 		character->ResetSpriteColor();
 		if (auto* movement = character->GetComponent<MovementComponent>())
-			movement->SetMoveSpeed(MoveSpeed::NORMAL);
+			movement->SetMoveSpeed(MovementComponent::SPEED_NORMAL);
 	}
 }
 

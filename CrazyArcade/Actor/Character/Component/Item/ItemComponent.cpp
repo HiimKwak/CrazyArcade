@@ -6,7 +6,6 @@
 #include "IUsableItem.h"
 #include "IEffect.h"
 #include "Shield/ShieldItem.h"
-#include "Actor/Character/MoveSpeed.h"
 
 #include <algorithm>
 
@@ -54,7 +53,12 @@ void ItemComponent::ApplyPassiveItemEffect(ItemType type)
 		break;
 	case ItemType::Roller:
 		if (movement)
-			movement->SetMoveSpeed(MoveSpeed::FAST);
+		{
+			float currentSpeed = movement->GetMoveSpeed();
+			float boostedSpeed = currentSpeed * 0.75f;
+			constexpr float minSpeed = MovementComponent::SPEED_FAST;
+			movement->SetMoveSpeed(boostedSpeed < minSpeed ? minSpeed : boostedSpeed);
+		}
 		break;
 	default:
 		break;
@@ -63,6 +67,7 @@ void ItemComponent::ApplyPassiveItemEffect(ItemType type)
 
 void ItemComponent::OnItemAcquired(ItemType type)
 {
+	acquiredItems[type]++;
 	ApplyPassiveItemEffect(type);
 
 	if (type != ItemType::Shield)
