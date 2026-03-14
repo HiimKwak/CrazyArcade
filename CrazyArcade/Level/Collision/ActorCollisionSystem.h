@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <vector>
 #include "Actor/Actor.h"
@@ -7,6 +7,7 @@
 #include "Actor/Character/Enemy/Enemy.h"
 #include "Actor/Environments/Box.h"
 #include "Actor/Character/Component/State/StateComponent.h"
+#include "Actor/Character/Component/Item/ItemComponent.h"
 
 using namespace engine;
 
@@ -72,8 +73,14 @@ private:
 			if (player && player->GetPosition() == explosionPos)
 			{
 				auto stateComp = player->GetComponent<StateComponent>();
+				auto itemComp = player->GetComponent<ItemComponent>();
 				if (stateComp && stateComp->GetCurrentState() == StateType::Normal)
+				{
+					if (itemComp && itemComp->HasActiveShield())
+						continue;
+
 					stateComp->ChangeState(StateType::Bubbled);
+				}
 			}
 
 			for (Enemy* enemy : enemies)

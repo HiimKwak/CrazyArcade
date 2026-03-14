@@ -1,4 +1,4 @@
-#include "ItemComponent.h"
+﻿#include "ItemComponent.h"
 #include "../InventoryComponent.h"
 #include "../StatsComponent.h"
 #include "../MovementComponent.h"
@@ -6,6 +6,7 @@
 #include "IUsableItem.h"
 #include "IEffect.h"
 #include "Shield/ShieldItem.h"
+#include "Shield/ShieldEffect.h"
 
 #include <algorithm>
 
@@ -70,19 +71,22 @@ void ItemComponent::OnItemAcquired(ItemType type)
 	acquiredItems[type]++;
 	ApplyPassiveItemEffect(type);
 
-	if (type != ItemType::Shield)
-		return;
-
-	if (usableItems.find(type) == usableItems.end())
+	if (IsUsableItem(type))
 	{
-		auto usable = CreateUsableItem(type);
-		if (usable)
-			usableItems[type] = std::move(usable);
+		if (usableItems.find(type) == usableItems.end())
+		{
+			auto usable = CreateUsableItem(type);
+			if (usable)
+				usableItems[type] = std::move(usable);
+		}
 	}
 
 	auto inventory = owner ? owner->GetComponent<InventoryComponent>() : nullptr;
 	if (inventory)
 		inventory->AddItem(type);
+
+	if (onItemAcquired)
+		onItemAcquired(type);
 }
 
 bool ItemComponent::RequestUseItem(ItemType type)
@@ -104,10 +108,29 @@ bool ItemComponent::RequestUseItem(ItemType type)
 	auto effect = it->second->Use(owner);
 	inventory->RemoveItem(type);
 
+	auto acquiredIt = acquiredItems.find(type);
+	if (acquiredIt != acquiredItems.end())
+	{
+		acquiredIt->second -= 1;
+		if (acquiredIt->second <= 0)
+			acquiredItems.erase(acquiredIt);
+	}
+
 	if (effect)
 	{
 		activeEffects.push_back(std::move(effect));
 	}
 
 	return true;
+}
+
+bool ItemComponent::HasActiveShield() const
+{
+	for (const auto& effect : activeEffects)
+	{
+		if (dynamic_cast<const ShieldEffect*>(effect.get()))
+			return true;
+	}
+
+	return false;
 }

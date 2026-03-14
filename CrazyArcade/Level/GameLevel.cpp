@@ -1,4 +1,4 @@
-#include "Game/Game.h"
+﻿#include "Game/Game.h"
 #include "GameLevel.h"
 #include "MenuLevel.h"
 #include "Core/Input.h"
@@ -6,6 +6,7 @@
 #include "Actor/Character/Player/Player.h"
 #include "Actor/Character/Enemy/Enemy.h"
 #include "Actor/Character/Component/State/StateComponent.h"
+#include "Actor/Character/Component/Item/ItemComponent.h"
 #include "Actor/Environments/Ground.h"
 #include "Actor/Environments/Wall.h"
 #include "Actor/Environments/Bush.h"
@@ -53,6 +54,13 @@ GameLevel::~GameLevel()
 
 void GameLevel::Tick(float deltaTime)
 {
+	if (renderService.IsPopupVisible())
+	{
+		if (Input::Get().GetKeyDown('S'))
+			renderService.HidePopup();
+		return;
+	}
+
 	super::Tick(deltaTime);
 
 	const float blinkCycle = DEBUG_PATH_ON_TIME + DEBUG_PATH_OFF_TIME;
@@ -130,6 +138,7 @@ void GameLevel::Draw()
 
 	Player* player = FindPlayer();
 	renderService.DrawHud(player);
+	renderService.DrawPopupOverlay();
 
 	int remainingStages = MAX_STAGE - currentStage;
 	float remainingTime = isClearWaiting ? clearTimer.GetRemainingTime() : 0.0f;
@@ -170,6 +179,18 @@ void GameLevel::SpawnActor(int character, const Vector2& position)
 		Player* player = new Player(position);
 		player->SetDelegate(this);
 		player->SetQueryDelegate(&worldQuery);
+		auto itemComp = player->GetComponent<ItemComponent>();
+		if (itemComp)
+		{
+			itemComp->SetOnItemAcquiredCallback([this, shieldPopupShown = false](ItemType type) mutable
+				{
+					if (type != ItemType::Shield || shieldPopupShown)
+						return;
+
+					shieldPopupShown = true;
+					renderService.ShowShieldPopup();
+				});
+		}
 		AddNewActor(player);
 		AddNewActor(new Ground(position));
 		break;

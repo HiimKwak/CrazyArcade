@@ -43,6 +43,21 @@ public:
 		tileSize = ts;
 	}
 
+	void ShowShieldPopup()
+	{
+		popupVisible = true;
+	}
+
+	void HidePopup()
+	{
+		popupVisible = false;
+	}
+
+	bool IsPopupVisible() const
+	{
+		return popupVisible;
+	}
+
 	static int GetHudWidth()
 	{
 		return HUD_WIDTH;
@@ -140,40 +155,20 @@ public:
 		}
 	}
 
+	void DrawPopupOverlay()
+	{
+		if (popupVisible)
+			DrawShieldPopup();
+	}
+
 	void DrawGameState(bool isGameOver, bool isGameClear, int remainingStages, float remainingTime)
 	{
-		const int viewportW = engine::Engine::Get().GetWidth();
-		const int viewportH = engine::Engine::Get().GetHeight();
-		const int centerX = (viewportW - HUD_WIDTH) / 2;
-		const int centerY = viewportH / 2;
-
-		const int boxWidth = 40;
-		const int boxHeight = 16;
+		const int centerX = (engine::Engine::Get().GetWidth() - HUD_WIDTH) / 2;
+		const int centerY = engine::Engine::Get().GetHeight() / 2;
 
 		if (isGameOver)
 		{
-			for (int y = centerY - boxHeight; y <= centerY + boxHeight; ++y)
-			{
-				for (int x = centerX - boxWidth; x <= centerX + boxWidth; ++x)
-				{
-					Renderer::Get().Submit(L" ", Vector2(x, y), Color::Black, 99);
-				}
-			}
-
-			for (int x = centerX - boxWidth; x <= centerX + boxWidth; ++x)
-			{
-				Renderer::Get().Submit(L"═", Vector2(x, centerY - boxHeight), Color::Red, 100);
-				Renderer::Get().Submit(L"═", Vector2(x, centerY + boxHeight), Color::Red, 100);
-			}
-			for (int y = centerY - boxHeight; y <= centerY + boxHeight; ++y)
-			{
-				Renderer::Get().Submit(L"║", Vector2(centerX - boxWidth, y), Color::Red, 100);
-				Renderer::Get().Submit(L"║", Vector2(centerX + boxWidth, y), Color::Red, 100);
-			}
-			Renderer::Get().Submit(L"╔", Vector2(centerX - boxWidth, centerY - boxHeight), Color::Red, 100);
-			Renderer::Get().Submit(L"╗", Vector2(centerX + boxWidth, centerY - boxHeight), Color::Red, 100);
-			Renderer::Get().Submit(L"╚", Vector2(centerX - boxWidth, centerY + boxHeight), Color::Red, 100);
-			Renderer::Get().Submit(L"╝", Vector2(centerX + boxWidth, centerY + boxHeight), Color::Red, 100);
+			DrawPopupContainer(Color::Red);
 
 			const wchar_t* title1 = L"█▀▀ ▄▀█ █▀▄▀█ █▀▀   █▀█ █░█ █▀▀ █▀█";
 			const wchar_t* title2 = L"█▄█ █▀█ █░▀░█ ██▄   █▄█ ▀▄▀ ██▄ █▀▄";
@@ -189,28 +184,7 @@ public:
 
 		if (isGameClear)
 		{
-			for (int y = centerY - boxHeight; y <= centerY + boxHeight; ++y)
-			{
-				for (int x = centerX - boxWidth; x <= centerX + boxWidth; ++x)
-				{
-					Renderer::Get().Submit(L" ", Vector2(x, y), Color::Black, 99);
-				}
-			}
-
-			for (int x = centerX - boxWidth; x <= centerX + boxWidth; ++x)
-			{
-				Renderer::Get().Submit(L"═", Vector2(x, centerY - boxHeight), Color::Yellow, 100);
-				Renderer::Get().Submit(L"═", Vector2(x, centerY + boxHeight), Color::Yellow, 100);
-			}
-			for (int y = centerY - boxHeight; y <= centerY + boxHeight; ++y)
-			{
-				Renderer::Get().Submit(L"║", Vector2(centerX - boxWidth, y), Color::Yellow, 100);
-				Renderer::Get().Submit(L"║", Vector2(centerX + boxWidth, y), Color::Yellow, 100);
-			}
-			Renderer::Get().Submit(L"╔", Vector2(centerX - boxWidth, centerY - boxHeight), Color::Yellow, 100);
-			Renderer::Get().Submit(L"╗", Vector2(centerX + boxWidth, centerY - boxHeight), Color::Yellow, 100);
-			Renderer::Get().Submit(L"╚", Vector2(centerX - boxWidth, centerY + boxHeight), Color::Yellow, 100);
-			Renderer::Get().Submit(L"╝", Vector2(centerX + boxWidth, centerY + boxHeight), Color::Yellow, 100);
+			DrawPopupContainer(Color::Yellow);
 
 			const wchar_t* title1 = L"█▀ ▀█▀ ▄▀█ █▀▀ █▀▀   █▀▀ █░░ █▀▀ ▄▀█ █▀█";
 			const wchar_t* title2 = L"▄█ ░█░ █▀█ █▄█ ██▄   █▄▄ █▄▄ ██▄ █▀█ █▀▄";
@@ -219,7 +193,7 @@ public:
 			Renderer::Get().Submit(title1, Vector2(centerX - title1Len / 2, centerY - 6), Color::Yellow, 100);
 			Renderer::Get().Submit(title2, Vector2(centerX - title2Len / 2, centerY - 5), Color::Yellow, 100);
 
-			wchar_t countdownStr[64];
+			wchar_t countdownStr[128];
 			swprintf_s(countdownStr, _countof(countdownStr), L"Next stage in:  %d seconds", static_cast<int>(remainingTime) + 1);
 			int countdownLen = static_cast<int>(wcslen(countdownStr));
 			Renderer::Get().Submit(countdownStr, Vector2(centerX - countdownLen / 2, centerY - 1), Color::Skyblue, 100);
@@ -246,6 +220,54 @@ public:
 	}
 
 private:
+	void DrawPopupContainer(Color borderColor, int boxWidth = defaultPopupWidth, int boxHeight = defaultPopupHeight)
+	{
+		const int centerX = (engine::Engine::Get().GetWidth() - HUD_WIDTH) / 2;
+		const int centerY = engine::Engine::Get().GetHeight() / 2;
+
+		for (int y = centerY - boxHeight; y <= centerY + boxHeight; ++y)
+		{
+			for (int x = centerX - boxWidth; x <= centerX + boxWidth; ++x)
+			{
+				Renderer::Get().Submit(L" ", Vector2(x, y), Color::Black, 99);
+			}
+		}
+
+		for (int x = centerX - boxWidth; x <= centerX + boxWidth; ++x)
+		{
+			Renderer::Get().Submit(L"═", Vector2(x, centerY - boxHeight), borderColor, 100);
+			Renderer::Get().Submit(L"═", Vector2(x, centerY + boxHeight), borderColor, 100);
+		}
+		for (int y = centerY - boxHeight; y <= centerY + boxHeight; ++y)
+		{
+			Renderer::Get().Submit(L"║", Vector2(centerX - boxWidth, y), borderColor, 100);
+			Renderer::Get().Submit(L"║", Vector2(centerX + boxWidth, y), borderColor, 100);
+		}
+		Renderer::Get().Submit(L"╔", Vector2(centerX - boxWidth, centerY - boxHeight), borderColor, 100);
+		Renderer::Get().Submit(L"╗", Vector2(centerX + boxWidth, centerY - boxHeight), borderColor, 100);
+		Renderer::Get().Submit(L"╚", Vector2(centerX - boxWidth, centerY + boxHeight), borderColor, 100);
+		Renderer::Get().Submit(L"╝", Vector2(centerX + boxWidth, centerY + boxHeight), borderColor, 100);
+	}
+
+	void DrawShieldPopup()
+	{
+		const int centerX = (engine::Engine::Get().GetWidth() - HUD_WIDTH) / 2;
+		const int centerY = engine::Engine::Get().GetHeight() / 2;
+
+		DrawPopupContainer(Color::White, 30);
+
+		const wchar_t* title1 = L"█▀ █▄█ █ █▀▀ █░░ █▀▄   ▄▀█ █▀▀ █▀█ █░█ █ █▀█ █▀▀ █▀▄";
+		const wchar_t* title2 = L"▄█ █ █ █ ██▄ █▄▄ █▄▀   █▀█ █▄▄ ▀▀█ █▄█ █ █▀▄ ██▄ █▄▀";
+		const wchar_t* msg1 = L"Press S to become invincible for 2 seconds.";
+
+		int title1Len = static_cast<int>(wcslen(title1));
+		int title2Len = static_cast<int>(wcslen(title2));
+		int msg1Len = static_cast<int>(wcslen(msg1));
+		Renderer::Get().Submit(title1, Vector2(centerX - title1Len / 2, centerY - 4), Color::White, 100);
+		Renderer::Get().Submit(title2, Vector2(centerX - title2Len / 2, centerY - 3), Color::White, 100);
+		Renderer::Get().Submit(msg1, Vector2(centerX - msg1Len / 2, centerY + 2), Color::White, 100);
+	}
+
 	int GetCenteredX(const wchar_t* text) const
 	{
 		const int viewportW = engine::Engine::Get().GetWidth();
@@ -270,6 +292,10 @@ private:
 
 private:
 	static constexpr int HUD_WIDTH = 20;
+	static constexpr int defaultPopupWidth = 40;
+	static constexpr int defaultPopupHeight = 16;
+
+	bool popupVisible = false;
 
 	int currentStage = 1;
 	bool debugPathVisible = false;
