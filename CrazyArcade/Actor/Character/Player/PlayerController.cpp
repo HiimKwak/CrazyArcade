@@ -1,4 +1,4 @@
-#include "PlayerController.h"
+﻿#include "PlayerController.h"
 #include "Player.h"
 #include "../Component/State/StateComponent.h"
 #include "../Component/MovementComponent.h"
@@ -54,7 +54,7 @@ void PlayerController::HandleMovementInput(float deltaTime)
 
 void PlayerController::HandleActionInput()
 {
-	if (!Input::Get().GetKey(VK_SPACE))
+	if (!Input::Get().GetKeyDown(VK_SPACE))
 		return;
 
 	auto waterBalloonComp = owner->GetComponent<WaterBalloonComponent>();
